@@ -28,9 +28,9 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 1 - Banking Domain & OOP**
+**Phase 2 - FastAPI Backend**
 
-Phase 0 is complete. The current implementation adds a framework-independent banking domain with customers, accounts, transactions, account states, transfers, domain exceptions, Decimal-based money, unit tests, and documentation. FastAPI remains only the Phase 0 application foundation; no banking HTTP endpoints have been added.
+Phase 0 and Phase 1 are complete. The current implementation adds a versioned FastAPI adapter for the framework-independent banking domain. It exposes customer, account, deposit, withdrawal, transfer, and transaction-history endpoints while keeping business rules in the domain. State remains in memory and is lost when the process restarts.
 
 ## Technology stack currently implemented
 
@@ -38,6 +38,8 @@ Phase 0 is complete. The current implementation adds a framework-independent ban
 - FastAPI
 - Uvicorn
 - Pydantic Settings
+- Pydantic request/response schemas
+- Versioned REST API
 - pytest, pytest-asyncio, and HTTPX
 - Ruff
 - MyPy configuration
@@ -92,7 +94,7 @@ python -m mypy backend
 PyBank/
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/health.py  # Versioned HTTP health route
+│   │   ├── api/               # HTTP routers, schemas, serializers, errors
 │   │   ├── core/config.py     # Typed environment configuration
 │   │   ├── core/logging.py    # Standard logging setup
 │   │   ├── domain/             # Framework-independent banking rules
@@ -107,7 +109,9 @@ PyBank/
 └── README.md
 ```
 
-The existing root `main.py` is legacy standalone OOP learning code. It remains intentionally separate and untouched. The current PyBank architecture lives under `backend/`, with Phase 1 banking rules under `backend/app/domain/`.
+The existing root `main.py` is legacy standalone OOP learning code. It remains intentionally separate and untouched. The current PyBank architecture lives under `backend/`, with Phase 1 banking rules under `backend/app/domain/` and Phase 2 HTTP adapters under `backend/app/api/`.
+
+Phase 2 uses in-memory application state. Restarting the application erases all customers, accounts, and transactions; PostgreSQL is intentionally deferred to Phase 3.
 
 ## Security principles
 

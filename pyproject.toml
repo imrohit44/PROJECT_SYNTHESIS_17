@@ -38,6 +38,7 @@ exclude = ["main.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+per-file-ignores = {"backend/app/api/**/*.py" = ["B008"]}
 
 [tool.ruff.format]
 quote-style = "double"

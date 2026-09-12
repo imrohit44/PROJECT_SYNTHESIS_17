@@ -4,7 +4,8 @@ from collections.abc import AsyncIterator
 
 from fastapi import FastAPI
 
-from backend.app.api.v1.health import router as health_router
+from backend.app.api.errors import register_exception_handlers
+from backend.app.api.v1.router import router as api_router
 from backend.app.core.config import get_settings
 from backend.app.core.logging import configure_logging
 
@@ -26,4 +27,5 @@ app = FastAPI(
     debug=settings.debug,
     lifespan=lifespan,
 )
-app.include_router(health_router, prefix="/api/v1")
+register_exception_handlers(app)
+app.include_router(api_router)
