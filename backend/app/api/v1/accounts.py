@@ -8,8 +8,8 @@ from backend.app.api.v1.schemas import (
     TransactionResponse,
 )
 from backend.app.api.v1.serializers import account_response, transaction_response
+from backend.app.application.banking import BankApplicationService
 from backend.app.domain.entities.account import Account
-from backend.app.domain.entities.bank import Bank
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
@@ -21,7 +21,8 @@ router = APIRouter(prefix="/accounts", tags=["accounts"])
     summary="Create an account",
 )
 def create_account(
-    request: CreateAccountRequest, bank: Bank = Depends(get_bank)
+    request: CreateAccountRequest,
+    bank: BankApplicationService = Depends(get_bank),
 ) -> AccountResponse:
     account: Account
     if request.account_type == "savings":
@@ -45,7 +46,9 @@ def create_account(
     response_model=AccountResponse,
     summary="Retrieve an account",
 )
-def get_account(account_id: str, bank: Bank = Depends(get_bank)) -> AccountResponse:
+def get_account(
+    account_id: str, bank: BankApplicationService = Depends(get_bank)
+) -> AccountResponse:
     return account_response(bank.find_account(account_id))
 
 
@@ -57,11 +60,9 @@ def get_account(account_id: str, bank: Bank = Depends(get_bank)) -> AccountRespo
 def deposit(
     account_id: str,
     request: MoneyRequest,
-    bank: Bank = Depends(get_bank),
+    bank: BankApplicationService = Depends(get_bank),
 ) -> AccountResponse:
-    account = bank.find_account(account_id)
-    account.deposit(request.amount)
-    return account_response(account)
+    return account_response(bank.deposit(account_id, request.amount))
 
 
 @router.post(
@@ -72,11 +73,9 @@ def deposit(
 def withdraw(
     account_id: str,
     request: MoneyRequest,
-    bank: Bank = Depends(get_bank),
+    bank: BankApplicationService = Depends(get_bank),
 ) -> AccountResponse:
-    account = bank.find_account(account_id)
-    account.withdraw(request.amount)
-    return account_response(account)
+    return account_response(bank.withdraw(account_id, request.amount))
 
 
 @router.get(
@@ -85,7 +84,7 @@ def withdraw(
     summary="Retrieve account transaction history",
 )
 def list_transactions(
-    account_id: str, bank: Bank = Depends(get_bank)
+    account_id: str, bank: BankApplicationService = Depends(get_bank)
 ) -> list[TransactionResponse]:
     account = bank.find_account(account_id)
     return [transaction_response(item) for item in account.transactions]

@@ -1,18 +1,27 @@
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 
 from backend.app.api.dependencies import get_bank
+from backend.app.application.banking import BankApplicationService
+from backend.app.infrastructure.persistence.database import create_session_factory
+from backend.app.infrastructure.persistence.models import Base
 from backend.app.main import app
 
 
 @pytest.fixture
-def client() -> Iterator[TestClient]:
-    get_bank.cache_clear()
+def client(tmp_path: Path) -> Iterator[TestClient]:
+    database_url = f"sqlite:///{tmp_path / 'api.sqlite3'}"
+    engine = create_engine(database_url)
+    Base.metadata.create_all(engine)
+    service = BankApplicationService(create_session_factory(database_url))
+    app.dependency_overrides[get_bank] = lambda: service
     with TestClient(app) as test_client:
         yield test_client
-    get_bank.cache_clear()
+    app.dependency_overrides.clear()
 
 
 def create_customer(client: TestClient, name: str = "Alice") -> str:
@@ -167,15 +176,15 @@ def test_frozen_and_closed_accounts_map_to_conflict(client: TestClient) -> None:
         "/api/v1/accounts",
         json={"customer_id": customer_id, "account_type": "savings"},
     ).json()["account_id"]
-    account = get_bank().find_account(account_id)
-    account.freeze()
+    service = app.dependency_overrides[get_bank]()
+    service.freeze_account(account_id)
 
     frozen = client.post(
         f"/api/v1/accounts/{account_id}/deposit", json={"amount": "1.00"}
     )
 
-    account.activate()
-    account.close()
+    service.activate_account(account_id)
+    service.close_account(account_id)
     closed = client.post(
         f"/api/v1/accounts/{account_id}/deposit", json={"amount": "1.00"}
     )

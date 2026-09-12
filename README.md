@@ -28,9 +28,9 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 2 - FastAPI Backend**
+**Phase 3 - Database Engineering & Persistence**
 
-Phase 0 and Phase 1 are complete. The current implementation adds a versioned FastAPI adapter for the framework-independent banking domain. It exposes customer, account, deposit, withdrawal, transfer, and transaction-history endpoints while keeping business rules in the domain. State remains in memory and is lost when the process restarts.
+Phase 0, Phase 1, and Phase 2 are complete. The current implementation adds SQLAlchemy persistence, PostgreSQL configuration, an Alembic migration, database constraints, application transactions, and row-locking transfer coordination. The domain remains framework- and database-independent.
 
 ## Technology stack currently implemented
 
@@ -40,6 +40,9 @@ Phase 0 and Phase 1 are complete. The current implementation adds a versioned Fa
 - Pydantic Settings
 - Pydantic request/response schemas
 - Versioned REST API
+- SQLAlchemy 2
+- PostgreSQL via psycopg
+- Alembic migrations
 - pytest, pytest-asyncio, and HTTPX
 - Ruff
 - MyPy configuration
@@ -69,9 +72,23 @@ python -m pip install -e ".[dev]"
 Copy-Item .env.example .env
 ```
 
-Edit `.env` only for local values. It is ignored by Git and must never contain credentials that are committed.
+Edit `.env` with a local PostgreSQL `DATABASE_URL`. It is ignored by Git and must never contain credentials that are committed.
 
-### 4. Start the application
+### 4. Prepare the database
+
+Create a local PostgreSQL database, then run:
+
+```powershell
+alembic upgrade head
+```
+
+To reverse the schema during development:
+
+```powershell
+alembic downgrade base
+```
+
+### 5. Start the application
 
 ```powershell
 python -m uvicorn backend.app.main:app --reload
@@ -79,7 +96,7 @@ python -m uvicorn backend.app.main:app --reload
 
 Open the generated OpenAPI UI at <http://127.0.0.1:8000/docs>. The liveness endpoint is <http://127.0.0.1:8000/api/v1/health>.
 
-### 5. Run tests and quality checks
+### 6. Run tests and quality checks
 
 ```powershell
 python -m pytest
@@ -95,9 +112,11 @@ PyBank/
 ├── backend/
 │   ├── app/
 │   │   ├── api/               # HTTP routers, schemas, serializers, errors
+│   │   ├── application/       # Use cases coordinating domain and persistence
 │   │   ├── core/config.py     # Typed environment configuration
 │   │   ├── core/logging.py    # Standard logging setup
 │   │   ├── domain/             # Framework-independent banking rules
+│   │   ├── infrastructure/     # SQLAlchemy models, sessions, and mappers
 │   │   └── main.py             # FastAPI application entrypoint
 │   └── tests/                  # API and domain behavior tests
 ├── docs/
@@ -111,7 +130,7 @@ PyBank/
 
 The existing root `main.py` is legacy standalone OOP learning code. It remains intentionally separate and untouched. The current PyBank architecture lives under `backend/`, with Phase 1 banking rules under `backend/app/domain/` and Phase 2 HTTP adapters under `backend/app/api/`.
 
-Phase 2 uses in-memory application state. Restarting the application erases all customers, accounts, and transactions; PostgreSQL is intentionally deferred to Phase 3.
+Phase 3 stores customers, accounts, and transactions in PostgreSQL. The automated persistence tests use isolated SQLite databases because they must not touch a developer database. PostgreSQL-specific row locking should be verified against a configured PostgreSQL server.
 
 ## Security principles
 

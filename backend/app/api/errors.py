@@ -3,6 +3,7 @@ from collections.abc import Awaitable, Callable
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 from starlette import status
 
 from backend.app.domain.exceptions import (
@@ -39,6 +40,14 @@ async def validation_handler(_: Request, exception: Exception) -> JSONResponse:
     return error_response("VALIDATION_ERROR", messages, 422)
 
 
+async def integrity_handler(_: Request, __: Exception) -> JSONResponse:
+    return error_response(
+        "DATABASE_CONFLICT",
+        "The requested operation conflicts with existing data.",
+        status.HTTP_409_CONFLICT,
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(
         AccountNotFoundError,
@@ -65,3 +74,4 @@ def register_exception_handlers(app: FastAPI) -> None:
         domain_handler("INVALID_TRANSFER", status.HTTP_400_BAD_REQUEST),
     )
     app.add_exception_handler(RequestValidationError, validation_handler)
+    app.add_exception_handler(IntegrityError, integrity_handler)

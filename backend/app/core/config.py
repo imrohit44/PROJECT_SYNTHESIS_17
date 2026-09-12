@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     app_version: str = Field(default="0.1.0", validation_alias="APP_VERSION")
     debug: bool = Field(default=False, validation_alias="DEBUG")
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
+    database_url: str = Field(
+        default="postgresql+psycopg://pybank:pybank@localhost:5432/pybank",
+        validation_alias="DATABASE_URL",
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
