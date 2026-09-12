@@ -28,9 +28,9 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 0 - Project Foundation**
+**Phase 1 - Banking Domain & OOP**
 
-The current implementation contains a small FastAPI application, typed environment configuration, standard-library logging, a versioned liveness endpoint, automated tests, and development quality tooling. Banking domain behavior is not part of the Phase 0 API.
+Phase 0 is complete. The current implementation adds a framework-independent banking domain with customers, accounts, transactions, account states, transfers, domain exceptions, Decimal-based money, unit tests, and documentation. FastAPI remains only the Phase 0 application foundation; no banking HTTP endpoints have been added.
 
 ## Technology stack currently implemented
 
@@ -95,8 +95,9 @@ PyBank/
 │   │   ├── api/v1/health.py  # Versioned HTTP health route
 │   │   ├── core/config.py     # Typed environment configuration
 │   │   ├── core/logging.py    # Standard logging setup
-│   │   └── main.py            # FastAPI application entrypoint
-│   └── tests/test_health.py   # API contract test
+│   │   ├── domain/             # Framework-independent banking rules
+│   │   └── main.py             # FastAPI application entrypoint
+│   └── tests/                  # API and domain behavior tests
 ├── docs/
 │   ├── architecture/         # System boundaries and evolution
 │   └── learning/              # Beginner-friendly explanations
@@ -106,7 +107,7 @@ PyBank/
 └── README.md
 ```
 
-The existing root `main.py` is a pre-Phase 0 standalone OOP exercise. It is intentionally left untouched while the new application foundation is established under `backend/`; Phase 1 will revisit the domain model deliberately.
+The existing root `main.py` is legacy standalone OOP learning code. It remains intentionally separate and untouched. The current PyBank architecture lives under `backend/`, with Phase 1 banking rules under `backend/app/domain/`.
 
 ## Security principles
 
