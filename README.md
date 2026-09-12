@@ -1,282 +1,143 @@
-# 🏦 PyBank - Production-Grade Banking Platform
+# PyBank
 
-> **A Production-Grade Banking Platform built to learn End-to-End Software Engineering, Backend Development, Distributed Systems, DevOps, and AI Integration.**
+## Overview
 
----
+PyBank is a progressive software engineering learning project for building a production-inspired banking platform. The repository intentionally grows in stages so each technology is introduced when its problem is clear.
 
-# 📖 Overview
+## Aim
 
-PyBank is not just another banking application—it is a **comprehensive software engineering learning project** designed to simulate how real-world fintech systems are architected, developed, secured, deployed, and scaled.
+The aim is to learn how a system evolves from a small, well-structured application into a secure, observable, distributed platform without skipping the engineering fundamentals.
 
-The project begins as a simple Object-Oriented Banking System and progressively evolves into a modern distributed platform by introducing production engineering practices, microservices, event-driven architecture, observability, AI-powered fraud detection, graph analytics, and intelligent AI agents.
+## Objectives
 
-Rather than learning technologies in isolation, PyBank demonstrates **why each technology exists, when it should be introduced, and how different components collaborate to build reliable, scalable enterprise software.**
+- Build clear Python modules and boundaries.
+- Learn API design, testing, configuration, and operational practices.
+- Introduce infrastructure only when the application needs it.
+- Document the reasoning behind important decisions.
 
----
+## Learning philosophy
 
-# 🎯 Aim
+PyBank evolves through:
 
-To build a production-grade banking platform that teaches the complete software engineering lifecycle—from designing Object-Oriented systems to deploying cloud-native distributed applications.
+```text
+Modular Monolith -> Production Backend -> Event-Driven Architecture
+                 -> Microservices -> AI-Enabled Distributed System
+```
 
----
+Each phase should leave the previous phase understandable and runnable. Complexity is earned by a concrete requirement, not added for appearance.
 
-# 🚀 Objectives
+## Current phase
 
-- Master Object-Oriented Programming (OOP)
-- Learn Backend Development using FastAPI
-- Design scalable REST APIs
-- Understand Database Design & SQL
-- Implement secure Authentication & Authorization
-- Learn Production Engineering Practices
-- Explore Event-Driven Architecture
-- Build Microservices
-- Integrate AI & Machine Learning
-- Learn Graph Databases
-- Understand DevOps & Cloud Deployment
-- Experience real-world Software Architecture
+**Phase 0 - Project Foundation**
 
----
+The current implementation contains a small FastAPI application, typed environment configuration, standard-library logging, a versioned liveness endpoint, automated tests, and development quality tooling. Banking domain behavior is not part of the Phase 0 API.
 
-# 👨‍💻 Target Audience
+## Technology stack currently implemented
 
-This project is designed for:
-
-- Computer Science Students
-- Backend Developers
-- Full Stack Developers
-- Python Developers
-- AI/ML Engineers
-- Software Engineering Enthusiasts
-- Developers preparing for Product-Based Companies
-- Anyone wanting to understand enterprise application development
-
----
-
-# 🌟 Learning Outcomes
-
-By completing this project, learners will understand:
-
-- Software Architecture
-- Object-Oriented Design
-- SOLID Principles
-- Design Patterns
-- REST API Development
-- Authentication & Security
-- Database Engineering
-- Distributed Systems
-- Event-Driven Communication
-- Microservices Architecture
-- DevOps Fundamentals
-- Performance Optimization
-- Observability & Monitoring
-- AI System Integration
-- Cloud Deployment
-- Production Engineering Best Practices
-
----
-
-# 🛠️ Tech Stack
-
-## Frontend
-
-- React.js
-- TypeScript
-- Tailwind CSS
-- React Query
-- Axios
-
----
-
-## Backend
-
-- Python
+- Python 3.12+
 - FastAPI
-- SQLAlchemy
-- Alembic
-- Pydantic
+- Uvicorn
+- Pydantic Settings
+- pytest, pytest-asyncio, and HTTPX
+- Ruff
+- MyPy configuration
 
----
+Future technologies are roadmap items, not current dependencies.
 
-## Authentication & Security
+## Getting started
 
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-- OAuth2
-- Password Hashing (bcrypt)
-- Rate Limiting
+### 1. Create a virtual environment
 
----
-
-## Database
-
-- PostgreSQL
-- Redis
-- Neo4j
-
----
-
-## Event Streaming
-
-- Apache Kafka
-
----
-
-## AI & Machine Learning
-
-- Scikit-Learn
-- PyTorch
-- Pandas
-- NumPy
-
----
-
-## AI Agents
-
-- LLM Tool Calling
-- Multi-Agent Framework
-- Retrieval-Augmented Generation (RAG)
-
----
-
-## DevOps
-
-- Docker
-- Docker Compose
-- GitHub Actions
-
----
-
-## Monitoring
-
-- Prometheus
-- Grafana
-
----
-
-## Real-Time Communication
-
-- WebSockets
-- WhatsApp API (Optional)
-
----
-
-## Cloud
-
-- AWS
-- Nginx
-- HTTPS
-- Reverse Proxy
-
----
-
-# 📚 Project Roadmap
-
-| Phase | Module |
-|--------|--------|
-| 0 | Engineering Fundamentals |
-| 1 | Object-Oriented Banking System |
-| 2 | REST API Development |
-| 3 | Database Engineering |
-| 4 | Authentication & Production Backend |
-| 5 | React Frontend Dashboard |
-| 6 | Docker & DevOps |
-| 7 | Redis & Performance Optimization |
-| 8 | Event-Driven Architecture (Kafka) |
-| 9 | Microservices |
-| 10 | Monitoring & Observability |
-| 11 | AI Fraud Detection |
-| 12 | Graph Analytics (Neo4j) |
-| 13 | AI Banking Agents |
-| 14 | Cloud Deployment |
-| 15 | Enterprise Enhancements |
-
----
-
-# 🏗️ Architecture Evolution
-
-```
-Object-Oriented Banking System
-                │
-                ▼
-        REST API Backend
-                │
-                ▼
-        PostgreSQL Database
-                │
-                ▼
-      Authentication & Security
-                │
-                ▼
-        React Dashboard
-                │
-                ▼
-        Dockerized Platform
-                │
-                ▼
-     Redis Performance Layer
-                │
-                ▼
-     Event-Driven Architecture
-                │
-                ▼
-        Microservices
-                │
-                ▼
-     Monitoring & Logging
-                │
-                ▼
-      AI Fraud Detection
-                │
-                ▼
-      Graph Analytics
-                │
-                ▼
-       AI Banking Agents
-                │
-                ▼
-      Cloud Deployment
+```powershell
+python -m venv .venv
+.\\.venv\\Scripts\\Activate.ps1
 ```
 
----
+On macOS or Linux, activate with `source .venv/bin/activate`.
 
-# 🎓 Core Engineering Concepts
+### 2. Install dependencies
 
-Throughout the project, learners will gain practical experience in:
+```powershell
+python -m pip install -e ".[dev]"
+```
 
-- Object-Oriented Programming
-- SOLID Principles
-- Clean Architecture
-- Layered Architecture
-- Repository Pattern
-- Service Layer Pattern
-- Dependency Injection
-- Design Patterns
-- Database Normalization
-- ACID Transactions
-- API Design
-- Secure Authentication
-- Distributed Systems
-- Event-Driven Design
-- Microservices
-- Caching
-- CI/CD
-- Containerization
-- Monitoring
-- AI Integration
-- Production Deployment
+### 3. Configure local settings
 
----
+```powershell
+Copy-Item .env.example .env
+```
 
-# 💡 Why This Project?
+Edit `.env` only for local values. It is ignored by Git and must never contain credentials that are committed.
 
-Most banking projects focus only on CRUD operations.
+### 4. Start the application
 
-PyBank goes beyond that by teaching **how real enterprise software is engineered**. Every phase introduces a new concept only when it becomes necessary, allowing learners to understand both the implementation and the architectural reasoning behind modern software systems.
+```powershell
+python -m uvicorn backend.app.main:app --reload
+```
 
-The objective is not just to build a banking application—but to develop the skills required to design, build, secure, deploy, monitor, and scale production-ready applications used in the industry.
+Open the generated OpenAPI UI at <http://127.0.0.1:8000/docs>. The liveness endpoint is <http://127.0.0.1:8000/api/v1/health>.
 
----
+### 5. Run tests and quality checks
 
-# 🎯 Final Goal
+```powershell
+python -m pytest
+ruff check .
+ruff format --check .
+python -m mypy backend
+```
 
-By the end of this project, learners will have built a fully functional, production-inspired banking platform while gaining hands-on experience across the complete software development lifecycle—from writing clean Object-Oriented code to deploying intelligent, distributed cloud-native systems.
+## Project structure
+
+```text
+PyBank/
+├── backend/
+│   ├── app/
+│   │   ├── api/v1/health.py  # Versioned HTTP health route
+│   │   ├── core/config.py     # Typed environment configuration
+│   │   ├── core/logging.py    # Standard logging setup
+│   │   └── main.py            # FastAPI application entrypoint
+│   └── tests/test_health.py   # API contract test
+├── docs/
+│   ├── architecture/         # System boundaries and evolution
+│   └── learning/              # Beginner-friendly explanations
+├── infrastructure/            # Reserved for later deployment work
+├── .env.example               # Safe configuration template
+├── pyproject.toml              # Dependencies and tool configuration
+└── README.md
+```
+
+The existing root `main.py` is a pre-Phase 0 standalone OOP exercise. It is intentionally left untouched while the new application foundation is established under `backend/`; Phase 1 will revisit the domain model deliberately.
+
+## Security principles
+
+- Never commit secrets or hardcode credentials.
+- Validate configuration at startup.
+- Keep dependencies minimal and reviewed.
+- Do not expose unnecessary debugging information in production.
+- Do not use `eval()`.
+- Treat all client input as untrusted.
+
+## Roadmap
+
+| Phase | Focus |
+|---:|---|
+| 0 | Project Foundation |
+| 1 | Banking Domain + OOP |
+| 2 | FastAPI Backend |
+| 3 | PostgreSQL + SQLAlchemy + Alembic |
+| 4 | Authentication + Security |
+| 5 | React + TypeScript Frontend |
+| 6 | Testing + Code Quality |
+| 7 | Docker + Docker Compose |
+| 8 | Redis + Performance |
+| 9 | Kafka + Event-Driven Architecture |
+| 10 | Microservices |
+| 11 | Observability |
+| 12 | ML Fraud Detection |
+| 13 | Neo4j + Fraud Graph |
+| 14 | LLM Banking Agents |
+| 15 | Real-Time + WhatsApp |
+| 16 | CI/CD + Cloud |
+| 17 | Production Hardening |
+
+Recommended initial commit after review: `chore: initialize PyBank project foundation`.
