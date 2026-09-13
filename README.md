@@ -28,9 +28,9 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 5 - React + TypeScript Frontend**
+**Phase 6 - Testing + Code Quality**
 
-Phases 0 through 4 are complete. The current implementation adds a Vite React/TypeScript client with Tailwind, React Router, Axios, TanStack React Query, authenticated routes, account workflows, transaction history, transfer UI, admin UI, responsive states, and frontend tests. The backend remains the authority for security and banking behavior.
+Phases 0 through 5 are complete. The current implementation establishes the testing pyramid, coverage measurement, shared backend fixtures, authentication/security regression tests, React Testing Library coverage, React Query behavior tests, and documented quality gates. The backend remains the authority for security and banking behavior.
 
 ## Technology stack currently implemented
 
@@ -52,6 +52,7 @@ Phases 0 through 4 are complete. The current implementation adds a Vite React/Ty
 - Axios
 - TanStack React Query
 - pytest, pytest-asyncio, and HTTPX
+- pytest-cov
 - Ruff
 - MyPy configuration
 
@@ -108,10 +109,34 @@ Open the generated OpenAPI UI at <http://127.0.0.1:8000/docs>. The liveness endp
 
 ```powershell
 python -m pytest
+python -m pytest -m unit
+python -m pytest -m integration
+python -m pytest -m security
+python -m pytest --cov=backend --cov-report=term-missing
 ruff check .
 ruff format --check .
 python -m mypy backend
 ```
+
+Frontend:
+
+```powershell
+cd frontend
+npm test
+npm run test:coverage
+npm run lint
+npm run typecheck
+npm run build
+```
+
+PostgreSQL-specific tests require a dedicated test database:
+
+```powershell
+$env:PYBANK_TEST_DATABASE_URL="postgresql+psycopg://pybank_test:pybank_test@localhost:5432/pybank_test"
+python -m pytest backend/tests/integration/persistence
+```
+
+Do not point `PYBANK_TEST_DATABASE_URL` at a normal development or production database.
 
 ## Project structure
 
@@ -141,6 +166,8 @@ The existing root `main.py` is legacy standalone OOP learning code. It remains i
 
 Phase 4 stores authentication users in PostgreSQL through migration `0002_users`. Phase 5 stores browser tokens in `sessionStorage` for this learning client; this is XSS-readable and is not presented as a hardened production banking strategy. See the Phase 5 security documentation for the production alternative.
 
+Phase 6 keeps browser E2E tests as a documented smoke target rather than adding Playwright before Dockerized orchestration exists. The high-value E2E suite should be automated in Phase 7 or Phase 16 using the Phase 6 quality gate.
+
 ## Security principles
 
 - Never commit secrets or hardcode credentials.
@@ -165,8 +192,8 @@ Phase 4 stores authentication users in PostgreSQL through migration `0002_users`
 | 2 | FastAPI Backend |
 | 3 | PostgreSQL + SQLAlchemy + Alembic |
 | 4 | Authentication + Security |
-| 5 | React + TypeScript Frontend (current) |
-| 6 | Testing + Code Quality |
+| 5 | React + TypeScript Frontend |
+| 6 | Testing + Code Quality (current) |
 | 7 | Docker + Docker Compose |
 | 8 | Redis + Performance |
 | 9 | Kafka + Event-Driven Architecture |

@@ -1,4 +1,4 @@
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
@@ -212,3 +212,79 @@ def test_login_rate_limit_is_enforced(
     ]
 
     assert [response.status_code for response in responses][-1] == 429
+
+
+def test_refresh_token_cannot_authenticate_current_user(
+    client: TestClient,
+    token_factory: Callable[..., dict[str, str]],
+) -> None:
+    tokens = token_factory()
+
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {tokens['refresh_token']}"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "AUTHENTICATION_REQUIRED"
+
+
+def test_inactive_user_with_valid_token_is_rejected(
+    client: TestClient,
+    auth_service: AuthApplicationService,
+    token_factory: Callable[..., dict[str, str]],
+) -> None:
+    tokens = token_factory()
+    with auth_service._session_factory.begin() as session:
+        user = session.get(UserModel, tokens["user_id"])
+        assert user is not None
+        user.is_active = False
+
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {tokens['access_token']}"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "AUTHENTICATION_REQUIRED"
+
+
+def test_customer_cannot_mutate_another_customers_account(
+    client: TestClient,
+    token_factory: Callable[..., dict[str, str]],
+) -> None:
+    alice = token_factory(name="Alice")
+    bob = token_factory(name="Bob")
+    account = client.post(
+        "/api/v1/accounts",
+        headers={"Authorization": f"Bearer {bob['access_token']}"},
+        json={"customer_id": bob["customer_id"], "account_type": "savings"},
+    )
+    assert account.status_code == 201
+
+    response = client.post(
+        f"/api/v1/accounts/{account.json()['account_id']}/deposit",
+        headers={"Authorization": f"Bearer {alice['access_token']}"},
+        json={"amount": "10.00"},
+    )
+
+    assert response.status_code == 403
+
+
+def test_security_logs_do_not_include_jwt_values(
+    client: TestClient,
+    token_factory: Callable[..., dict[str, str]],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    tokens = token_factory()
+
+    with caplog.at_level("INFO", logger="pybank.security"):
+        response = client.post(
+            "/api/v1/auth/refresh",
+            json={"refresh_token": tokens["refresh_token"]},
+        )
+
+    assert response.status_code == 200
+    logs = caplog.text
+    assert tokens["access_token"] not in logs
+    assert tokens["refresh_token"] not in logs

@@ -1,39 +1,9 @@
-from collections.abc import Iterator
-from pathlib import Path
-
-import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import select
 
-from backend.app.api.dependencies import get_auth, get_bank, get_login_limiter
 from backend.app.application.auth import AuthApplicationService
-from backend.app.application.banking import BankApplicationService
-from backend.app.infrastructure.persistence.database import create_session_factory
-from backend.app.infrastructure.persistence.models import Base
-from backend.app.main import app
-from backend.app.security.passwords import PasswordService
-from backend.app.security.tokens import TokenService
-
-
-@pytest.fixture
-def client(tmp_path: Path) -> Iterator[TestClient]:
-    database_url = f"sqlite:///{tmp_path / 'api.sqlite3'}"
-    engine = create_engine(database_url)
-    Base.metadata.create_all(engine)
-    factory = create_session_factory(database_url)
-    service = BankApplicationService(factory)
-    auth = AuthApplicationService(
-        factory,
-        PasswordService(),
-        TokenService("test-secret-that-is-at-least-32-bytes-long", "HS256", 15, 7),
-    )
-    app.dependency_overrides[get_bank] = lambda: service
-    app.dependency_overrides[get_auth] = lambda: auth
-    get_login_limiter.cache_clear()
-    with TestClient(app) as test_client:
-        yield test_client
-    app.dependency_overrides.clear()
-    get_login_limiter.cache_clear()
+from backend.app.infrastructure.persistence.models import UserModel
+from backend.app.security.roles import UserRole
 
 
 def register(client: TestClient, name: str = "Alice") -> tuple[str, str]:
@@ -180,8 +150,8 @@ def test_authentication_and_admin_protection(client: TestClient) -> None:
     _, token = register(client)
     use_token(client, token)
     admin_response = client.get("/api/v1/users")
-    no_token = TestClient(app)
-    missing_response = no_token.get("/api/v1/users")
+    client.headers.pop("Authorization")
+    missing_response = client.get("/api/v1/users")
 
     assert admin_response.status_code == 403
     assert missing_response.status_code == 401
@@ -205,3 +175,103 @@ def test_duplicate_registration_and_invalid_login_are_safe(client: TestClient) -
     assert duplicate.status_code == 409
     assert invalid_login.status_code == 401
     assert invalid_login.json()["error"]["code"] == "AUTHENTICATION_FAILED"
+
+
+def test_refresh_me_and_successful_transfer_contract(client: TestClient) -> None:
+    alice_id, alice_token = register(client, "Alice")
+    bob_id, bob_token = register(client, "Bob")
+    use_token(client, alice_token)
+    source_id = client.post(
+        "/api/v1/accounts",
+        json={
+            "customer_id": alice_id,
+            "account_type": "current",
+            "opening_balance": "100.00",
+            "overdraft_limit": "50.00",
+        },
+    ).json()["account_id"]
+    use_token(client, bob_token)
+    destination_id = client.post(
+        "/api/v1/accounts",
+        json={"customer_id": bob_id, "account_type": "savings"},
+    ).json()["account_id"]
+    login = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "alice@example.com",
+            "password": "correct horse battery staple",
+        },
+    )
+    refresh = client.post(
+        "/api/v1/auth/refresh",
+        json={"refresh_token": login.json()["refresh_token"]},
+    )
+    use_token(client, refresh.json()["access_token"])
+
+    me = client.get("/api/v1/auth/me")
+    transfer = client.post(
+        "/api/v1/transfers",
+        json={
+            "source_account_id": source_id,
+            "destination_account_id": destination_id,
+            "amount": "40.00",
+        },
+    )
+    source = client.get(f"/api/v1/accounts/{source_id}")
+
+    assert refresh.status_code == 200
+    assert me.status_code == 200
+    assert me.json()["email"] == "alice@example.com"
+    assert "password_hash" not in me.text
+    assert transfer.status_code == 200
+    assert transfer.json()["amount"] == "40.00"
+    assert source.json()["balance"] == "60.00"
+
+
+def test_admin_can_create_customer_and_list_users(
+    client: TestClient,
+    auth_service: AuthApplicationService,
+) -> None:
+    _, token = register(client)
+    with auth_service._session_factory.begin() as session:
+        user = session.scalar(select(UserModel))
+        assert user is not None
+        user.role = UserRole.ADMIN.value
+    use_token(client, token)
+
+    created = client.post(
+        "/api/v1/customers",
+        json={"name": "Carol", "email": "carol@example.com"},
+    )
+    users = client.get("/api/v1/users")
+
+    assert created.status_code == 201
+    assert users.status_code == 200
+    assert "password_hash" not in users.text
+
+
+def test_api_error_contract_for_common_status_codes(client: TestClient) -> None:
+    customer_id, token = register(client)
+    use_token(client, token)
+
+    not_found = client.get("/api/v1/accounts/missing-account")
+    validation = client.post(
+        "/api/v1/accounts",
+        json={"customer_id": customer_id, "account_type": "unknown"},
+    )
+    conflict = client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": "Alice Again",
+            "email": "alice@example.com",
+            "password": "correct horse battery staple",
+        },
+    )
+
+    for response in (not_found, validation, conflict):
+        body = response.json()
+        assert set(body) == {"error"}
+        assert {"code", "message"} <= set(body["error"])
+    assert not_found.status_code == 404
+    assert validation.status_code == 422
+    assert conflict.status_code == 409

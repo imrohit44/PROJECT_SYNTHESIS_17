@@ -8,6 +8,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.pytest-tmp/
 .mypy_cache/
 .ruff_cache/
 .coverage
@@ -31,3 +32,4 @@ Thumbs.db
 # Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/coverage/
