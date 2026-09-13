@@ -204,8 +204,11 @@ class BankApplicationService:
 
     def _locked_account(self, session: Session, account_id: str) -> AccountModel:
         model = session.execute(
-            self._account_query().with_for_update().where(AccountModel.id == account_id)
+            self._account_query()
+            .with_for_update(of=AccountModel)
+            .where(AccountModel.id == account_id)
         ).scalar_one_or_none()
+
         if model is None:
             from backend.app.domain.exceptions import AccountNotFoundError
 
