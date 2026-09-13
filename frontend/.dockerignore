@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.vite/
+.DS_Store
+Thumbs.db
+npm-debug.log*

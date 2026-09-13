@@ -28,9 +28,9 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 6 - Testing + Code Quality**
+**Phase 7 - Docker + Docker Compose**
 
-Phases 0 through 5 are complete. The current implementation establishes the testing pyramid, coverage measurement, shared backend fixtures, authentication/security regression tests, React Testing Library coverage, React Query behavior tests, and documented quality gates. The backend remains the authority for security and banking behavior.
+Phases 0 through 6 are complete. The current implementation adds a reproducible Docker Compose development environment for the existing modular monolith: PostgreSQL 18, FastAPI backend, and React frontend.
 
 ## Technology stack currently implemented
 
@@ -138,6 +138,56 @@ python -m pytest backend/tests/integration/persistence
 
 Do not point `PYBANK_TEST_DATABASE_URL` at a normal development or production database.
 
+## Docker quick start
+
+Prerequisites:
+
+- Docker
+- Docker Compose
+
+Create local configuration if needed:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Build and start the stack:
+
+```powershell
+docker compose build
+docker compose up
+```
+
+Or start detached:
+
+```powershell
+docker compose up -d
+```
+
+Open the frontend at <http://localhost:8080>. Verify the backend at
+<http://localhost:8000/api/v1/health>.
+
+Useful commands:
+
+```powershell
+docker compose ps
+docker compose logs
+docker compose logs backend
+docker compose down
+```
+
+The Docker database is stored in the named volume `pybank_postgres_data`.
+`docker compose down` keeps that data. To intentionally reset the Docker
+database:
+
+```powershell
+docker compose down -v
+docker compose up -d
+```
+
+Detailed Docker notes are in `docs/architecture/phase-7.md` and
+`docs/learning/phase-7.md`.
+
 ## Project structure
 
 ```text
@@ -193,8 +243,8 @@ Phase 6 keeps browser E2E tests as a documented smoke target rather than adding 
 | 3 | PostgreSQL + SQLAlchemy + Alembic |
 | 4 | Authentication + Security |
 | 5 | React + TypeScript Frontend |
-| 6 | Testing + Code Quality (current) |
-| 7 | Docker + Docker Compose |
+| 6 | Testing + Code Quality |
+| 7 | Docker + Docker Compose (current) |
 | 8 | Redis + Performance |
 | 9 | Kafka + Event-Driven Architecture |
 | 10 | Microservices |
