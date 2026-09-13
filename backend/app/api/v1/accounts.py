@@ -20,6 +20,16 @@ from backend.app.security.principal import CurrentUser
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
 
+@router.get("", response_model=list[AccountResponse], summary="List owned accounts")
+def list_accounts(
+    bank: BankApplicationService = Depends(get_bank),
+    user: CurrentUser = Depends(get_current_user),
+) -> list[AccountResponse]:
+    return [
+        account_response(account) for account in bank.list_accounts(user.customer_id)
+    ]
+
+
 @router.post(
     "",
     response_model=AccountResponse,

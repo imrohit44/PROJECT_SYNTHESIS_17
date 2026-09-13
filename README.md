@@ -28,9 +28,9 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 4 - Authentication & Security**
+**Phase 5 - React + TypeScript Frontend**
 
-Phases 0 through 3 are complete. The current implementation adds User/Customer separation, Argon2id password hashing, JWT access and refresh tokens, role-based authorization, account ownership enforcement, rate limiting, security headers, and local security events. The domain remains framework- and database-independent.
+Phases 0 through 4 are complete. The current implementation adds a Vite React/TypeScript client with Tailwind, React Router, Axios, TanStack React Query, authenticated routes, account workflows, transaction history, transfer UI, admin UI, responsive states, and frontend tests. The backend remains the authority for security and banking behavior.
 
 ## Technology stack currently implemented
 
@@ -46,6 +46,11 @@ Phases 0 through 3 are complete. The current implementation adds User/Customer s
 - Argon2id password hashing
 - JWT authentication
 - Role-based authorization
+- React + TypeScript
+- Vite + Tailwind CSS
+- React Router
+- Axios
+- TanStack React Query
 - pytest, pytest-asyncio, and HTTPX
 - Ruff
 - MyPy configuration
@@ -122,6 +127,7 @@ PyBank/
 │   │   ├── infrastructure/     # SQLAlchemy models, sessions, and mappers
 │   │   └── main.py             # FastAPI application entrypoint
 │   └── tests/                  # API and domain behavior tests
+├── frontend/                   # React + TypeScript client
 ├── docs/
 │   ├── architecture/         # System boundaries and evolution
 │   └── learning/              # Beginner-friendly explanations
@@ -133,7 +139,7 @@ PyBank/
 
 The existing root `main.py` is legacy standalone OOP learning code. It remains intentionally separate and untouched. The current PyBank architecture lives under `backend/`, with Phase 1 banking rules under `backend/app/domain/` and Phase 2 HTTP adapters under `backend/app/api/`.
 
-Phase 4 stores authentication users in PostgreSQL through migration `0002_users`. Passwords are never stored as plaintext. The current rate limiter is process-local, and refresh tokens are stateless; distributed rate limiting and revocable token storage are future work.
+Phase 4 stores authentication users in PostgreSQL through migration `0002_users`. Phase 5 stores browser tokens in `sessionStorage` for this learning client; this is XSS-readable and is not presented as a hardened production banking strategy. See the Phase 5 security documentation for the production alternative.
 
 ## Security principles
 
@@ -158,8 +164,8 @@ Phase 4 stores authentication users in PostgreSQL through migration `0002_users`
 | 1 | Banking Domain + OOP |
 | 2 | FastAPI Backend |
 | 3 | PostgreSQL + SQLAlchemy + Alembic |
-| 4 | Authentication + Security (current) |
-| 5 | React + TypeScript Frontend |
+| 4 | Authentication + Security |
+| 5 | React + TypeScript Frontend (current) |
 | 6 | Testing + Code Quality |
 | 7 | Docker + Docker Compose |
 | 8 | Redis + Performance |

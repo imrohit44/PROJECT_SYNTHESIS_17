@@ -108,6 +108,7 @@ def test_account_deposit_withdraw_and_history(client: TestClient) -> None:
     assert withdraw.status_code == 200
     assert withdraw.json()["balance"] == "115.00"
     assert history.status_code == 200
+    assert len(client.get("/api/v1/accounts").json()) == 1
 
 
 def test_cross_customer_account_access_is_forbidden(client: TestClient) -> None:

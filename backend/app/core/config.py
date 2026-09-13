@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     login_rate_window_seconds: int = Field(
         default=60, validation_alias="LOGIN_RATE_WINDOW_SECONDS"
     )
+    frontend_origin: str = Field(
+        default="http://localhost:5173", validation_alias="FRONTEND_ORIGIN"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

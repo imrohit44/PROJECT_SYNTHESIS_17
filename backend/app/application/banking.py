@@ -122,6 +122,15 @@ class BankApplicationService:
                 raise AccountNotFoundError(account_id)
             return account_to_domain(model)
 
+    def list_accounts(self, customer_id: str) -> list[Account]:
+        with self._session_factory() as session:
+            models = session.scalars(
+                self._account_query()
+                .where(AccountModel.customer_id == customer_id)
+                .order_by(AccountModel.created_at)
+            ).all()
+            return [account_to_domain(model) for model in models]
+
     def account_owner_id(self, account_id: str) -> str:
         with self._session_factory() as session:
             owner_id = session.scalar(
