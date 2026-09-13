@@ -122,6 +122,17 @@ class BankApplicationService:
                 raise AccountNotFoundError(account_id)
             return account_to_domain(model)
 
+    def account_owner_id(self, account_id: str) -> str:
+        with self._session_factory() as session:
+            owner_id = session.scalar(
+                select(AccountModel.customer_id).where(AccountModel.id == account_id)
+            )
+            if owner_id is None:
+                from backend.app.domain.exceptions import AccountNotFoundError
+
+                raise AccountNotFoundError(account_id)
+            return owner_id
+
     def deposit(self, account_id: str, amount: Decimal | int | str) -> Account:
         with self._session_factory.begin() as session:
             model = self._locked_account(session, account_id)

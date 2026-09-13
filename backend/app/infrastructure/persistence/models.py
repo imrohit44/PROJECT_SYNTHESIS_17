@@ -38,6 +38,32 @@ class CustomerModel(Base):
     )
 
 
+class UserModel(Base):
+    __tablename__ = "users"
+    __table_args__ = (
+        CheckConstraint("role IN ('customer', 'admin')", name="ck_users_role"),
+        Index("ix_users_email", "email"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    customer_id: Mapped[str] = mapped_column(
+        ForeignKey("customers.id"), unique=True, nullable=False
+    )
+    email: Mapped[str] = mapped_column(String(320), nullable=False, unique=True)
+    password_hash: Mapped[str] = mapped_column(String(512), nullable=False)
+    role: Mapped[str] = mapped_column(String(20), nullable=False)
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+
 class AccountModel(Base):
     __tablename__ = "accounts"
     __table_args__ = (

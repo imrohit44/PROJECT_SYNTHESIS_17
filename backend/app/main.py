@@ -1,8 +1,12 @@
 import logging
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 
 from backend.app.api.errors import register_exception_handlers
 from backend.app.api.v1.router import router as api_router
@@ -27,5 +31,20 @@ app = FastAPI(
     debug=settings.debug,
     lifespan=lifespan,
 )
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 register_exception_handlers(app)
 app.include_router(api_router)

@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends
 
+from backend.app.api.auth_dependencies import authorize_account, get_current_user
 from backend.app.api.dependencies import get_bank
 from backend.app.api.v1.schemas import TransferRequest, TransferResponse
 from backend.app.application.banking import BankApplicationService
+from backend.app.security.principal import CurrentUser
 
 router = APIRouter(prefix="/transfers", tags=["transfers"])
 
@@ -13,8 +15,11 @@ router = APIRouter(prefix="/transfers", tags=["transfers"])
     summary="Transfer money between accounts",
 )
 def transfer(
-    request: TransferRequest, bank: BankApplicationService = Depends(get_bank)
+    request: TransferRequest,
+    bank: BankApplicationService = Depends(get_bank),
+    user: CurrentUser = Depends(get_current_user),
 ) -> TransferResponse:
+    authorize_account(request.source_account_id, user, bank)
     source, destination = bank.transfer(
         request.source_account_id,
         request.destination_account_id,

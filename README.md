@@ -28,9 +28,9 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 3 - Database Engineering & Persistence**
+**Phase 4 - Authentication & Security**
 
-Phase 0, Phase 1, and Phase 2 are complete. The current implementation adds SQLAlchemy persistence, PostgreSQL configuration, an Alembic migration, database constraints, application transactions, and row-locking transfer coordination. The domain remains framework- and database-independent.
+Phases 0 through 3 are complete. The current implementation adds User/Customer separation, Argon2id password hashing, JWT access and refresh tokens, role-based authorization, account ownership enforcement, rate limiting, security headers, and local security events. The domain remains framework- and database-independent.
 
 ## Technology stack currently implemented
 
@@ -43,6 +43,9 @@ Phase 0, Phase 1, and Phase 2 are complete. The current implementation adds SQLA
 - SQLAlchemy 2
 - PostgreSQL via psycopg
 - Alembic migrations
+- Argon2id password hashing
+- JWT authentication
+- Role-based authorization
 - pytest, pytest-asyncio, and HTTPX
 - Ruff
 - MyPy configuration
@@ -130,11 +133,17 @@ PyBank/
 
 The existing root `main.py` is legacy standalone OOP learning code. It remains intentionally separate and untouched. The current PyBank architecture lives under `backend/`, with Phase 1 banking rules under `backend/app/domain/` and Phase 2 HTTP adapters under `backend/app/api/`.
 
-Phase 3 stores customers, accounts, and transactions in PostgreSQL. The automated persistence tests use isolated SQLite databases because they must not touch a developer database. PostgreSQL-specific row locking should be verified against a configured PostgreSQL server.
+Phase 4 stores authentication users in PostgreSQL through migration `0002_users`. Passwords are never stored as plaintext. The current rate limiter is process-local, and refresh tokens are stateless; distributed rate limiting and revocable token storage are future work.
 
 ## Security principles
 
 - Never commit secrets or hardcode credentials.
+- Never store plaintext passwords.
+- Keep JWT secrets in environment-backed configuration.
+- Enforce account ownership server-side.
+- Use role-based authorization for administrative operations.
+- Rate-limit authentication attempts.
+- Log security events without sensitive values.
 - Validate configuration at startup.
 - Keep dependencies minimal and reviewed.
 - Do not expose unnecessary debugging information in production.
@@ -149,7 +158,7 @@ Phase 3 stores customers, accounts, and transactions in PostgreSQL. The automate
 | 1 | Banking Domain + OOP |
 | 2 | FastAPI Backend |
 | 3 | PostgreSQL + SQLAlchemy + Alembic |
-| 4 | Authentication + Security |
+| 4 | Authentication + Security (current) |
 | 5 | React + TypeScript Frontend |
 | 6 | Testing + Code Quality |
 | 7 | Docker + Docker Compose |

@@ -1,5 +1,10 @@
 from fastapi import APIRouter, Depends, status
 
+from backend.app.api.auth_dependencies import (
+    authorize_account,
+    authorize_customer,
+    get_current_user,
+)
 from backend.app.api.dependencies import get_bank
 from backend.app.api.v1.schemas import (
     AccountResponse,
@@ -10,6 +15,7 @@ from backend.app.api.v1.schemas import (
 from backend.app.api.v1.serializers import account_response, transaction_response
 from backend.app.application.banking import BankApplicationService
 from backend.app.domain.entities.account import Account
+from backend.app.security.principal import CurrentUser
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
@@ -23,7 +29,9 @@ router = APIRouter(prefix="/accounts", tags=["accounts"])
 def create_account(
     request: CreateAccountRequest,
     bank: BankApplicationService = Depends(get_bank),
+    user: CurrentUser = Depends(get_current_user),
 ) -> AccountResponse:
+    authorize_customer(user, request.customer_id)
     account: Account
     if request.account_type == "savings":
         account = bank.create_savings_account(
@@ -47,8 +55,11 @@ def create_account(
     summary="Retrieve an account",
 )
 def get_account(
-    account_id: str, bank: BankApplicationService = Depends(get_bank)
+    account_id: str,
+    bank: BankApplicationService = Depends(get_bank),
+    user: CurrentUser = Depends(get_current_user),
 ) -> AccountResponse:
+    authorize_account(account_id, user, bank)
     return account_response(bank.find_account(account_id))
 
 
@@ -61,7 +72,9 @@ def deposit(
     account_id: str,
     request: MoneyRequest,
     bank: BankApplicationService = Depends(get_bank),
+    user: CurrentUser = Depends(get_current_user),
 ) -> AccountResponse:
+    authorize_account(account_id, user, bank)
     return account_response(bank.deposit(account_id, request.amount))
 
 
@@ -74,7 +87,9 @@ def withdraw(
     account_id: str,
     request: MoneyRequest,
     bank: BankApplicationService = Depends(get_bank),
+    user: CurrentUser = Depends(get_current_user),
 ) -> AccountResponse:
+    authorize_account(account_id, user, bank)
     return account_response(bank.withdraw(account_id, request.amount))
 
 
@@ -84,7 +99,10 @@ def withdraw(
     summary="Retrieve account transaction history",
 )
 def list_transactions(
-    account_id: str, bank: BankApplicationService = Depends(get_bank)
+    account_id: str,
+    bank: BankApplicationService = Depends(get_bank),
+    user: CurrentUser = Depends(get_current_user),
 ) -> list[TransactionResponse]:
+    authorize_account(account_id, user, bank)
     account = bank.find_account(account_id)
     return [transaction_response(item) for item in account.transactions]

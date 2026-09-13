@@ -1,11 +1,12 @@
 from collections.abc import Awaitable, Callable
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from starlette import status
 
+from backend.app.application.auth import AuthenticationError
 from backend.app.domain.exceptions import (
     AccountNotActiveError,
     AccountNotFoundError,
@@ -48,6 +49,21 @@ async def integrity_handler(_: Request, __: Exception) -> JSONResponse:
     )
 
 
+async def authentication_handler(_: Request, __: Exception) -> JSONResponse:
+    return error_response("AUTHENTICATION_FAILED", "Invalid email or password", 401)
+
+
+async def http_exception_handler(_: Request, exception: Exception) -> JSONResponse:
+    if not isinstance(exception, HTTPException):
+        return error_response("HTTP_ERROR", "Request failed", 500)
+    codes = {401: "AUTHENTICATION_REQUIRED", 403: "FORBIDDEN", 429: "RATE_LIMITED"}
+    return error_response(
+        codes.get(exception.status_code, "HTTP_ERROR"),
+        str(exception.detail),
+        exception.status_code,
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(
         AccountNotFoundError,
@@ -75,3 +91,5 @@ def register_exception_handlers(app: FastAPI) -> None:
     )
     app.add_exception_handler(RequestValidationError, validation_handler)
     app.add_exception_handler(IntegrityError, integrity_handler)
+    app.add_exception_handler(AuthenticationError, authentication_handler)
+    app.add_exception_handler(HTTPException, http_exception_handler)

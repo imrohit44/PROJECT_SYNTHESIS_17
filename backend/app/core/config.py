@@ -16,6 +16,20 @@ class Settings(BaseSettings):
         default="postgresql+psycopg://pybank:pybank@localhost:5432/pybank",
         validation_alias="DATABASE_URL",
     )
+    jwt_secret: str = Field(
+        default="change-this-development-secret",
+        validation_alias="JWT_SECRET",
+    )
+    jwt_algorithm: str = Field(default="HS256", validation_alias="JWT_ALGORITHM")
+    access_token_minutes: int = Field(
+        default=15, validation_alias="ACCESS_TOKEN_MINUTES"
+    )
+    refresh_token_days: int = Field(default=7, validation_alias="REFRESH_TOKEN_DAYS")
+    password_min_length: int = Field(default=8, validation_alias="PASSWORD_MIN_LENGTH")
+    login_rate_limit: int = Field(default=5, validation_alias="LOGIN_RATE_LIMIT")
+    login_rate_window_seconds: int = Field(
+        default=60, validation_alias="LOGIN_RATE_WINDOW_SECONDS"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
