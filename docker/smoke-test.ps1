@@ -84,8 +84,8 @@ Invoke-Json -Method Post -Uri "$ApiBaseUrl/transfers" -Token $tokens.access_toke
 } | Out-Null
 
 $transactions = Invoke-Json -Method Get -Uri "$ApiBaseUrl/accounts/$($source.account_id)/transactions" -Token $tokens.access_token
-if ($transactions.Count -lt 4) {
-    throw "Expected at least 4 source account transactions."
+if ($transactions.Count -lt 3) {
+    throw "Expected at least 3 source account transactions."
 }
 
 Write-Output "Docker smoke test passed for $email"

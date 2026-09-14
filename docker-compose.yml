@@ -2,39 +2,95 @@ services:
   postgres:
     image: postgres:18
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pybank
+      POSTGRES_DB: ${POSTGRES_DB:-pybank_docker}
+      POSTGRES_USER: ${POSTGRES_USER:-pybank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pybank_docker_password}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
     volumes:
       - pybank_postgres_data:/var/lib/postgresql
-    ports:
-      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d pybank"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+    networks:
+      - pybank
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pybank
 
   backend:
     build:
       context: .
-      dockerfile: docker/Dockerfile.backend
+      dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/pybank
+      APP_NAME: ${APP_NAME:-PyBank}
+      APP_ENV: ${APP_ENV:-docker-development}
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      DEBUG: ${PYBANK_DEBUG:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://pybank:pybank_docker_password@postgres:5432/pybank_docker}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      CACHE_ENABLED: ${CACHE_ENABLED:-true}
+      CUSTOMER_CACHE_TTL_SECONDS: ${CUSTOMER_CACHE_TTL_SECONDS:-300}
+      ACCOUNT_CACHE_TTL_SECONDS: ${ACCOUNT_CACHE_TTL_SECONDS:-60}
+      ACCOUNT_LIST_CACHE_TTL_SECONDS: ${ACCOUNT_LIST_CACHE_TTL_SECONDS:-60}
+      JWT_SECRET: ${JWT_SECRET:-change-this-docker-development-secret}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-15}
+      REFRESH_TOKEN_DAYS: ${REFRESH_TOKEN_DAYS:-7}
+      PASSWORD_MIN_LENGTH: ${PASSWORD_MIN_LENGTH:-8}
+      LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-5}
+      LOGIN_RATE_WINDOW_SECONDS: ${LOGIN_RATE_WINDOW_SECONDS:-60}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:8080}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+    ports:
+      - "${BACKEND_HOST_PORT:-8000}:8000"
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "8000:8000"
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=2).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - pybank
 
   frontend:
     build:
-      context: .
-      dockerfile: docker/Dockerfile.frontend
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
     ports:
-      - "3000:80"
+      - "${FRONTEND_HOST_PORT:-8080}:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pybank
 
 volumes:
   pybank_postgres_data:
+
+networks:
+  pybank:
+    driver: bridge

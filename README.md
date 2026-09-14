@@ -188,6 +188,11 @@ docker compose up -d
 Detailed Docker notes are in `docs/architecture/phase-7.md` and
 `docs/learning/phase-7.md`.
 
+Phase 8 adds Redis to the Docker stack as a cache and shared login rate-limit
+store. Redis is reached by the backend as `redis://redis:6379/0` inside Compose.
+Host development can use `REDIS_URL=redis://localhost:6379/0`. See
+`docs/architecture/phase-8.md` and `docs/learning/phase-8.md`.
+
 ## Project structure
 
 ```text
@@ -244,8 +249,8 @@ Phase 6 keeps browser E2E tests as a documented smoke target rather than adding 
 | 4 | Authentication + Security |
 | 5 | React + TypeScript Frontend |
 | 6 | Testing + Code Quality |
-| 7 | Docker + Docker Compose (current) |
-| 8 | Redis + Performance |
+| 7 | Docker + Docker Compose |
+| 8 | Redis + Performance (current) |
 | 9 | Kafka + Event-Driven Architecture |
 | 10 | Microservices |
 | 11 | Observability |

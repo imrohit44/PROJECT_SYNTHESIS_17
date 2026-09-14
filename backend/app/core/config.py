@@ -33,6 +33,17 @@ class Settings(BaseSettings):
     frontend_origin: str = Field(
         default="http://localhost:5173", validation_alias="FRONTEND_ORIGIN"
     )
+    redis_url: str | None = Field(default=None, validation_alias="REDIS_URL")
+    cache_enabled: bool = Field(default=True, validation_alias="CACHE_ENABLED")
+    customer_cache_ttl_seconds: int = Field(
+        default=300, validation_alias="CUSTOMER_CACHE_TTL_SECONDS"
+    )
+    account_cache_ttl_seconds: int = Field(
+        default=60, validation_alias="ACCOUNT_CACHE_TTL_SECONDS"
+    )
+    account_list_cache_ttl_seconds: int = Field(
+        default=60, validation_alias="ACCOUNT_LIST_CACHE_TTL_SECONDS"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
