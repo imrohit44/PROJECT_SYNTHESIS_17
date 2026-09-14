@@ -13,6 +13,15 @@ from backend.app.api.errors import register_exception_handlers
 from backend.app.api.v1.router import router as api_router
 from backend.app.core.config import get_settings
 from backend.app.core.logging import configure_logging
+from backend.app.infrastructure.kafka import (
+    AuditConsumer,
+    AuditConsumerThread,
+    KafkaEventProducer,
+    OutboxPublisher,
+    OutboxPublisherThread,
+)
+from backend.app.infrastructure.outbox import OutboxRepository
+from backend.app.infrastructure.persistence.database import create_session_factory
 
 settings = get_settings()
 configure_logging(settings)
@@ -22,7 +31,31 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     logger.info("Starting %s in %s environment", settings.app_name, settings.app_env)
+    workers: list[OutboxPublisherThread | AuditConsumerThread] = []
+    if settings.kafka_enabled:
+        session_factory = create_session_factory(settings.database_url)
+        topic = f"{settings.kafka_topic_prefix}.events"
+        producer = KafkaEventProducer(settings.kafka_bootstrap_servers, topic)
+        workers.append(
+            OutboxPublisherThread(
+                OutboxPublisher(OutboxRepository(session_factory), producer)
+            )
+        )
+        workers.append(
+            AuditConsumerThread(
+                AuditConsumer(
+                    settings.kafka_bootstrap_servers,
+                    topic,
+                    settings.kafka_consumer_group,
+                    session_factory,
+                )
+            )
+        )
+        for worker in workers:
+            worker.start()
     yield
+    for worker in workers:
+        worker.stop()
     logger.info("Shutting down %s", settings.app_name)
 
 

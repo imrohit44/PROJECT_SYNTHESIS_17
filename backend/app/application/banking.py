@@ -6,12 +6,19 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload, sessionmaker
 
+from backend.app.application.events import (
+    account_created_event,
+    deposit_completed_event,
+    transfer_completed_event,
+    withdrawal_completed_event,
+)
 from backend.app.domain.entities.account import Account
 from backend.app.domain.entities.current_account import CurrentAccount
 from backend.app.domain.entities.customer import Customer
 from backend.app.domain.entities.savings_account import SavingsAccount
 from backend.app.domain.enums import TransactionStatus
 from backend.app.domain.services.transfer import TransferService
+from backend.app.infrastructure.outbox import add_outbox_event
 from backend.app.infrastructure.persistence.mappers import (
     account_to_domain,
     customer_to_domain,
@@ -109,6 +116,10 @@ class BankApplicationService:
                 overdraft_limit=getattr(account, "overdraft_limit", None),
             )
             session.add(model)
+            add_outbox_event(
+                session,
+                account_created_event(account.account_id, customer_id, account_type),
+            )
         return customer, account
 
     def find_account(self, account_id: str) -> Account:
@@ -149,6 +160,15 @@ class BankApplicationService:
             transaction = account.deposit(amount)
             model.balance = account.balance
             session.add(self._transaction_model(account_id, transaction))
+            add_outbox_event(
+                session,
+                deposit_completed_event(
+                    account_id,
+                    account.owner.customer_id,
+                    transaction.amount,
+                    transaction.transaction_id,
+                ),
+            )
             return account
 
     def withdraw(self, account_id: str, amount: Decimal | int | str) -> Account:
@@ -158,6 +178,15 @@ class BankApplicationService:
             transaction = account.withdraw(amount)
             model.balance = account.balance
             session.add(self._transaction_model(account_id, transaction))
+            add_outbox_event(
+                session,
+                withdrawal_completed_event(
+                    account_id,
+                    account.owner.customer_id,
+                    transaction.amount,
+                    transaction.transaction_id,
+                ),
+            )
             return account
 
     def list_transactions(self, account_id: str) -> list:
@@ -219,6 +248,18 @@ class BankApplicationService:
                 self._transaction_model(
                     destination.account_id, destination.transactions[-1]
                 )
+            )
+            add_outbox_event(
+                session,
+                transfer_completed_event(
+                    source.account_id,
+                    destination.account_id,
+                    source.owner.customer_id,
+                    destination.owner.customer_id,
+                    source.transactions[-1].amount,
+                    source.transactions[-1].transaction_id,
+                    destination.transactions[-1].transaction_id,
+                ),
             )
             return source, destination
 

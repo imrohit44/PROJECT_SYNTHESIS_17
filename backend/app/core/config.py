@@ -44,6 +44,16 @@ class Settings(BaseSettings):
     account_list_cache_ttl_seconds: int = Field(
         default=60, validation_alias="ACCOUNT_LIST_CACHE_TTL_SECONDS"
     )
+    kafka_enabled: bool = Field(default=False, validation_alias="KAFKA_ENABLED")
+    kafka_bootstrap_servers: str = Field(
+        default="localhost:9092", validation_alias="KAFKA_BOOTSTRAP_SERVERS"
+    )
+    kafka_topic_prefix: str = Field(
+        default="pybank", validation_alias="KAFKA_TOPIC_PREFIX"
+    )
+    kafka_consumer_group: str = Field(
+        default="pybank-audit-consumer", validation_alias="KAFKA_CONSUMER_GROUP"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

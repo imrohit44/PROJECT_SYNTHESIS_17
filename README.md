@@ -193,6 +193,10 @@ store. Redis is reached by the backend as `redis://redis:6379/0` inside Compose.
 Host development can use `REDIS_URL=redis://localhost:6379/0`. See
 `docs/architecture/phase-8.md` and `docs/learning/phase-8.md`.
 
+Phase 9 adds Kafka through a transactional outbox. Kafka is reached as
+`kafka:9092` inside Compose and transports events from durable PostgreSQL outbox
+rows. See `docs/architecture/phase-9.md` and `docs/learning/phase-9.md`.
+
 ## Project structure
 
 ```text
@@ -250,8 +254,8 @@ Phase 6 keeps browser E2E tests as a documented smoke target rather than adding 
 | 5 | React + TypeScript Frontend |
 | 6 | Testing + Code Quality |
 | 7 | Docker + Docker Compose |
-| 8 | Redis + Performance (current) |
-| 9 | Kafka + Event-Driven Architecture |
+| 8 | Redis + Performance |
+| 9 | Kafka + Event-Driven Architecture (current) |
 | 10 | Microservices |
 | 11 | Observability |
 | 12 | ML Fraud Detection |
