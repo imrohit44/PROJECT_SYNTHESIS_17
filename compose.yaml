@@ -9,6 +9,7 @@ services:
       - "${POSTGRES_HOST_PORT:-5433}:5432"
     volumes:
       - pybank_postgres_data:/var/lib/postgresql
+      - ./infrastructure/postgres:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
@@ -114,6 +115,37 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      - pybank
+
+  fraud:
+    build:
+      context: ./services/fraud
+      dockerfile: Dockerfile
+    environment:
+      APP_NAME: ${APP_NAME:-PyBankFraud}
+      APP_ENV: ${APP_ENV:-docker-development}
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      DEBUG: ${PYBANK_DEBUG:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      FRAUD_DATABASE_URL: ${FRAUD_DATABASE_URL:-postgresql+psycopg://pybank:pybank_docker_password@postgres:5432/pybank_fraud}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_TOPIC_PREFIX: ${KAFKA_TOPIC_PREFIX:-pybank}
+      KAFKA_CONSUMER_GROUP: ${KAFKA_CONSUMER_GROUP:-pybank-fraud-consumer}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+    ports:
+      - "${FRAUD_HOST_PORT:-8001}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - pybank
 
