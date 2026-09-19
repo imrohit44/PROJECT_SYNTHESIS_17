@@ -81,6 +81,8 @@ services:
       LOGIN_RATE_WINDOW_SECONDS: ${LOGIN_RATE_WINDOW_SECONDS:-60}
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:8080}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      OTEL_TRACING_ENABLED: ${OTEL_TRACING_ENABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318/v1/traces}
     ports:
       - "${BACKEND_HOST_PORT:-8000}:8000"
     depends_on:
@@ -89,6 +91,8 @@ services:
       redis:
         condition: service_healthy
       kafka:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=2).read()"]
@@ -120,8 +124,11 @@ services:
 
   fraud:
     build:
-      context: ./services/fraud
-      dockerfile: Dockerfile
+      # Build context is the repository root so the shared services/common
+      # package can be copied into the image. Fraud remains independently
+      # deployable: it has its own Dockerfile, dependencies and migrations.
+      context: .
+      dockerfile: services/fraud/Dockerfile
     environment:
       APP_NAME: ${APP_NAME:-PyBankFraud}
       APP_ENV: ${APP_ENV:-docker-development}
@@ -130,9 +137,13 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       FRAUD_DATABASE_URL: ${FRAUD_DATABASE_URL:-postgresql+psycopg://pybank:pybank_docker_password@postgres:5432/pybank_fraud}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
-      KAFKA_TOPIC_PREFIX: ${KAFKA_TOPIC_PREFIX:-pybank}
-      KAFKA_CONSUMER_GROUP: ${KAFKA_CONSUMER_GROUP:-pybank-fraud-consumer}
+      # Single shared topic. The event type lives in the envelope, not the topic
+      # name, so transfer.completed and risk.assessed travel on pybank.events.
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-pybank.events}
+      KAFKA_CONSUMER_GROUP: ${KAFKA_CONSUMER_GROUP_FRAUD:-pybank-fraud-consumer}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      OTEL_TRACING_ENABLED: ${OTEL_TRACING_ENABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318/v1/traces}
     ports:
       - "${FRAUD_HOST_PORT:-8001}:8000"
     depends_on:
@@ -140,12 +151,79 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      jaeger:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 15s
+    networks:
+      - pybank
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      SPAN_STORAGE_TYPE: memory
+      QUERY_BASE_PATH: /
+    ports:
+      # UI/query API only; OTLP ingestion (4317/4318) stays on the compose network.
+      - "${JAEGER_UI_HOST_PORT:-16686}:16686"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:16686/api/services"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
       start_period: 10s
+    networks:
+      - pybank
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "${PROMETHEUS_HOST_PORT:-9090}:9090"
+    depends_on:
+      backend:
+        condition: service_healthy
+      fraud:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - pybank
+
+  grafana:
+    image: grafana/grafana:11.5.1
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-pybank_grafana_password}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/grafana/pybank-dashboard.json:/var/lib/grafana/dashboards/pybank-dashboard.json:ro
+    ports:
+      - "${GRAFANA_HOST_PORT:-3000}:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
     networks:
       - pybank
 

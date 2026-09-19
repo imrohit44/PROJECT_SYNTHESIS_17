@@ -28,9 +28,13 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 7 - Docker + Docker Compose**
+**Phase 11 - Observability (verified 2026-09-19)**
 
-Phases 0 through 6 are complete. The current implementation adds a reproducible Docker Compose development environment for the existing modular monolith: PostgreSQL 18, FastAPI backend, and React frontend.
+Phases 0 through 10 are complete. Phase 11 adds structlog JSON logging,
+correlation IDs, Kafka `correlation_id` + `traceparent` headers,
+OpenTelemetry/Jaeger tracing, Prometheus metrics, provisioned Grafana,
+and real readiness checks. Runtime verification is documented in
+`docs/verification/phase-11.md`.
 
 ## Technology stack currently implemented
 
@@ -55,6 +59,12 @@ Phases 0 through 6 are complete. The current implementation adds a reproducible 
 - pytest-cov
 - Ruff
 - MyPy configuration
+- structlog JSON logging
+- OpenTelemetry OTLP tracing
+- Prometheus metrics
+- Apache Kafka event transport
+- Independent Fraud microservice
+- Jaeger, Prometheus, and Grafana observability stack
 
 Future technologies are roadmap items, not current dependencies.
 
@@ -255,9 +265,9 @@ Phase 6 keeps browser E2E tests as a documented smoke target rather than adding 
 | 6 | Testing + Code Quality |
 | 7 | Docker + Docker Compose |
 | 8 | Redis + Performance |
-| 9 | Kafka + Event-Driven Architecture (current) |
+| 9 | Kafka + Event-Driven Architecture |
 | 10 | Microservices |
-| 11 | Observability |
+| 11 | Observability (verified; see `docs/verification/phase-11.md`) |
 | 12 | ML Fraud Detection |
 | 13 | Neo4j + Fraud Graph |
 | 14 | LLM Banking Agents |

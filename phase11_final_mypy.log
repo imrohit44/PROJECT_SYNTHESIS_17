@@ -1,9 +1,0 @@
-services\fraud\alembic\env.py: error: Duplicate module named "env" (also at ".\alembic\env.py")
-services\fraud\alembic\env.py: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#mapping-file-paths-to-modules for more info
-services\fraud\alembic\env.py: note: Common resolutions include:
-services\fraud\alembic\env.py: note:     a) using `--exclude` to avoid checking one of them,
-services\fraud\alembic\env.py: note:     b) adding `__init__.py` somewhere,
-services\fraud\alembic\env.py: note:     c) using `--explicit-package-bases` or adjusting `MYPYPATH`
-Found 1 error in 1 file (errors prevented further checking)
-
-EXIT_CODE=2

@@ -9,6 +9,7 @@ description = "A progressive software engineering learning project for banking s
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "structlog>=24.1,<25.0",
     "fastapi>=0.115,<1.0",
     "alembic>=1.14,<2.0",
     "argon2-cffi>=23.1,<26.0",
@@ -20,6 +21,11 @@ dependencies = [
     "psycopg[binary]>=3.2,<4.0",
     "sqlalchemy>=2.0,<3.0",
     "uvicorn[standard]>=0.34,<1.0",
+    "prometheus-client>=0.20,<1.0",
+    "opentelemetry-sdk>=1.29,<2.0",
+    "opentelemetry-api>=1.29,<2.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.29,<2.0",
+    "opentelemetry-instrumentation-fastapi>=0.50b0",
 ]
 
 [project.optional-dependencies]
@@ -33,7 +39,49 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["backend*"]
+include = ["backend*", "services*"]
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+# The fraud service is an independent deployable with its own mypy config
+# (services/fraud/mypy.ini) and its own root-relative imports. Type-checking it
+# from the repository root would re-discover a second `env` module from its
+# alembic directory, so it is excluded here and checked separately.
+exclude = ["^services/fraud/", "^alembic/versions/", "^frontend/", "^artifacts/"]
+
+[[tool.mypy.overrides]]
+module = ["backend.tests.*"]
+disallow_untyped_defs = false
+check_untyped_defs = false
+warn_unused_ignores = false
+
+# The rate-limit and cache unit tests inject a hand-rolled fake Redis that
+# intentionally implements only the subset of the redis-py API those tests
+# exercise. A targeted disable (not a global rule relaxation) keeps mypy green
+# without forcing interface changes on production code.
+[[tool.mypy.overrides]]
+module = [
+    "backend.tests.security.test_rate_limit_redis",
+    "backend.tests.infrastructure.test_cache",
+]
+disable_error_code = ["assignment", "arg-type"]
+
+[[tool.mypy.overrides]]
+module = "confluent_kafka.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "opentelemetry.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "redis.*"
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "-q -p no:cacheprovider --basetemp=.pytest-tmp"
@@ -59,19 +107,19 @@ fail_under = 60
 [tool.ruff]
 target-version = "py312"
 line-length = 88
-exclude = ["main.py", "frontend/node_modules", "frontend/dist"]
+# "/main.py" anchors to the repository root so only the legacy standalone
+# script is skipped; backend/app/main.py and services/fraud/app/main.py are
+# linted normally.
+exclude = ["/main.py", "frontend/node_modules", "frontend/dist", "artifacts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
-per-file-ignores = {"backend/app/api/**/*.py" = ["B008"]}
+per-file-ignores = { "backend/app/api/**/*.py" = [
+    "B008",
+], "**/alembic/env.py" = [
+    "E402",
+    "I001",
+] }
 
 [tool.ruff.format]
 quote-style = "double"
-
-[tool.mypy]
-python_version = "3.12"
-check_untyped_defs = true
-disallow_untyped_defs = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true

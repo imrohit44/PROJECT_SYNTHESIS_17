@@ -36,10 +36,13 @@ def get_auth() -> AuthApplicationService:
 @lru_cache
 def get_login_limiter() -> LoginRateLimiter:
     settings = get_settings()
+    # Test runs use the process-local limiter so counters cannot leak between
+    # tests through Redis. Production behaviour is unchanged.
+    redis_url = None if settings.app_env == "test" else settings.redis_url
     return LoginRateLimiter(
         settings.login_rate_limit,
         settings.login_rate_window_seconds,
-        redis_url=settings.redis_url,
+        redis_url=redis_url,
     )
 
 

@@ -1,6 +1,0 @@
-
-> pybank-frontend@0.1.0 typecheck
-> tsc -b --pretty false
-
-
-EXIT_CODE=0

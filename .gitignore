@@ -33,3 +33,17 @@ Thumbs.db
 frontend/node_modules/
 frontend/dist/
 frontend/coverage/
+
+# Phase 11 generated verification artifacts
+# Raw logs, JUnit XML, JSON captures, pytest temp output and metric snapshots
+# that are produced during verification must not pollute the source tree.
+artifacts/
+*.log
+*.xml
+.pytest-tmp*/
+.pytest-tmp-p11/
+phase11_*.log
+phase11_*.xml
+phase11_*.json
+*.tmp
+

@@ -156,6 +156,10 @@ class OutboxEventModel(Base):
     attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_error: Mapped[str | None] = mapped_column(Text)
+    # Correlation metadata captured at request time so the asynchronous outbox
+    # publisher can forward it as Kafka headers after the request has finished.
+    correlation_id: Mapped[str | None] = mapped_column(String(128))
+    traceparent: Mapped[str | None] = mapped_column(String(128))
 
 
 class ProcessedEventModel(Base):

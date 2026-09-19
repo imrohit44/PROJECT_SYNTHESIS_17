@@ -9,15 +9,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml ./
+# Build context is the repository root so the shared services/common package
+# (whose observability and tracing modules the fraud service imports) can be
+# copied into the image. The fraud service stays independently deployable: it
+# has its own pyproject.toml, alembic directory and entrypoint.
+COPY services/common ./services/common
+COPY services/fraud/pyproject.toml ./services/fraud/pyproject.toml
+COPY services/fraud/alembic.ini ./services/fraud/alembic.ini
+COPY services/fraud/alembic ./services/fraud/alembic
+COPY services/fraud/app ./services/fraud/app
+COPY services/fraud/tests ./services/fraud/tests
+COPY docker/fraud-entrypoint.sh ./docker/fraud-entrypoint.sh
 
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir ./services/fraud \
+    && chmod +x /app/docker/fraud-entrypoint.sh
 
-# Copy application and tests
-# NOTE: alembic will be created later
-COPY app ./app
-COPY tests ./tests
+# /app makes services.common importable; /app/services/fraud makes `app.*`
+# importable by the fraud application and by its alembic migrations.
+ENV PYTHONPATH=/app/services/fraud:/app
 
-ENV PYTHONPATH=/app
+EXPOSE 8000
 
+ENTRYPOINT ["/app/docker/fraud-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

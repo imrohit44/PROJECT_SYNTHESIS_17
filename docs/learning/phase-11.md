@@ -21,6 +21,9 @@ guessing with regular expressions.
 structlog lets PyBank build that line from a processor chain instead of
 hand-formatting strings.
 
+Phase 11 runtime result: Banking and Fraud container application logs are pure
+JSON objects; readiness responses contain only `ok`/`unavailable`.
+
 ## Correlation IDs
 
 A correlation ID is one identifier attached to everything that belongs to the
@@ -30,6 +33,10 @@ binds it to a context variable so background threads can log the same value.
 
 The ID is not authorization and not identity. It is only a label that makes
 searching logs possible. Anything a client supplies must still be validated.
+
+Phase 11 runtime result: `phase11-final-test-398435e3` was preserved from the
+Banking transfer response through `transfer.completed` Kafka headers into the
+Fraud `fraud_assessments` row and onward in `risk.assessed` headers.
 
 ## Metrics
 
@@ -42,6 +49,11 @@ Prometheus-style metrics come in a few shapes:
 Labels add dimensions (`method`, `route`, `status`). Every unique label
 combination is a separate time series, which is why high-cardinality labels such
 as raw URL paths with IDs inside them are dangerous.
+
+Phase 11 runtime result: `transfers_total`, `fraud_events_consumed_total`,
+`fraud_assessments_total`, `fraud_duplicate_events_total`,
+`outbox_pending_events`, and `outbox_publish_failures_total` were scraped live,
+and Prometheus reported `banking -> UP` and `fraud -> UP`.
 
 ## Pull, not push
 
@@ -56,12 +68,18 @@ Liveness asks "is this process broken and should be restarted". Readiness asks
 returns `ready` will not prevent traffic from reaching an instance whose
 database is unreachable.
 
+Phase 11 runtime result: stopping Redis made Banking `/health -> 200` and
+`/ready -> 503`; restoring Redis returned `/ready -> 200`.
+
 ## Logs versus traces
 
 A metric tells you something changed. Logs tell you what happened in one place. A
 trace shows one request crossing service boundaries and where the time went, which
 is why trace context usually travels in message headers - including Kafka record
 headers.
+
+Phase 11 runtime result: Jaeger contains Banking HTTP spans and Fraud
+`fraud.risk_evaluation` spans, with separate W3C `traceparent` Kafka headers.
 
 ## Hygiene
 

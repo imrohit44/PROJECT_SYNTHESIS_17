@@ -11,6 +11,9 @@ RUN addgroup --system pybank && adduser --system --ingroup pybank pybank
 COPY pyproject.toml README.md alembic.ini ./
 COPY alembic ./alembic
 COPY backend ./backend
+# services/common holds the shared observability + tracing package imported by
+# both the banking API and the fraud service.
+COPY services ./services
 COPY docker/backend-entrypoint.sh ./docker/backend-entrypoint.sh
 
 RUN pip install --no-cache-dir --upgrade pip \

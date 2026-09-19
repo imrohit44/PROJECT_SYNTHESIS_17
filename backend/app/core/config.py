@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     kafka_consumer_group: str = Field(
         default="pybank-audit-consumer", validation_alias="KAFKA_CONSUMER_GROUP"
     )
+    otel_tracing_enabled: bool = Field(
+        default=False, validation_alias="OTEL_TRACING_ENABLED"
+    )
+    otel_exporter_otlp_endpoint: str | None = Field(
+        default=None, validation_alias="OTEL_EXPORTER_OTLP_ENDPOINT"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
