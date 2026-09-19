@@ -1,0 +1,320 @@
+{
+  "started_utc": "2026-09-17T21:50:29Z",
+  "docker_initial": {
+    "exit": 0,
+    "stdout": "NAME                IMAGE                                                                     COMMAND                  SERVICE    CREATED          STATUS                      PORTS\npybank-backend-1    pybank-backend                                                            \"/app/docker/backend\u2026\"   backend    9 minutes ago    Up 9 minutes (healthy)      0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp\npybank-fraud-1      pybank-fraud                                                              \"uvicorn app.main:ap\u2026\"   fraud      40 seconds ago   Exited (1) 30 seconds ago   \npybank-frontend-1   sha256:26382f5f693cc23bd3092353acbc68d489719b0f5a0fd190d79c962d7108ec9a   \"/docker-entrypoint.\u2026\"   frontend   3 days ago       Up 38 minutes (healthy)     0.0.0.0:8080->80/tcp, [::]:8080->80/tcp\npybank-kafka-1      apache/kafka:3.9.1                                                        \"/__cacert_entrypoin\u2026\"   kafka      3 days ago       Up 39 minutes (healthy)     9092/tcp\npybank-postgres-1   postgres:18                                                               \"docker-entrypoint.s\u2026\"   postgres   3 days ago       Up 39 minutes (healthy)     0.0.0.0:5433->5432/tcp, [::]:5433->5432/tcp\npybank-redis-1      redis:7.4-alpine                                                          \"docker-entrypoint.s\u2026\"   redis      3 days ago       Up 39 minutes (healthy)     6379/tcp\n",
+    "stderr": ""
+  },
+  "backend_settings": {
+    "exit": 0,
+    "stdout": "{'login_rate_limit': 5, 'login_rate_window_seconds': 60}\n5 60\n24.4.0\n",
+    "stderr": ""
+  },
+  "banking_health": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 17 Sep 2026 21:50:34 GMT",
+      "server": "uvicorn",
+      "content-length": "35",
+      "content-type": "application/json",
+      "x-correlation-id": "a417b5f3-1582-4c57-ae5a-bc203fde5cdb",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'"
+    },
+    "body": "{\"status\":\"ok\",\"service\":\"banking\"}"
+  },
+  "banking_ready": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 17 Sep 2026 21:50:34 GMT",
+      "server": "uvicorn",
+      "content-length": "38",
+      "content-type": "application/json",
+      "x-correlation-id": "beb99d0a-0d48-4804-a311-6f7509bed366",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'"
+    },
+    "body": "{\"status\":\"ready\",\"service\":\"banking\"}"
+  },
+  "fraud_health": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "fraud_ready": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "correlation_generated": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 17 Sep 2026 21:50:42 GMT",
+      "server": "uvicorn",
+      "content-length": "35",
+      "content-type": "application/json",
+      "x-correlation-id": "615350ab-1aca-4690-baed-24f960d9b49c",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'"
+    },
+    "body": "{\"status\":\"ok\",\"service\":\"banking\"}"
+  },
+  "correlation_preserved": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 17 Sep 2026 21:50:42 GMT",
+      "server": "uvicorn",
+      "content-length": "35",
+      "content-type": "application/json",
+      "x-correlation-id": "phase11-633d5b5831ee4111ba8b1f869b658413",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'"
+    },
+    "body": "{\"status\":\"ok\",\"service\":\"banking\"}"
+  },
+  "supplied_context": {
+    "correlation_id": "phase11-633d5b5831ee4111ba8b1f869b658413",
+    "traceparent": "00-9247607b00f045adb771f8eea1d4cc7d-75b701bc98dc4cf7-01"
+  },
+  "real_transfer": {
+    "source_account_id": "e2e79fe3-e28a-4ed1-9f5e-707bd889334c",
+    "destination_account_id": "b4269bc0-8f12-4472-8fa1-8be213b13d90",
+    "amount": "15.00",
+    "source_transaction_id": "0d3b0a09-ac0c-4818-88f3-befe7bee05af",
+    "destination_transaction_id": "93414a43-c44a-4163-96e4-87ee0fc0b7a2"
+  },
+  "banking_outbox": [
+    [
+      "780b5bd0-2060-4951-8ea8-4b2bedc7499c",
+      {
+        "event_id": "780b5bd0-2060-4951-8ea8-4b2bedc7499c",
+        "event_type": "transfer.completed",
+        "schema_version": 1,
+        "occurred_at": "2026-09-17T21:50:45.362169+00:00",
+        "aggregate_type": "transfer",
+        "aggregate_id": "0d3b0a09-ac0c-4818-88f3-befe7bee05af",
+        "payload": {
+          "source_account_id": "e2e79fe3-e28a-4ed1-9f5e-707bd889334c",
+          "destination_account_id": "b4269bc0-8f12-4472-8fa1-8be213b13d90",
+          "source_customer_id": "b0d4c5ca-86d9-4cb7-84db-0cbc538b8431",
+          "destination_customer_id": "b0d4c5ca-86d9-4cb7-84db-0cbc538b8431",
+          "amount": "15.00",
+          "source_transaction_id": "0d3b0a09-ac0c-4818-88f3-befe7bee05af",
+          "destination_transaction_id": "93414a43-c44a-4163-96e4-87ee0fc0b7a2"
+        }
+      },
+      "2026-09-17 21:50:47.128844+00:00"
+    ]
+  ],
+  "kafka_record": {
+    "exit": 0,
+    "stdout": "[{\"event\": {\"event_id\": \"780b5bd0-2060-4951-8ea8-4b2bedc7499c\", \"event_type\": \"transfer.completed\", \"schema_version\": 1, \"occurred_at\": \"2026-09-17T21:50:45.362169+00:00\", \"aggregate_type\": \"transfer\", \"aggregate_id\": \"0d3b0a09-ac0c-4818-88f3-befe7bee05af\", \"payload\": {\"source_account_id\": \"e2e79fe3-e28a-4ed1-9f5e-707bd889334c\", \"destination_account_id\": \"b4269bc0-8f12-4472-8fa1-8be213b13d90\", \"source_customer_id\": \"b0d4c5ca-86d9-4cb7-84db-0cbc538b8431\", \"destination_customer_id\": \"b0d4c5ca-86d9-4cb7-84db-0cbc538b8431\", \"amount\": \"15.00\", \"source_transaction_id\": \"0d3b0a09-ac0c-4818-88f3-befe7bee05af\", \"destination_transaction_id\": \"93414a43-c44a-4163-96e4-87ee0fc0b7a2\"}}, \"headers\": [], \"partition\": 0, \"offset\": 25}]\n",
+    "stderr": ""
+  },
+  "audit_before_duplicate": [
+    [
+      "780b5bd0-2060-4951-8ea8-4b2bedc7499c",
+      "pybank-audit-consumer"
+    ]
+  ],
+  "duplicate_publish": {
+    "exit": 0,
+    "stdout": "remaining 0\n",
+    "stderr": ""
+  },
+  "audit_after_duplicate": [
+    [
+      "780b5bd0-2060-4951-8ea8-4b2bedc7499c",
+      "pybank-audit-consumer"
+    ]
+  ],
+  "fraud_assessment_rows": [],
+  "risk_assessed_rows": [],
+  "fraud_assessment_http": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "fraud_restart": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": " Container pybank-postgres-1 Waiting \n Container pybank-kafka-1 Waiting \n Container pybank-kafka-1 Healthy \n Container pybank-postgres-1 Healthy \n Container pybank-fraud-1 Starting \n Container pybank-fraud-1 Started \n"
+  },
+  "fraud_recovery_health": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "fraud_recovery_assessment": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "kafka_stop": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": " Container pybank-kafka-1 Stopping \n Container pybank-kafka-1 Stopped \n"
+  },
+  "ready_kafka_down": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 17 Sep 2026 21:51:36 GMT",
+      "server": "uvicorn",
+      "content-length": "38",
+      "content-type": "application/json",
+      "x-correlation-id": "cccd840d-9c70-4511-98bc-fe059cefada9",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'"
+    },
+    "body": "{\"status\":\"ready\",\"service\":\"banking\"}"
+  },
+  "health_kafka_down": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 17 Sep 2026 21:51:36 GMT",
+      "server": "uvicorn",
+      "content-length": "35",
+      "content-type": "application/json",
+      "x-correlation-id": "90ff64dc-6337-492a-b96b-ab82bbe35530",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'"
+    },
+    "body": "{\"status\":\"ok\",\"service\":\"banking\"}"
+  },
+  "transfer_kafka_down": {
+    "source_account_id": "e2e79fe3-e28a-4ed1-9f5e-707bd889334c",
+    "destination_account_id": "b4269bc0-8f12-4472-8fa1-8be213b13d90",
+    "amount": "15.00",
+    "source_transaction_id": "28173350-bde4-4c0e-9f0e-69a426100b34",
+    "destination_transaction_id": "c763f88d-aa9e-41ac-b7d1-3205d66ba42e"
+  },
+  "outbox_kafka_down": [
+    [
+      "272b86c6-3fb5-40d3-bd9f-a61df75e1b4e",
+      {
+        "event_id": "272b86c6-3fb5-40d3-bd9f-a61df75e1b4e",
+        "event_type": "transfer.completed",
+        "schema_version": 1,
+        "occurred_at": "2026-09-17T21:51:37.347733+00:00",
+        "aggregate_type": "transfer",
+        "aggregate_id": "28173350-bde4-4c0e-9f0e-69a426100b34",
+        "payload": {
+          "source_account_id": "e2e79fe3-e28a-4ed1-9f5e-707bd889334c",
+          "destination_account_id": "b4269bc0-8f12-4472-8fa1-8be213b13d90",
+          "source_customer_id": "b0d4c5ca-86d9-4cb7-84db-0cbc538b8431",
+          "destination_customer_id": "b0d4c5ca-86d9-4cb7-84db-0cbc538b8431",
+          "amount": "15.00",
+          "source_transaction_id": "28173350-bde4-4c0e-9f0e-69a426100b34",
+          "destination_transaction_id": "c763f88d-aa9e-41ac-b7d1-3205d66ba42e"
+        }
+      },
+      "2026-09-17 21:51:49.336083+00:00"
+    ]
+  ],
+  "kafka_start": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": " Container pybank-kafka-1 Starting \n Container pybank-kafka-1 Started \n"
+  },
+  "ready_kafka_recovered": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 17 Sep 2026 21:52:23 GMT",
+      "server": "uvicorn",
+      "content-length": "38",
+      "content-type": "application/json",
+      "x-correlation-id": "62722851-c496-4fbe-8619-7a96dffb1a2d",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'"
+    },
+    "body": "{\"status\":\"ready\",\"service\":\"banking\"}"
+  },
+  "outbox_kafka_recovered": [
+    [
+      "272b86c6-3fb5-40d3-bd9f-a61df75e1b4e",
+      {
+        "event_id": "272b86c6-3fb5-40d3-bd9f-a61df75e1b4e",
+        "event_type": "transfer.completed",
+        "schema_version": 1,
+        "occurred_at": "2026-09-17T21:51:37.347733+00:00",
+        "aggregate_type": "transfer",
+        "aggregate_id": "28173350-bde4-4c0e-9f0e-69a426100b34",
+        "payload": {
+          "source_account_id": "e2e79fe3-e28a-4ed1-9f5e-707bd889334c",
+          "destination_account_id": "b4269bc0-8f12-4472-8fa1-8be213b13d90",
+          "source_customer_id": "b0d4c5ca-86d9-4cb7-84db-0cbc538b8431",
+          "destination_customer_id": "b0d4c5ca-86d9-4cb7-84db-0cbc538b8431",
+          "amount": "15.00",
+          "source_transaction_id": "28173350-bde4-4c0e-9f0e-69a426100b34",
+          "destination_transaction_id": "c763f88d-aa9e-41ac-b7d1-3205d66ba42e"
+        }
+      },
+      "2026-09-17 21:51:49.336083+00:00"
+    ]
+  ],
+  "kafka_recovered_record": {
+    "exit": 0,
+    "stdout": "[{\"event\": {\"event_id\": \"272b86c6-3fb5-40d3-bd9f-a61df75e1b4e\", \"event_type\": \"transfer.completed\", \"schema_version\": 1, \"occurred_at\": \"2026-09-17T21:51:37.347733+00:00\", \"aggregate_type\": \"transfer\", \"aggregate_id\": \"28173350-bde4-4c0e-9f0e-69a426100b34\", \"payload\": {\"source_account_id\": \"e2e79fe3-e28a-4ed1-9f5e-707bd889334c\", \"destination_account_id\": \"b4269bc0-8f12-4472-8fa1-8be213b13d90\", \"source_customer_id\": \"b0d4c5ca-86d9-4cb7-84db-0cbc538b8431\", \"destination_customer_id\": \"b0d4c5ca-86d9-4cb7-84db-0cbc538b8431\", \"amount\": \"15.00\", \"source_transaction_id\": \"28173350-bde4-4c0e-9f0e-69a426100b34\", \"destination_transaction_id\": \"c763f88d-aa9e-41ac-b7d1-3205d66ba42e\"}}, \"headers\": [], \"partition\": 0, \"offset\": 27}]\n",
+    "stderr": ""
+  },
+  "metrics_banking": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 17 Sep 2026 21:52:31 GMT",
+      "server": "uvicorn",
+      "content-length": "18905",
+      "content-type": "text/plain; version=1.0.0; charset=utf-8",
+      "x-correlation-id": "585fd7f5-9e4e-471a-8174-0fd63113f1a3",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "referrer-policy": "no-referrer",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'"
+    },
+    "body": "# HELP python_gc_objects_collected_total Objects collected during gc\n# TYPE python_gc_objects_collected_total counter\npython_gc_objects_collected_total{generation=\"0\"} 3545.0\npython_gc_objects_collected_total{generation=\"1\"} 1302.0\npython_gc_objects_collected_total{generation=\"2\"} 190.0\n# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC\n# TYPE python_gc_objects_uncollectable_total counter\npython_gc_objects_uncollectable_total{generation=\"0\"} 0.0\npython_gc_objects_uncollectable_total{generation=\"1\"} 0.0\npython_gc_objects_uncollectable_total{generation=\"2\"} 0.0\n# HELP python_gc_collections_total Number of times this generation was collected\n# TYPE python_gc_collections_total counter\npython_gc_collections_total{generation=\"0\"} 253.0\npython_gc_collections_total{generation=\"1\"} 23.0\npython_gc_collections_total{generation=\"2\"} 2.0\n# HELP python_info Python platform information\n# TYPE python_info gauge\npython_info{implementation=\"CPython\",major=\"3\",minor=\"12\",patchlevel=\"14\",version=\"3.12.14\"} 1.0\n# HELP process_virtual_memory_bytes Virtual memory size in bytes.\n# TYPE process_virtual_memory_bytes gauge\nprocess_virtual_memory_bytes 1.166966784e+09\n# HELP process_resident_memory_bytes Resident memory size in bytes.\n# TYPE process_resident_memory_bytes gauge\nprocess_resident_memory_bytes 1.03604224e+08\n# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n# TYPE process_start_time_seconds gauge\nprocess_start_time_seconds 1.78968125637e+09\n# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.\n# TYPE process_cpu_seconds_total counter\nprocess_cpu_seconds_total 20.38\n# HELP process_open_fds Number of open file descriptors.\n# TYPE process_open_fds gauge\nprocess_open_fds 35.0\n# HELP process_max_fds Maximum number of open file descriptors.\n# TYPE process_max_fds gauge\nprocess_max_fds 1.048576e+06\n# HELP http_requests_total Total HTTP requests\n# TYPE http_requests_total counter\nhttp_requests_total{method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_requests_total{method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_requests_total{method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_requests_total{method=\"POST\",route=\"/api/v1/auth/register\",status=\"201\"} 1.0\nhttp_requests_total{method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_requests_total{method=\"POST\",route=\"/api/v1/accounts\",status=\"201\"} 2.0\nhttp_requests_total{method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\n# HELP http_requests_created Total HTTP requests\n# TYPE http_requests_created gauge\nhttp_requests_created{method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 1.7896812873539925e+09\nhttp_requests_created{method=\"GET\",route=\"/health\",status=\"200\"} 1.7896818357508068e+09\nhttp_requests_created{method=\"GET\",route=\"/ready\",status=\"200\"} 1.789681835763485e+09\nhttp_requests_created{method=\"POST\",route=\"/api/v1/auth/register\",status=\"201\"} 1.7896818447865832e+09\nhttp_requests_created{method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.7896818450273807e+09\nhttp_requests_created{method=\"POST\",route=\"/api/v1/accounts\",status=\"201\"} 1.789681845237568e+09\nhttp_requests_created{method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 1.7896818453878229e+09\n# HELP http_request_duration_seconds HTTP request latency\n# TYPE http_request_duration_seconds histogram\nhttp_request_duration_seconds_bucket{le=\"0.005\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 50.0\nhttp_request_duration_seconds_bucket{le=\"0.01\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 56.0\nhttp_request_duration_seconds_bucket{le=\"0.025\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"0.05\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"0.075\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"0.1\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"0.25\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"0.5\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"0.75\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"1.0\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"2.5\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"5.0\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"7.5\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"10.0\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_bucket{le=\"+Inf\",method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_count{method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 57.0\nhttp_request_duration_seconds_sum{method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 0.18113589999848045\nhttp_request_duration_seconds_bucket{le=\"0.005\",method=\"GET\",route=\"/health\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"0.01\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"0.025\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"0.05\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"0.075\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"0.1\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"0.25\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"0.5\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"0.75\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"1.0\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"2.5\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"5.0\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"7.5\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"10.0\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_bucket{le=\"+Inf\",method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_count{method=\"GET\",route=\"/health\",status=\"200\"} 4.0\nhttp_request_duration_seconds_sum{method=\"GET\",route=\"/health\",status=\"200\"} 0.0194007000000056\nhttp_request_duration_seconds_bucket{le=\"0.005\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"0.01\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"0.025\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"0.05\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"0.075\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"0.1\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"0.25\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"0.5\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"0.75\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"1.0\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"2.5\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"5.0\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"7.5\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"10.0\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_bucket{le=\"+Inf\",method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_count{method=\"GET\",route=\"/ready\",status=\"200\"} 3.0\nhttp_request_duration_seconds_sum{method=\"GET\",route=\"/ready\",status=\"200\"} 0.007604700000229059\nhttp_request_duration_seconds_bucket{le=\"0.005\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.01\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.025\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.05\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.075\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.1\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.25\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.5\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.75\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"1.0\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"2.5\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"5.0\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"7.5\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"10.0\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"+Inf\",method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 1.0\nhttp_request_duration_seconds_count{method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 1.0\nhttp_request_duration_seconds_sum{method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 0.8204882999998517\nhttp_request_duration_seconds_bucket{le=\"0.005\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.01\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.025\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.05\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.075\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.1\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.25\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"0.5\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"0.75\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"1.0\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"2.5\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"5.0\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"7.5\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"10.0\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"+Inf\",method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_count{method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.0\nhttp_request_duration_seconds_sum{method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 0.23125230000005104\nhttp_request_duration_seconds_bucket{le=\"0.005\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.01\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.025\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.05\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"0.075\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"0.1\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"0.25\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"0.5\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"0.75\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"1.0\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"2.5\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"5.0\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"7.5\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"10.0\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"+Inf\",method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_count{method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 2.0\nhttp_request_duration_seconds_sum{method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 0.23903019999988828\nhttp_request_duration_seconds_bucket{le=\"0.005\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.01\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.025\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.05\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.075\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 1.0\nhttp_request_duration_seconds_bucket{le=\"0.1\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"0.25\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"0.5\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"0.75\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"1.0\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"2.5\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"5.0\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"7.5\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"10.0\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_bucket{le=\"+Inf\",method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_count{method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 2.0\nhttp_request_duration_seconds_sum{method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 0.15709419999984675\nhttp_request_duration_seconds_bucket{le=\"0.005\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.01\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.025\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.05\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.075\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.1\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.25\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.5\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"0.75\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"1.0\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"2.5\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"5.0\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"7.5\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"10.0\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_bucket{le=\"+Inf\",method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_count{method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\nhttp_request_duration_seconds_sum{method=\"GET\",route=\"/metrics\",status=\"200\"} 0.0\n# HELP http_request_duration_seconds_created HTTP request latency\n# TYPE http_request_duration_seconds_created gauge\nhttp_request_duration_seconds_created{method=\"GET\",route=\"/api/v1/health\",status=\"200\"} 1.7896812873256037e+09\nhttp_request_duration_seconds_created{method=\"GET\",route=\"/health\",status=\"200\"} 1.7896818357413733e+09\nhttp_request_duration_seconds_created{method=\"GET\",route=\"/ready\",status=\"200\"} 1.7896818357599823e+09\nhttp_request_duration_seconds_created{method=\"POST\",route=\"/api/v1/auth/register\",status=\"200\"} 1.78968184396581e+09\nhttp_request_duration_seconds_created{method=\"POST\",route=\"/api/v1/auth/login\",status=\"200\"} 1.7896818447958329e+09\nhttp_request_duration_seconds_created{method=\"POST\",route=\"/api/v1/accounts\",status=\"200\"} 1.789681845038622e+09\nhttp_request_duration_seconds_created{method=\"POST\",route=\"/api/v1/transfers\",status=\"200\"} 1.7896818452943323e+09\nhttp_request_duration_seconds_created{method=\"GET\",route=\"/metrics\",status=\"200\"} 1.7896819516307292e+09\n# HELP transfers_total Total successful transfers\n# TYPE transfers_total counter\ntransfers_total 0.0\n# HELP transfers_created Total successful transfers\n# TYPE transfers_created gauge\ntransfers_created 1.7896812837794728e+09\n# HELP transfer_failures_total Total failed transfers\n# TYPE transfer_failures_total counter\ntransfer_failures_total 0.0\n# HELP transfer_failures_created Total failed transfers\n# TYPE transfer_failures_created gauge\ntransfer_failures_created 1.7896812837795267e+09\n# HELP outbox_pending_events Pending outbox events\n# TYPE outbox_pending_events gauge\noutbox_pending_events 0.0\n# HELP outbox_publish_failures_total Outbox publish failures\n# TYPE outbox_publish_failures_total counter\noutbox_publish_failures_total 0.0\n# HELP outbox_publish_failures_created Outbox publish failures\n# TYPE outbox_publish_failures_created gauge\noutbox_publish_failures_created 1.789681283779632e+09\n"
+  },
+  "metrics_fraud": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "prometheus_targets": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "grafana_health": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "grafana_datasources": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "grafana_dashboards": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "jaeger_services": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "jaeger_traces": {
+    "error": "[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  "docker_final": {
+    "exit": 0,
+    "stdout": "NAME                IMAGE                                                                     COMMAND                  SERVICE    CREATED          STATUS                          PORTS\npybank-backend-1    pybank-backend                                                            \"/app/docker/backend\u2026\"   backend    12 minutes ago   Up 12 minutes (healthy)         0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp\npybank-fraud-1      pybank-fraud                                                              \"uvicorn app.main:ap\u2026\"   fraud      3 minutes ago    Exited (1) About a minute ago   \npybank-frontend-1   sha256:26382f5f693cc23bd3092353acbc68d489719b0f5a0fd190d79c962d7108ec9a   \"/docker-entrypoint.\u2026\"   frontend   4 days ago       Up 40 minutes (healthy)         0.0.0.0:8080->80/tcp, [::]:8080->80/tcp\npybank-kafka-1      apache/kafka:3.9.1                                                        \"/__cacert_entrypoin\u2026\"   kafka      3 days ago       Up About a minute (healthy)     9092/tcp\npybank-postgres-1   postgres:18                                                               \"docker-entrypoint.s\u2026\"   postgres   3 days ago       Up 42 minutes (healthy)         0.0.0.0:5433->5432/tcp, [::]:5433->5432/tcp\npybank-redis-1      redis:7.4-alpine                                                          \"docker-entrypoint.s\u2026\"   redis      4 days ago       Up 42 minutes (healthy)         6379/tcp\n",
+    "stderr": ""
+  },
+  "fraud_logs": {
+    "exit": 0,
+    "stdout": "fraud-1  |   File \"/usr/local/lib/python3.12/site-packages/uvicorn/config.py\", line 434, in load_app\nfraud-1  |     return import_from_string(self.app)\nfraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/uvicorn/importer.py\", line 22, in import_from_string\nfraud-1  |     raise exc from None\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/uvicorn/importer.py\", line 19, in import_from_string\nfraud-1  |     module = importlib.import_module(module_str)\nfraud-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/importlib/__init__.py\", line 90, in import_module\nfraud-1  |     return _bootstrap._gcd_import(name[level:], package, level)\nfraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\nfraud-1  |   File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\nfraud-1  |   File \"/app/app/main.py\", line 4, in <module>\nfraud-1  |     from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST\nfraud-1  | ModuleNotFoundError: No module named 'prometheus_client'\nfraud-1  | Traceback (most recent call last):\nfraud-1  |   File \"/usr/local/bin/uvicorn\", line 8, in <module>\nfraud-1  |     sys.exit(main())\nfraud-1  |              ^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/click/core.py\", line 1631, in __call__\nfraud-1  |     return self.main(*args, **kwargs)\nfraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/click/core.py\", line 1552, in main\nfraud-1  |     rv = self.invoke(ctx)\nfraud-1  |          ^^^^^^^^^^^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/click/core.py\", line 1415, in invoke\nfraud-1  |     return ctx.invoke(self.callback, **ctx.params)\nfraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/click/core.py\", line 910, in invoke\nfraud-1  |     return callback(*args, **kwargs)\nfraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/uvicorn/main.py\", line 448, in main\nfraud-1  |     run(\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/uvicorn/main.py\", line 620, in run\nfraud-1  |     config.load_app()\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/uvicorn/config.py\", line 434, in load_app\nfraud-1  |     return import_from_string(self.app)\nfraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/uvicorn/importer.py\", line 22, in import_from_string\nfraud-1  |     raise exc from None\nfraud-1  |   File \"/usr/local/lib/python3.12/site-packages/uvicorn/importer.py\", line 19, in import_from_string\nfraud-1  |     module = importlib.import_module(module_str)\nfraud-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"/usr/local/lib/python3.12/importlib/__init__.py\", line 90, in import_module\nfraud-1  |     return _bootstrap._gcd_import(name[level:], package, level)\nfraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\nfraud-1  |   File \"<frozen importlib._bootstrap_external>\", line 999, in exec_module\nfraud-1  |   File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\nfraud-1  |   File \"/app/app/main.py\", line 4, in <module>\nfraud-1  |     from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST\nfraud-1  | ModuleNotFoundError: No module named 'prometheus_client'\n",
+    "stderr": ""
+  },
+  "log_inspection": {
+    "lines": 63,
+    "fully_json_lines": 0,
+    "synthetic_password_found": false,
+    "synthetic_email_found": false,
+    "issued_token_found": false,
+    "scope": "Banking logs since verification start; synthetic credentials only"
+  },
+  "banking_logs_redacted": "INFO:     127.0.0.1:41358 - \"GET /api/v1/health HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:25196 - \"GET /health HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:25196 - \"GET /ready HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:58222 - \"GET /api/v1/health HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:37350 - \"GET /health HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:37350 - \"GET /health HTTP/1.1\" 200 OK\nINFO:pybank.security:security_event=registration_success user_id=701b7144-8665-4161-a959-64713c7bf65f\nINFO:     192.168.65.1:37350 - \"POST /api/v1/auth/register HTTP/1.1\" 201 Created\nINFO:pybank.security:security_event=login_success user_id=701b7144-8665-4161-a959-64713c7bf65f\nINFO:     192.168.65.1:37350 - \"POST /api/v1/auth/login HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:37350 - \"POST /api/v1/accounts HTTP/1.1\" 201 Created\nINFO:     192.168.65.1:37350 - \"POST /api/v1/accounts HTTP/1.1\" 201 Created\nINFO:     192.168.65.1:37350 - \"POST /api/v1/transfers HTTP/1.1\" 200 OK\nINFO:backend.app.infrastructure.kafka:outbox event published\nINFO:backend.app.infrastructure.kafka:outbox event published\nINFO:backend.app.infrastructure.kafka:outbox event published\nINFO:backend.app.infrastructure.kafka:audit event processed\nINFO:backend.app.infrastructure.kafka:audit event processed\nINFO:backend.app.infrastructure.kafka:audit event processed\nINFO:     127.0.0.1:45212 - \"GET /api/v1/health HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:41058 - \"GET /api/v1/health HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:56972 - \"GET /api/v1/health HTTP/1.1\" 200 OK\n%6|1789681889.626|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Disconnected: connection closed by peer: receive 0 after POLLIN (after 603937ms in state UP)\n%6|1789681889.626|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Disconnected: connection closed by peer: receive 0 after POLLIN (after 604750ms in state UP)\n%3|1789681889.628|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT)\n%3|1789681889.628|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT)\n%6|1789681889.638|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Disconnected: connection closed by peer: receive 0 after POLLIN (after 604636ms in state UP)\n%3|1789681889.640|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT)\n%3|1789681889.678|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)\n%3|1789681889.901|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)\n%3|1789681889.916|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)\n%3|1789681890.105|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT)\n%3|1789681891.105|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)\nINFO:     127.0.0.1:47276 - \"GET /api/v1/health HTTP/1.1\" 200 OK\n%3|1789681893.106|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT)\n%3|1789681894.106|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 0ms in state CONNECT, 1 identical error(s) suppressed)\nINFO:     192.168.65.1:16147 - \"GET /ready HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:16147 - \"GET /health HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:16147 - \"POST /api/v1/transfers HTTP/1.1\" 200 OK\n%3|1789681900.098|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Failed to resolve 'kafka:9092': Name or service not known (after 3988ms in state CONNECT)\n%3|1789681902.969|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Failed to resolve 'kafka:9092': Name or service not known (after 7860ms in state CONNECT)\nINFO:     127.0.0.1:54204 - \"GET /api/v1/health HTTP/1.1\" 200 OK\n%3|1789681908.404|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Failed to resolve 'kafka:9092': Name or service not known (after 3841ms in state CONNECT)\n%3|1789681908.540|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Failed to resolve 'kafka:9092': Name or service not known (after 3847ms in state CONNECT)\nINFO:backend.app.infrastructure.kafka:outbox event published\n%3|1789681914.122|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 0ms in state CONNECT)\n%3|1789681914.564|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT)\n%3|1789681914.838|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT)\nINFO:     127.0.0.1:33610 - \"GET /api/v1/health HTTP/1.1\" 200 OK\n%3|1789681919.712|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 0ms in state CONNECT, 200 identical error(s) suppressed)\n%3|1789681921.127|FAIL|rdkafka#producer-1| [thrd:kafka:9092/bootstrap]: kafka:9092/bootstrap: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT, 14 identical error(s) suppressed)\n%3|1789681922.588|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT)\n%3|1789681923.556|FAIL|rdkafka#consumer-2| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT, 1 identical error(s) suppressed)\n%3|1789681926.374|FAIL|rdkafka#producer-1| [thrd:kafka:9092/1]: kafka:9092/1: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 3ms in state CONNECT, 2 identical error(s) suppressed)\nINFO:     127.0.0.1:52834 - \"GET /api/v1/health HTTP/1.1\" 200 OK\n%3|1789681931.638|FAIL|rdkafka#consumer-2| [thrd:GroupCoordinator]: GroupCoordinator: kafka:9092: Connect to ipv4#172.18.0.2:9092 failed: Connection refused (after 1ms in state CONNECT, 1 identical error(s) suppressed)\n%4|1789681932.232|SESSTMOUT|rdkafka#consumer-2| [thrd:main]: Consumer group session timed out (in join-state steady) after 45027 ms without a successful response from the group coordinator (broker 1, last error was Success): revoking assignment and rejoining group\nINFO:     127.0.0.1:55204 - \"GET /api/v1/health HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:62253 - \"GET /ready HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:34782 - \"GET /api/v1/health HTTP/1.1\" 200 OK\nINFO:     192.168.65.1:46606 - \"GET /metrics HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:49852 - \"GET /api/v1/health HTTP/1.1\" 200 OK\nINFO:     127.0.0.1:33996 - \"GET /api/v1/health HTTP/1.1\" 200 OK\n",
+  "finished_utc": "2026-09-17T21:53:02Z"
+}

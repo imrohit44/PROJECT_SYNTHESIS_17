@@ -1,0 +1,7 @@
+mypy.ini: No [mypy] section in config file
+app\infrastructure\kafka_consumer.py:16: error: Name "logging" is not defined  [name-defined]
+app\main.py:22: error: Cannot find implementation or library stub for module named "services.common.observability"  [import-not-found]
+app\main.py:22: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+Found 2 errors in 2 files (checked 14 source files)
+
+EXIT_CODE=1

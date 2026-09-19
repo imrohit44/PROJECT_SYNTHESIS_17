@@ -1,0 +1,15 @@
+{
+  "cid": "phase11-corr-89393066",
+  "email": "p11_78758cda@example.com",
+  "customer_id": "d634900a-4d55-41c8-ab20-abfa4b493379",
+  "src": "a9f168f8-f8fa-4f6f-b25d-215d1373fb47",
+  "dst": "0a9a26b9-6035-45fd-99a0-4308b43ac170",
+  "transfer": {
+    "source_account_id": "a9f168f8-f8fa-4f6f-b25d-215d1373fb47",
+    "destination_account_id": "0a9a26b9-6035-45fd-99a0-4308b43ac170",
+    "amount": "12000.00",
+    "source_transaction_id": "006e5c0b-f920-47e8-84d1-0ba261aca6c9",
+    "destination_transaction_id": "0faf904f-5d54-4868-abb9-ba37daccd2d4"
+  },
+  "token": "REDACTED"
+}

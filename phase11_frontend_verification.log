@@ -1,0 +1,48 @@
+v24.14.0
+
+> pybank-frontend@0.1.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/PyBank/PyBank/frontend[39m
+
+ [32m✓[39m src/lib/storage.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/lib/queries.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 465[2mms[22m[39m
+ [32m✓[39m src/lib/api.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/components/layout/ProtectedRoute.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 261[2mms[22m[39m
+ [32m✓[39m src/app/AuthContext.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 785[2mms[22m[39m
+   [33m[2m✓[22m[39m AuthProvider[2m > [22mlogs in, stores tokens, and loads the current user [33m 595[2mms[22m[39m
+ [32m✓[39m src/pages/Login.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 2015[2mms[22m[39m
+   [33m[2m✓[22m[39m Login[2m > [22msubmits credentials and navigates after success [33m 681[2mms[22m[39m
+   [33m[2m✓[22m[39m Login[2m > [22mshows a safe authentication error [33m 1325[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 03:04:17
+[2m   Duration [22m 14.83s[2m (transform 4.01s, setup 6.26s, collect 9.45s, tests 3.55s, environment 36.18s, prepare 6.19s)[22m
+
+TEST_EXIT=%0%  
+
+> pybank-frontend@0.1.0 lint
+> eslint .
+
+LINT_EXIT=%0%  
+
+> pybank-frontend@0.1.0 typecheck
+> tsc -b --pretty false
+
+TYPECHECK_EXIT=%0%  
+
+> pybank-frontend@0.1.0 build
+> tsc -b && vite build
+
+[36mvite v7.3.6 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 1713 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+[2mdist/[22m[35massets/index-BhICnBkB.css  [39m[1m[2m 16.36 kB[22m[1m[22m[2m │ gzip:   4.62 kB[22m
+[2mdist/[22m[36massets/index-CsQQDO9D.js   [39m[1m[2m377.67 kB[22m[1m[22m[2m │ gzip: 120.15 kB[22m
+[32m✓ built in 29.49s[39m
+BUILD_EXIT=%0% 

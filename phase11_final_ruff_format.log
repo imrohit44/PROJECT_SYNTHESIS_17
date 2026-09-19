@@ -1,0 +1,407 @@
+unformatted: File would be reformatted
+   --> backend\tests\security\test_auth.py:200:1
+    |
+199 |     from backend.app.security.rate_limit import LoginRateLimiter
+    -     
+200 +
+201 |     # Override with a limiter that allows 0 attempts
+202 |     app.dependency_overrides[get_login_limiter] = lambda: LoginRateLimiter(0, 60)
+    -     
+203 +
+204 |     client.post(
+--------------------------------------------------------------------------------
+216 |     )
+    -     
+217 +
+218 |     # Clean up override so it doesn't leak (though auth_context clears it too)
+219 |     app.dependency_overrides.pop(get_login_limiter, None)
+    -     
+    -     assert response.status_code == 429
+    -
+220 |
+221 +     assert response.status_code == 429
+222 |
+    |
+
+unformatted: File would be reformatted
+   --> docker\phase11_runtime_verify.py:2:1
+    |
+1   | """Local Phase 11 verification. Never deletes volumes or existing records."""
+2   +
+3   | import json
+--------------------------------------------------------------------------------
+27  |         p = subprocess.run(
+    -             args, capture_output=True, text=True, timeout=timeout,
+    -             encoding="utf-8", errors="replace"
+28  +             args,
+29  +             capture_output=True,
+30  +             text=True,
+31  +             timeout=timeout,
+32  +             encoding="utf-8",
+33  +             errors="replace",
+34  |         )
+--------------------------------------------------------------------------------
+40  | def compose(*args, timeout=60):
+    -     return command(["docker", "compose", "-f", str(ROOT / "compose.yaml"), *args], timeout)
+41  +     return command(
+42  +         ["docker", "compose", "-f", str(ROOT / "compose.yaml"), *args], timeout
+43  +     )
+44  |
+--------------------------------------------------------------------------------
+56  |     with psycopg.connect(
+    -         host="localhost", port=5433, dbname=db, user="pybank",
+    -         password="pybank_docker_password", connect_timeout=5
+57  +         host="localhost",
+58  +         port=5433,
+59  +         dbname=db,
+60  +         user="pybank",
+61  +         password="pybank_docker_password",
+62  +         connect_timeout=5,
+63  |     ) as conn:
+--------------------------------------------------------------------------------
+70  |         "where payload->'payload'->>'source_transaction_id'=%s",
+    -         (tx,)
+71  +         (tx,),
+72  |     )
+--------------------------------------------------------------------------------
+76  |     r = client.post(
+    -         "http://localhost:8000/api/v1/transfers", headers=headers,
+    -         json={"source_account_id": source, "destination_account_id": destination,
+    -               "amount": "15.00"}
+77  +         "http://localhost:8000/api/v1/transfers",
+78  +         headers=headers,
+79  +         json={
+80  +             "source_account_id": source,
+81  +             "destination_account_id": destination,
+82  +             "amount": "15.00",
+83  +         },
+84  |     )
+--------------------------------------------------------------------------------
+113 | save("docker_initial", compose("ps", "--all"))
+    - save("backend_settings", compose(
+    -     "exec", "-T", "backend", "python", "-c",
+    -     "from backend.app.core.config import Settings; "
+    -     "print({k:Settings.model_fields[k].default for k in "
+    -     "['login_rate_limit','login_rate_window_seconds']}); "
+    -     "print(Settings().login_rate_limit,Settings().login_rate_window_seconds); "
+    -     "import structlog; print(structlog.__version__)"
+    - ))
+114 + save(
+115 +     "backend_settings",
+116 +     compose(
+117 +         "exec",
+118 +         "-T",
+119 +         "backend",
+120 +         "python",
+121 +         "-c",
+122 +         "from backend.app.core.config import Settings; "
+123 +         "print({k:Settings.model_fields[k].default for k in "
+124 +         "['login_rate_limit','login_rate_window_seconds']}); "
+125 +         "print(Settings().login_rate_limit,Settings().login_rate_window_seconds); "
+126 +         "import structlog; print(structlog.__version__)",
+127 +     ),
+128 + )
+129 | for service, port in [("banking", 8000), ("fraud", 8001)]:
+--------------------------------------------------------------------------------
+135 | save("correlation_generated", probe("http://localhost:8000/health"))
+    - save("correlation_preserved", probe(
+    -     "http://localhost:8000/health",
+    -     {"X-Correlation-ID": cid, "traceparent": trace}
+    - ))
+136 + save(
+137 +     "correlation_preserved",
+138 +     probe(
+139 +         "http://localhost:8000/health", {"X-Correlation-ID": cid, "traceparent": trace}
+140 +     ),
+141 + )
+142 | save("supplied_context", {"correlation_id": cid, "traceparent": trace})
+--------------------------------------------------------------------------------
+147 |     secrets.extend([password, email])
+    -     r = client.post("http://localhost:8000/api/v1/auth/register",
+    -                     json={"name": "Phase 11 Verification", "email": email,
+    -                           "password": password})
+148 +     r = client.post(
+149 +         "http://localhost:8000/api/v1/auth/register",
+150 +         json={"name": "Phase 11 Verification", "email": email, "password": password},
+151 +     )
+152 |     r.raise_for_status()
+153 |     customer = r.json()["customer_id"]
+    -     r = client.post("http://localhost:8000/api/v1/auth/login",
+    -                     json={"email": email, "password": password})
+154 +     r = client.post(
+155 +         "http://localhost:8000/api/v1/auth/login",
+156 +         json={"email": email, "password": password},
+157 +     )
+158 |     r.raise_for_status()
+159 |     tokens = r.json()
+160 |     secrets.extend(v for k, v in tokens.items() if "token" in k and isinstance(v, str))
+    -     headers = {"Authorization": "Bearer " + tokens["access_token"],
+    -                "X-Correlation-ID": cid, "traceparent": trace}
+161 +     headers = {
+162 +         "Authorization": "Bearer " + tokens["access_token"],
+163 +         "X-Correlation-ID": cid,
+164 +         "traceparent": trace,
+165 +     }
+166 |     accounts = []
+167 |     for balance in ["100.00", "0.00"]:
+    -         r = client.post("http://localhost:8000/api/v1/accounts",
+    -                         headers=headers,
+    -                         json={"customer_id": customer, "account_type": "savings",
+    -                               "opening_balance": balance})
+168 +         r = client.post(
+169 +             "http://localhost:8000/api/v1/accounts",
+170 +             headers=headers,
+171 +             json={
+172 +                 "customer_id": customer,
+173 +                 "account_type": "savings",
+174 +                 "opening_balance": balance,
+175 +             },
+176 +         )
+177 |         r.raise_for_status()
+--------------------------------------------------------------------------------
+187 |         event_id = rows[0][0]
+    -         save("audit_before_duplicate", sql(
+    -             "select event_id,consumer_group from processed_events where event_id=%s",
+    -             (event_id,)
+    -         ))
+188 +         save(
+189 +             "audit_before_duplicate",
+190 +             sql(
+191 +                 "select event_id,consumer_group from processed_events where event_id=%s",
+192 +                 (event_id,),
+193 +             ),
+194 +         )
+195 |         event_json = json.dumps(rows[0][1])
+--------------------------------------------------------------------------------
+201 |         )
+    -         save("duplicate_publish", compose("exec", "-T", "backend", "python", "-c", code))
+202 +         save(
+203 +             "duplicate_publish", compose("exec", "-T", "backend", "python", "-c", code)
+204 +         )
+205 |         time.sleep(5)
+    -         save("audit_after_duplicate", sql(
+    -             "select event_id,consumer_group from processed_events where event_id=%s",
+    -             (event_id,)
+    -         ))
+206 +         save(
+207 +             "audit_after_duplicate",
+208 +             sql(
+209 +                 "select event_id,consumer_group from processed_events where event_id=%s",
+210 +                 (event_id,),
+211 +             ),
+212 +         )
+213 |         try:
+    -             save("fraud_assessment_rows", sql(
+    -                 "select event_id,transaction_id,risk_level from fraud_assessments "
+    -                 "where event_id=%s", (event_id,), fraud=True
+    -             ))
+    -             save("risk_assessed_rows", sql(
+    -                 "select payload,published_at from outbox_events "
+    -                 "where event_type='risk.assessed' and payload::text like %s",
+    -                 ("%" + str(event_id) + "%",), fraud=True
+    -             ))
+214 +             save(
+215 +                 "fraud_assessment_rows",
+216 +                 sql(
+217 +                     "select event_id,transaction_id,risk_level from fraud_assessments "
+218 +                     "where event_id=%s",
+219 +                     (event_id,),
+220 +                     fraud=True,
+221 +                 ),
+222 +             )
+223 +             save(
+224 +                 "risk_assessed_rows",
+225 +                 sql(
+226 +                     "select payload,published_at from outbox_events "
+227 +                     "where event_type='risk.assessed' and payload::text like %s",
+228 +                     ("%" + str(event_id) + "%",),
+229 +                     fraud=True,
+230 +                 ),
+231 +             )
+232 |         except Exception as exc:
+233 |             save("fraud_database_error", str(exc))
+    -     save("fraud_assessment_http", probe(
+    -         "http://localhost:8001/api/v1/risk-assessments/" + tx
+    -     ))
+234 +     save(
+235 +         "fraud_assessment_http",
+236 +         probe("http://localhost:8001/api/v1/risk-assessments/" + tx),
+237 +     )
+238 |     save("fraud_restart", compose("start", "fraud"))
+239 |     time.sleep(6)
+240 |     save("fraud_recovery_health", probe("http://localhost:8001/health"))
+    -     save("fraud_recovery_assessment", probe(
+    -         "http://localhost:8001/api/v1/risk-assessments/" + tx
+    -     ))
+241 +     save(
+242 +         "fraud_recovery_assessment",
+243 +         probe("http://localhost:8001/api/v1/risk-assessments/" + tx),
+244 +     )
+245 |
+--------------------------------------------------------------------------------
+273 | save("jaeger_services", probe("http://localhost:16686/api/services"))
+    - save("jaeger_traces", probe("http://localhost:16686/api/traces?service=banking&limit=5"))
+274 + save(
+275 +     "jaeger_traces", probe("http://localhost:16686/api/traces?service=banking&limit=5")
+276 + )
+277 | save("docker_final", compose("ps", "--all"))
+--------------------------------------------------------------------------------
+288 |         pass
+    - save("log_inspection", {
+    -     "lines": len(lines), "fully_json_lines": valid,
+    -     "synthetic_password_found": bool(secrets and secrets[0] in text),
+    -     "synthetic_email_found": bool(len(secrets) > 1 and secrets[1] in text),
+    -     "issued_token_found": any(value in text for value in secrets[2:]),
+    -     "scope": "Banking logs since verification start; synthetic credentials only"
+    - })
+289 + save(
+290 +     "log_inspection",
+291 +     {
+292 +         "lines": len(lines),
+293 +         "fully_json_lines": valid,
+294 +         "synthetic_password_found": bool(secrets and secrets[0] in text),
+295 +         "synthetic_email_found": bool(len(secrets) > 1 and secrets[1] in text),
+296 +         "issued_token_found": any(value in text for value in secrets[2:]),
+297 +         "scope": "Banking logs since verification start; synthetic credentials only",
+298 +     },
+299 + )
+300 | for secret in secrets:
+301 |     text = text.replace(secret, "[REDACTED]")
+302 | save("banking_logs_redacted", text)
+303 | save("finished_utc", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+    - print("Runtime evidence saved:", OUT)
+304 + print("Runtime evidence saved:", OUT)
+    |
+
+unformatted: File would be reformatted
+  --> services\common\observability.py:40:1
+   |
+39 |         return event_dict
+40 +
+41 |     return processor
+   |
+
+unformatted: File would be reformatted
+  --> services\fraud\app\infrastructure\kafka_consumer.py:2:1
+   |
+1  | import structlog
+2  +
+3  | logger = structlog.get_logger(__name__)
+--------------------------------------------------------------------------------
+57 |
+   -         assessment = self.rule_engine.evaluate(str(event_id), str(transaction_id), amount)
+58 +         assessment = self.rule_engine.evaluate(
+59 +             str(event_id), str(transaction_id), amount
+60 +         )
+61 |
+   |
+
+unformatted: File would be reformatted
+  --> services\fraud\app\infrastructure\models.py:13:43
+   |
+12 |     assessment_id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
+   -     event_id: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+13 +     event_id: Mapped[str] = mapped_column(
+14 +         String, unique=True, index=True, nullable=False
+15 +     )
+16 |     transaction_id: Mapped[str] = mapped_column(String, index=True, nullable=False)
+--------------------------------------------------------------------------------
+43 |     schema_version: Mapped[str] = mapped_column(String, nullable=False)
+   -     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+44 +     occurred_at: Mapped[datetime] = mapped_column(
+45 +         DateTime(timezone=True), nullable=False
+46 +     )
+47 |     published_at: Mapped[datetime | None] = mapped_column(
+   |
+
+unformatted: File would be reformatted
+  --> verify_flow.py:11:1
+   |
+10 |
+11 +
+12 | def main():
+13 |     client = httpx.Client(base_url=BASE_URL)
+   -     
+14 +
+15 |     print("1. Registering user...")
+16 |     username = f"testuser_{uuid.uuid4().hex[:8]}"
+17 |     pwd = "TestPassword123!"
+   -     r = client.post("/auth/register", json={"username": username, "email": f"{username}@example.com", "password": pwd, "full_name": "Test User"})
+18 +     r = client.post(
+19 +         "/auth/register",
+20 +         json={
+21 +             "username": username,
+22 +             "email": f"{username}@example.com",
+23 +             "password": pwd,
+24 +             "full_name": "Test User",
+25 +         },
+26 +     )
+27 |     r.raise_for_status()
+--------------------------------------------------------------------------------
+49 |     print("6. Transfer from source to dest...")
+   -     r = client.post("/transfers/", json={
+   -         "source_account_id": source_acc,
+   -         "destination_account_id": dest_acc,
+   -         "amount": 12000,
+   -         "description": "Test Transfer"
+   -     })
+50 +     r = client.post(
+51 +         "/transfers/",
+52 +         json={
+53 +             "source_account_id": source_acc,
+54 +             "destination_account_id": dest_acc,
+55 +             "amount": 12000,
+56 +             "description": "Test Transfer",
+57 +         },
+58 +     )
+59 |     r.raise_for_status()
+60 |     transfer_data = r.json()
+61 |     source_txn_id = transfer_data["source_transaction_id"]
+   -     
+62 +
+63 |     print(f"Transfer successful. Source Txn: {source_txn_id}")
+   -     
+64 +
+65 |     print("7. Waiting for Kafka and Fraud Service...")
+66 |     time.sleep(5)
+   -     
+67 +
+68 |     print("8. Checking Fraud Service API...")
+   -     r_fraud = httpx.get(f"http://localhost:8001/api/v1/risk-assessments/{source_txn_id}")
+69 +     r_fraud = httpx.get(
+70 +         f"http://localhost:8001/api/v1/risk-assessments/{source_txn_id}"
+71 +     )
+72 |     print(r_fraud.status_code, r_fraud.text)
+   -     
+73 +
+74 |     print("9. Checking Fraud DB directly...")
+75 |     with psycopg.connect(DB_URL) as conn:
+76 |         with conn.cursor() as cur:
+   -             cur.execute("SELECT risk_level, reasons FROM fraud_assessments WHERE transaction_id = %s", (source_txn_id,))
+77 +             cur.execute(
+78 +                 "SELECT risk_level, reasons FROM fraud_assessments WHERE transaction_id = %s",
+79 +                 (source_txn_id,),
+80 +             )
+81 |             res = cur.fetchone()
+82 |             print("Fraud Assessment:", res)
+   -             
+83 +
+84 |             cur.execute("SELECT COUNT(*) FROM processed_events")
+85 |             res2 = cur.fetchone()
+86 |             print("Processed Events count:", res2[0])
+   -             
+   -             cur.execute("SELECT COUNT(*) FROM outbox_events WHERE event_type = 'risk.assessed'")
+87 +
+88 +             cur.execute(
+89 +                 "SELECT COUNT(*) FROM outbox_events WHERE event_type = 'risk.assessed'"
+90 +             )
+91 |             res3 = cur.fetchone()
+92 |             print("Outbox Risk Assessed count:", res3[0])
+93 |
+94 +
+95 | if __name__ == "__main__":
+   |
+
+6 files would be reformatted, 106 files already formatted
+
+EXIT_CODE=1

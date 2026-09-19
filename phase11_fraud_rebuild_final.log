@@ -1,0 +1,232 @@
+time="2026-09-18T03:25:39+05:30" level=warning msg="Found multiple config files with supported names: D:\\PyBank\\PyBank\\compose.yaml, D:\\PyBank\\PyBank\\docker-compose.yml"
+time="2026-09-18T03:25:39+05:30" level=warning msg="Using D:\\PyBank\\PyBank\\compose.yaml"
+ Image pybank-fraud Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 517B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 559B 0.0s done
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 2.8s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B 0.0s done
+#4 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 2.60kB 0.1s done
+#5 DONE 0.1s
+
+#6 [1/7] FROM docker.io/library/python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea
+#6 resolve docker.io/library/python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea 0.2s done
+#6 DONE 0.2s
+
+#7 [2/7] WORKDIR /app
+#7 CACHED
+
+#8 [3/7] RUN apt-get update && apt-get install -y --no-install-recommends     build-essential     librdkafka-dev     libpq-dev     && rm -rf /var/lib/apt/lists/*
+#8 CACHED
+
+#9 [4/7] COPY pyproject.toml ./
+#9 DONE 0.3s
+
+#10 [5/7] RUN pip install --no-cache-dir .
+#10 17.51 Processing /app
+#10 17.54   Installing build dependencies: started
+#10 27.83   Installing build dependencies: finished with status 'done'
+#10 27.84   Getting requirements to build wheel: started
+#10 29.11   Getting requirements to build wheel: finished with status 'done'
+#10 29.11   Preparing metadata (pyproject.toml): started
+#10 31.29   Preparing metadata (pyproject.toml): finished with status 'done'
+#10 32.38 Collecting structlog<25.0,>=24.1 (from pybank-fraud==0.1.0)
+#10 32.86   Downloading structlog-24.4.0-py3-none-any.whl.metadata (7.3 kB)
+#10 33.16 Collecting prometheus-client<1.0,>=0.20 (from pybank-fraud==0.1.0)
+#10 33.25   Downloading prometheus_client-0.26.0-py3-none-any.whl.metadata (2.1 kB)
+#10 34.16 Collecting fastapi<1.0,>=0.115 (from pybank-fraud==0.1.0)
+#10 34.20   Downloading fastapi-0.141.1-py3-none-any.whl.metadata (27 kB)
+#10 34.52 Collecting alembic<2.0,>=1.14 (from pybank-fraud==0.1.0)
+#10 34.60   Downloading alembic-1.20.0-py3-none-any.whl.metadata (7.3 kB)
+#10 35.19 Collecting confluent-kafka<3.0,>=2.6 (from pybank-fraud==0.1.0)
+#10 35.22   Downloading confluent_kafka-2.15.1-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (33 kB)
+#10 35.73 Collecting pydantic-settings<3.0,>=2.6 (from pybank-fraud==0.1.0)
+#10 35.77   Downloading pydantic_settings-2.15.0-py3-none-any.whl.metadata (3.9 kB)
+#10 36.08 Collecting psycopg<4.0,>=3.2 (from psycopg[binary]<4.0,>=3.2->pybank-fraud==0.1.0)
+#10 36.13   Downloading psycopg-3.3.5-py3-none-any.whl.metadata (4.3 kB)
+#10 38.84 Collecting sqlalchemy<3.0,>=2.0 (from pybank-fraud==0.1.0)
+#10 38.87   Downloading sqlalchemy-2.0.54-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.7 kB)
+#10 39.20 Collecting uvicorn<1.0,>=0.34 (from uvicorn[standard]<1.0,>=0.34->pybank-fraud==0.1.0)
+#10 39.25   Downloading uvicorn-0.53.0-py3-none-any.whl.metadata (6.6 kB)
+#10 39.38 Collecting Mako (from alembic<2.0,>=1.14->pybank-fraud==0.1.0)
+#10 39.41   Downloading mako-1.4.1-py3-none-any.whl.metadata (2.9 kB)
+#10 39.53 Collecting typing-extensions>=4.12 (from alembic<2.0,>=1.14->pybank-fraud==0.1.0)
+#10 39.56   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+#10 39.87 Collecting starlette>=0.46.0 (from fastapi<1.0,>=0.115->pybank-fraud==0.1.0)
+#10 39.89   Downloading starlette-1.6.0-py3-none-any.whl.metadata (6.4 kB)
+#10 40.61 Collecting pydantic>=2.9.0 (from fastapi<1.0,>=0.115->pybank-fraud==0.1.0)
+#10 40.64   Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+#10 40.80 Collecting typing-inspection>=0.4.2 (from fastapi<1.0,>=0.115->pybank-fraud==0.1.0)
+#10 40.82   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+#10 40.87 Collecting annotated-doc>=0.0.2 (from fastapi<1.0,>=0.115->pybank-fraud==0.1.0)
+#10 40.90   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+#10 42.79 Collecting psycopg-binary==3.3.5 (from psycopg[binary]<4.0,>=3.2->pybank-fraud==0.1.0)
+#10 42.82   Downloading psycopg_binary-3.3.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.7 kB)
+#10 42.98 Collecting python-dotenv>=0.21.0 (from pydantic-settings<3.0,>=2.6->pybank-fraud==0.1.0)
+#10 43.00   Downloading python_dotenv-1.2.3-py3-none-any.whl.metadata (29 kB)
+#10 43.82 Collecting greenlet>=1 (from sqlalchemy<3.0,>=2.0->pybank-fraud==0.1.0)
+#10 43.85   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+#10 43.97 Collecting click>=7.0 (from uvicorn<1.0,>=0.34->uvicorn[standard]<1.0,>=0.34->pybank-fraud==0.1.0)
+#10 44.00   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+#10 44.05 Collecting h11>=0.8 (from uvicorn<1.0,>=0.34->uvicorn[standard]<1.0,>=0.34->pybank-fraud==0.1.0)
+#10 44.07   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+#10 44.26 Collecting httptools>=0.8.0 (from uvicorn[standard]<1.0,>=0.34->pybank-fraud==0.1.0)
+#10 44.28   Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+#10 44.44 Collecting pyyaml>=5.1 (from uvicorn[standard]<1.0,>=0.34->pybank-fraud==0.1.0)
+#10 44.47   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+#10 44.90 Collecting uvloop>=0.15.1 (from uvicorn[standard]<1.0,>=0.34->pybank-fraud==0.1.0)
+#10 44.93   Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+#10 45.37 Collecting watchfiles>=0.20 (from uvicorn[standard]<1.0,>=0.34->pybank-fraud==0.1.0)
+#10 45.40   Downloading watchfiles-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+#10 45.99 Collecting websockets>=13.0 (from uvicorn[standard]<1.0,>=0.34->pybank-fraud==0.1.0)
+#10 46.02   Downloading websockets-17.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+#10 46.12 Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi<1.0,>=0.115->pybank-fraud==0.1.0)
+#10 46.20   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+#10 50.49 Collecting pydantic-core==2.46.5 (from pydantic>=2.9.0->fastapi<1.0,>=0.115->pybank-fraud==0.1.0)
+#10 50.52   Downloading pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+#10 50.77 Collecting anyio<5,>=3.6.2 (from starlette>=0.46.0->fastapi<1.0,>=0.115->pybank-fraud==0.1.0)
+#10 50.80   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+#10 51.44 Collecting MarkupSafe>=2.0 (from Mako->alembic<2.0,>=1.14->pybank-fraud==0.1.0)
+#10 51.49   Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+#10 51.69 Collecting idna>=2.8 (from anyio<5,>=3.6.2->starlette>=0.46.0->fastapi<1.0,>=0.115->pybank-fraud==0.1.0)
+#10 51.75   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+#10 51.92 Downloading alembic-1.20.0-py3-none-any.whl (268 kB)
+#10 52.21 Downloading confluent_kafka-2.15.1-cp312-cp312-manylinux_2_28_x86_64.whl (4.8 MB)
+#10 57.36    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.8/4.8 MB 923.8 kB/s eta 0:00:00
+#10 57.39 Downloading fastapi-0.141.1-py3-none-any.whl (131 kB)
+#10 57.69 Downloading prometheus_client-0.26.0-py3-none-any.whl (64 kB)
+#10 57.81 Downloading psycopg-3.3.5-py3-none-any.whl (213 kB)
+#10 57.98 Downloading psycopg_binary-3.3.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.2 MB)
+#10 61.74    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.2/5.2 MB 1.4 MB/s eta 0:00:00
+#10 61.79 Downloading pydantic_settings-2.15.0-py3-none-any.whl (69 kB)
+#10 61.87 Downloading sqlalchemy-2.0.54-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.5 MB)
+#10 64.37    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.5/3.5 MB 1.4 MB/s eta 0:00:00
+#10 64.39 Downloading structlog-24.4.0-py3-none-any.whl (67 kB)
+#10 64.45 Downloading uvicorn-0.53.0-py3-none-any.whl (87 kB)
+#10 64.53 Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+#10 64.55 Downloading click-8.5.0-py3-none-any.whl (125 kB)
+#10 64.64 Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+#10 65.01    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 1.6 MB/s eta 0:00:00
+#10 65.03 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#10 65.08 Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (523 kB)
+#10 65.47 Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+#10 65.81 Downloading pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+#10 67.14    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 1.6 MB/s eta 0:00:00
+#10 67.16 Downloading python_dotenv-1.2.3-py3-none-any.whl (22 kB)
+#10 67.20 Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+#10 67.67    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 1.7 MB/s eta 0:00:00
+#10 67.71 Downloading starlette-1.6.0-py3-none-any.whl (75 kB)
+#10 67.83 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#10 67.88 Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+#10 67.95 Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.4 MB)
+#10 71.22    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.4/4.4 MB 1.4 MB/s eta 0:00:00
+#10 71.24 Downloading watchfiles-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+#10 71.53 Downloading websockets-17.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (224 kB)
+#10 71.72 Downloading mako-1.4.1-py3-none-any.whl (80 kB)
+#10 71.80 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+#10 71.83 Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+#10 71.92 Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+#10 71.95 Downloading idna-3.20-py3-none-any.whl (69 kB)
+#10 72.26 Building wheels for collected packages: pybank-fraud
+#10 72.26   Building wheel for pybank-fraud (pyproject.toml): started
+#10 73.24   Building wheel for pybank-fraud (pyproject.toml): finished with status 'done'
+#10 73.25   Created wheel for pybank-fraud: filename=pybank_fraud-0.1.0-py3-none-any.whl size=1265 sha256=d2fe08bcd90bb533307706362465dc534850bf249b7910a8bc8995c3b56426af
+#10 73.25   Stored in directory: /tmp/pip-ephem-wheel-cache-q5gu5kxd/wheels/54/1b/b7/aa63e25c8f14f4f2ae7b04e6097bdecb770e455c5c1ee0a600
+#10 73.27 Successfully built pybank-fraud
+#10 73.62 Installing collected packages: websockets, uvloop, typing-extensions, structlog, pyyaml, python-dotenv, psycopg-binary, prometheus-client, MarkupSafe, idna, httptools, h11, greenlet, confluent-kafka, click, annotated-types, annotated-doc, uvicorn, typing-inspection, sqlalchemy, pydantic-core, psycopg, Mako, anyio, watchfiles, starlette, pydantic, alembic, pydantic-settings, fastapi, pybank-fraud
+#10 89.79 Successfully installed Mako-1.4.1 MarkupSafe-3.0.3 alembic-1.20.0 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 click-8.5.0 confluent-kafka-2.15.1 fastapi-0.141.1 greenlet-3.5.6 h11-0.16.0 httptools-0.8.0 idna-3.20 prometheus-client-0.26.0 psycopg-3.3.5 psycopg-binary-3.3.5 pybank-fraud-0.1.0 pydantic-2.13.5 pydantic-core-2.46.5 pydantic-settings-2.15.0 python-dotenv-1.2.3 pyyaml-6.0.3 sqlalchemy-2.0.54 starlette-1.6.0 structlog-24.4.0 typing-extensions-4.16.0 typing-inspection-0.4.4 uvicorn-0.53.0 uvloop-0.22.1 watchfiles-1.2.0 websockets-17.1
+#10 89.80 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#10 90.29 
+#10 90.29 [notice] A new release of pip is available: 25.0.1 -> 26.2.1
+#10 90.29 [notice] To update, run: pip install --upgrade pip
+#10 DONE 91.9s
+
+#11 [6/7] COPY app ./app
+#11 DONE 0.7s
+
+#12 [7/7] COPY tests ./tests
+#12 DONE 0.1s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 16.4s done
+#13 exporting manifest sha256:4efa1c1573681d499569cc8be8578bd92e42ccf5c74b1f8057d4852a093d33cc 0.0s done
+#13 exporting config sha256:d6adadd9692b46aa1105198429f1bc88a076579a27f0f0f7857abe8fd9a35b8d 0.0s done
+#13 exporting attestation manifest sha256:5772051ca3822b27ae7be485dbf7d706362b8d937e3cb76e9a5024c989ca2a25
+#13 exporting attestation manifest sha256:5772051ca3822b27ae7be485dbf7d706362b8d937e3cb76e9a5024c989ca2a25 0.0s done
+#13 exporting manifest list sha256:a46cc35f4814c18424ee6564233e3f9bf6a57b93044ae58f8468396889e65f2a 0.0s done
+#13 naming to docker.io/library/pybank-fraud:latest done
+#13 unpacking to docker.io/library/pybank-fraud:latest
+#13 unpacking to docker.io/library/pybank-fraud:latest 3.8s done
+#13 DONE 20.5s
+
+#14 resolving provenance for metadata file
+#14 DONE 0.1s
+ Image pybank-fraud Built 
+ Container pybank-fraud-1 Recreate 
+ Container pybank-fraud-1 Recreated 
+ Container pybank-fraud-1 Starting 
+ Container pybank-fraud-1 Started 
+BUILD_EXIT=0  
+time="2026-09-18T03:27:54+05:30" level=warning msg="Found multiple config files with supported names: D:\\PyBank\\PyBank\\compose.yaml, D:\\PyBank\\PyBank\\docker-compose.yml"
+time="2026-09-18T03:27:54+05:30" level=warning msg="Using D:\\PyBank\\PyBank\\compose.yaml"
+NAME                IMAGE                                                                     COMMAND                  SERVICE    CREATED          STATUS                     PORTS
+pybank-backend-1    pybank-backend                                                            "/app/docker/backend…"   backend    17 minutes ago   Up 16 minutes (healthy)    0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+pybank-fraud-1      pybank-fraud                                                              "uvicorn app.main:ap…"   fraud      13 seconds ago   Exited (1) 3 seconds ago   
+pybank-frontend-1   sha256:26382f5f693cc23bd3092353acbc68d489719b0f5a0fd190d79c962d7108ec9a   "/docker-entrypoint.…"   frontend   4 days ago       Up 45 minutes (healthy)    0.0.0.0:8080->80/tcp, [::]:8080->80/tcp
+pybank-kafka-1      apache/kafka:3.9.1                                                        "/__cacert_entrypoin…"   kafka      3 days ago       Up 6 minutes (healthy)     9092/tcp
+pybank-postgres-1   postgres:18                                                               "docker-entrypoint.s…"   postgres   3 days ago       Up 47 minutes (healthy)    0.0.0.0:5433->5432/tcp, [::]:5433->5432/tcp
+pybank-redis-1      redis:7.4-alpine                                                          "docker-entrypoint.s…"   redis      4 days ago       Up 47 minutes (healthy)    6379/tcp
+time="2026-09-18T03:27:55+05:30" level=warning msg="Found multiple config files with supported names: D:\\PyBank\\PyBank\\compose.yaml, D:\\PyBank\\PyBank\\docker-compose.yml"
+time="2026-09-18T03:27:55+05:30" level=warning msg="Using D:\\PyBank\\PyBank\\compose.yaml"
+fraud-1  |   File "/usr/local/bin/uvicorn", line 8, in <module>
+fraud-1  |     sys.exit(main())
+fraud-1  |              ^^^^^^
+fraud-1  |   File "/usr/local/lib/python3.12/site-packages/click/core.py", line 1631, in __call__
+fraud-1  |     return self.main(*args, **kwargs)
+fraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+fraud-1  |   File "/usr/local/lib/python3.12/site-packages/click/core.py", line 1552, in main
+fraud-1  |     rv = self.invoke(ctx)
+fraud-1  |          ^^^^^^^^^^^^^^^^
+fraud-1  |   File "/usr/local/lib/python3.12/site-packages/click/core.py", line 1415, in invoke
+fraud-1  |     return ctx.invoke(self.callback, **ctx.params)
+fraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+fraud-1  |   File "/usr/local/lib/python3.12/site-packages/click/core.py", line 910, in invoke
+fraud-1  |     return callback(*args, **kwargs)
+fraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^
+fraud-1  |   File "/usr/local/lib/python3.12/site-packages/uvicorn/main.py", line 448, in main
+fraud-1  |     run(
+fraud-1  |   File "/usr/local/lib/python3.12/site-packages/uvicorn/main.py", line 620, in run
+fraud-1  |     config.load_app()
+fraud-1  |   File "/usr/local/lib/python3.12/site-packages/uvicorn/config.py", line 434, in load_app
+fraud-1  |     return import_from_string(self.app)
+fraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+fraud-1  |   File "/usr/local/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
+fraud-1  |     module = importlib.import_module(module_str)
+fraud-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+fraud-1  |   File "/usr/local/lib/python3.12/importlib/__init__.py", line 90, in import_module
+fraud-1  |     return _bootstrap._gcd_import(name[level:], package, level)
+fraud-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+fraud-1  |   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+fraud-1  |   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+fraud-1  |   File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+fraud-1  |   File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+fraud-1  |   File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+fraud-1  |   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+fraud-1  |   File "/app/app/main.py", line 9, in <module>
+fraud-1  |     from .infrastructure.kafka_consumer import FraudConsumerThread
+fraud-1  |   File "/app/app/infrastructure/kafka_consumer.py", line 16, in <module>
+fraud-1  |     logger = logging.getLogger(__name__)
+fraud-1  |              ^^^^^^^
+fraud-1  | NameError: name 'logging' is not defined. Did you forget to import 'logging'?

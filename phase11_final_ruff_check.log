@@ -1,0 +1,433 @@
+I001 [*] Import block is un-sorted or un-formatted
+   --> backend\tests\security\test_auth.py:197:5
+    |
+195 |   ) -> None:
+196 |       client, _ = auth_context
+197 | /     from backend.app.main import app
+198 | |     from backend.app.api.dependencies import get_login_limiter
+199 | |     from backend.app.security.rate_limit import LoginRateLimiter
+    | |________________________________________________________________^
+200 |       
+201 |       # Override with a limiter that allows 0 attempts
+    |
+help: Organize imports
+    |
+196 |     client, _ = auth_context
+197 +     from backend.app.api.dependencies import get_login_limiter
+198 |     from backend.app.main import app
+    -     from backend.app.api.dependencies import get_login_limiter
+199 |     from backend.app.security.rate_limit import LoginRateLimiter
+    |
+
+E501 Line too long (91 > 88)
+  --> docker\phase11_runtime_verify.py:36:89
+   |
+35 | def compose(*args, timeout=60):
+36 |     return command(["docker", "compose", "-f", str(ROOT / "compose.yaml"), *args], timeout)
+   |                                                                                         ^^^
+
+E501 Line too long (150 > 88)
+  --> docker\phase11_runtime_verify.py:88:89
+   |
+86 | …
+87 | …d')==TX:
+88 | …) if v else None) for k,v in (m.headers() or [])],'partition':m.partition(),'offset':m.offset()})
+   |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+89 | …
+90 | …
+   |
+
+E501 Line too long (89 > 88)
+   --> docker\phase11_runtime_verify.py:164:89
+    |
+162 |             "print('remaining',p.flush(10))"
+163 |         )
+164 |         save("duplicate_publish", compose("exec", "-T", "backend", "python", "-c", code))
+    |                                                                                         ^
+165 |         time.sleep(5)
+166 |         save("audit_after_duplicate", sql(
+    |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> services\common\observability.py:1:1
+  |
+1 | / import structlog
+2 | | import logging
+3 | | import uuid
+4 | | from fastapi import Request, Response
+5 | | from starlette.middleware.base import BaseHTTPMiddleware
+6 | | from contextvars import ContextVar
+  | |__________________________________^
+7 |
+8 |   # Context variable to store correlation id for non‑HTTP contexts (e.g., background workers)
+  |
+help: Organize imports
+  |
+  - import structlog
+1 | import logging
+2 | import uuid
+3 + from contextvars import ContextVar
+4 +
+5 + import structlog
+6 | from fastapi import Request, Response
+7 | from starlette.middleware.base import BaseHTTPMiddleware
+  - from contextvars import ContextVar
+8 |
+  |
+
+E501 Line too long (91 > 88)
+ --> services\common\observability.py:8:89
+  |
+6 | from contextvars import ContextVar
+7 |
+8 | # Context variable to store correlation id for non‑HTTP contexts (e.g., background workers)
+  |                                                                                         ^^^
+9 | correlation_id_ctx: ContextVar[str | None] = ContextVar("correlation_id", default=None)
+  |
+
+E402 Module level import not at top of file
+  --> services\fraud\alembic\env.py:16:1
+   |
+14 |     fileConfig(config.config_file_name)
+15 |
+16 | import os
+   | ^^^^^^^^^
+17 | import sys
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> services\fraud\alembic\env.py:17:1
+   |
+16 | import os
+17 | import sys
+   | ^^^^^^^^^^
+18 |
+19 | # Add the app directory to the path so we can import from it
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> services\fraud\alembic\env.py:22:1
+   |
+20 | sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+21 |
+22 | from app.infrastructure.database import DATABASE_URL, Base
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23 |
+24 | # Import models so they are registered with Base.metadata
+   |
+help: Move module level imports to top of file
+
+UP042 Class RiskLevel inherits from both `str` and `enum.Enum`
+ --> services\fraud\app\domain\models.py:7:7
+  |
+7 | class RiskLevel(str, Enum):
+  |       ^^^^^^^^^
+8 |     LOW = "LOW"
+9 |     MEDIUM = "MEDIUM"
+  |
+help: Inherit from `enum.StrEnum`
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> services\fraud\app\infrastructure\kafka_consumer.py:1:1
+  |
+1 | import structlog
+  | ^^^^^^^^^^^^^^^^
+2 | logger = structlog.get_logger(__name__)
+3 | import threading
+  |
+help: Organize imports
+  |
+1 | import structlog
+2 +
+3 | logger = structlog.get_logger(__name__)
+  |
+
+E402 Module level import not at top of file
+ --> services\fraud\app\infrastructure\kafka_consumer.py:3:1
+  |
+1 | import structlog
+2 | logger = structlog.get_logger(__name__)
+3 | import threading
+  | ^^^^^^^^^^^^^^^^
+4 | from decimal import Decimal
+  |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+ --> services\fraud\app\infrastructure\kafka_consumer.py:4:1
+  |
+2 | logger = structlog.get_logger(__name__)
+3 | import threading
+4 | from decimal import Decimal
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 |
+6 | from confluent_kafka import Consumer, KafkaError
+  |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+ --> services\fraud\app\infrastructure\kafka_consumer.py:6:1
+  |
+4 | from decimal import Decimal
+5 |
+6 | from confluent_kafka import Consumer, KafkaError
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+7 | from sqlalchemy.exc import IntegrityError
+8 | from sqlalchemy.orm import Session
+  |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+ --> services\fraud\app\infrastructure\kafka_consumer.py:7:1
+  |
+6 | from confluent_kafka import Consumer, KafkaError
+7 | from sqlalchemy.exc import IntegrityError
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+8 | from sqlalchemy.orm import Session
+  |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> services\fraud\app\infrastructure\kafka_consumer.py:8:1
+   |
+ 6 | from confluent_kafka import Consumer, KafkaError
+ 7 | from sqlalchemy.exc import IntegrityError
+ 8 | from sqlalchemy.orm import Session
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 9 |
+10 | from ..application.events import EventEnvelope
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> services\fraud\app\infrastructure\kafka_consumer.py:10:1
+   |
+ 8 | from sqlalchemy.orm import Session
+ 9 |
+10 | from ..application.events import EventEnvelope
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+11 | from ..domain.rules import RuleEngine
+12 | from .database import SessionLocal
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> services\fraud\app\infrastructure\kafka_consumer.py:11:1
+   |
+10 | from ..application.events import EventEnvelope
+11 | from ..domain.rules import RuleEngine
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 | from .database import SessionLocal
+13 | from .models import FraudAssessmentModel, ProcessedEventModel
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> services\fraud\app\infrastructure\kafka_consumer.py:12:1
+   |
+10 | from ..application.events import EventEnvelope
+11 | from ..domain.rules import RuleEngine
+12 | from .database import SessionLocal
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+13 | from .models import FraudAssessmentModel, ProcessedEventModel
+14 | from .outbox import add_outbox_event
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> services\fraud\app\infrastructure\kafka_consumer.py:13:1
+   |
+11 | from ..domain.rules import RuleEngine
+12 | from .database import SessionLocal
+13 | from .models import FraudAssessmentModel, ProcessedEventModel
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 | from .outbox import add_outbox_event
+   |
+help: Move module level imports to top of file
+
+E402 Module level import not at top of file
+  --> services\fraud\app\infrastructure\kafka_consumer.py:14:1
+   |
+12 | from .database import SessionLocal
+13 | from .models import FraudAssessmentModel, ProcessedEventModel
+14 | from .outbox import add_outbox_event
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+15 |
+16 | logger = logging.getLogger(__name__)
+   |
+help: Move module level imports to top of file
+
+F821 Undefined name `logging`
+  --> services\fraud\app\infrastructure\kafka_consumer.py:16:10
+   |
+14 | from .outbox import add_outbox_event
+15 |
+16 | logger = logging.getLogger(__name__)
+   |          ^^^^^^^
+
+E501 Line too long (89 > 88)
+  --> services\fraud\app\infrastructure\kafka_consumer.py:49:89
+   |
+47 |             db.rollback()
+48 |             logger.info(
+49 |                 f"Event {event_id} already processed by group {self.group_id}. Skipping."
+   |                                                                                         ^
+50 |             )
+51 |             return
+   |
+
+E501 Line too long (90 > 88)
+  --> services\fraud\app\infrastructure\kafka_consumer.py:57:89
+   |
+55 |         amount = Decimal(str(payload.get("amount", 0)))
+56 |
+57 |         assessment = self.rule_engine.evaluate(str(event_id), str(transaction_id), amount)
+   |                                                                                         ^^
+58 |
+59 |         db_assessment = FraudAssessmentModel(
+   |
+
+F821 Undefined name `json`
+   --> services\fraud\app\infrastructure\kafka_consumer.py:103:30
+    |
+102 |             try:
+103 |                 event_data = json.loads(msg.value().decode("utf-8"))
+    |                              ^^^^
+104 |                 with SessionLocal() as db:
+105 |                     self.process_event(db, event_data)
+    |
+
+E501 Line too long (90 > 88)
+  --> services\fraud\app\infrastructure\models.py:13:89
+   |
+12 |     assessment_id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
+13 |     event_id: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+   |                                                                                         ^^
+14 |     transaction_id: Mapped[str] = mapped_column(String, index=True, nullable=False)
+15 |     risk_score: Mapped[float] = mapped_column(Float, nullable=False)
+   |
+
+E501 Line too long (90 > 88)
+  --> services\fraud\app\infrastructure\models.py:42:89
+   |
+40 |     payload: Mapped[dict] = mapped_column(JSON, nullable=False)
+41 |     schema_version: Mapped[str] = mapped_column(String, nullable=False)
+42 |     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+   |                                                                                         ^^
+43 |     published_at: Mapped[datetime | None] = mapped_column(
+44 |         DateTime(timezone=True), nullable=True
+   |
+
+E711 Comparison to `None` should be `cond is None`
+  --> services\fraud\app\infrastructure\outbox.py:29:54
+   |
+27 |         return (
+28 |             self.db.query(OutboxEventModel)
+29 |             .filter(OutboxEventModel.published_at == None)
+   |                                                      ^^^^
+30 |             .limit(limit)
+31 |             .all()
+   |
+help: Replace with `cond is None`
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> verify_flow.py:1:1
+  |
+1 | / import httpx
+2 | | import time
+3 | | import psycopg
+4 | | import json
+5 | | import uuid
+6 | | import os
+  | |_________^
+7 |
+8 |   BASE_URL = "http://localhost:8000/api/v1"
+  |
+help: Organize imports
+  |
+  - import httpx
+  - import time
+  - import psycopg
+1 | import json
+  - import uuid
+2 | import os
+3 + import time
+4 + import uuid
+5 +
+6 + import httpx
+7 + import psycopg
+8 |
+  |
+
+F401 [*] `json` imported but unused
+ --> verify_flow.py:4:8
+  |
+2 | import time
+3 | import psycopg
+4 | import json
+  |        ^^^^
+5 | import uuid
+6 | import os
+  |
+help: Remove unused import: `json`
+  |
+3 | import psycopg
+  - import json
+4 | import uuid
+  |
+
+F401 [*] `os` imported but unused
+ --> verify_flow.py:6:8
+  |
+4 | import json
+5 | import uuid
+6 | import os
+  |        ^^
+7 |
+8 | BASE_URL = "http://localhost:8000/api/v1"
+  |
+help: Remove unused import: `os`
+  |
+5 | import uuid
+  - import os
+6 |
+  |
+
+E501 Line too long (145 > 88)
+  --> verify_flow.py:17:89
+   |
+15 | …
+16 | …
+17 | …ame": username, "email": f"{username}@example.com", "password": pwd, "full_name": "Test User"})
+   |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+18 | …
+   |
+
+E501 Line too long (120 > 88)
+  --> verify_flow.py:63:89
+   |
+61 |     with psycopg.connect(DB_URL) as conn:
+62 |         with conn.cursor() as cur:
+63 |             cur.execute("SELECT risk_level, reasons FROM fraud_assessments WHERE transaction_id = %s", (source_txn_id,))
+   |                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+64 |             res = cur.fetchone()
+65 |             print("Fraud Assessment:", res)
+   |
+
+E501 Line too long (96 > 88)
+  --> verify_flow.py:71:89
+   |
+69 |             print("Processed Events count:", res2[0])
+70 |             
+71 |             cur.execute("SELECT COUNT(*) FROM outbox_events WHERE event_type = 'risk.assessed'")
+   |                                                                                         ^^^^^^^^
+72 |             res3 = cur.fetchone()
+73 |             print("Outbox Risk Assessed count:", res3[0])
+   |
+
+Found 34 errors.
+[*] 6 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
+
+EXIT_CODE=1
