@@ -18,6 +18,11 @@ class FraudAssessmentModel(Base):
     risk_level: Mapped[str] = mapped_column(String, nullable=False)
     reasons: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     correlation_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    # Phase 12 ML fields (additive, nullable; rules-only rows stay NULL).
+    rule_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ml_probability: Mapped[float | None] = mapped_column(Float, nullable=True)
+    combined_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    model_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )

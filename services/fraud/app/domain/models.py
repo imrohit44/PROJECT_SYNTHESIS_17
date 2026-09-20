@@ -19,3 +19,7 @@ class RiskAssessment:
     reasons: list[str]
     assessment_id: str = field(default_factory=lambda: str(uuid4()))
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    # Phase 12 ML fields. None means "assessed by rules only".
+    rule_score: float | None = None
+    ml_probability: float | None = None
+    model_version: str | None = None

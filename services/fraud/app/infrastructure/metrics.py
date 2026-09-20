@@ -34,6 +34,15 @@ FRAUD_DUPLICATE_EVENTS_TOTAL = Counter(
     "fraud_duplicate_events_total",
     "Total duplicate Kafka events ignored by the fraud consumer",
 )
+FRAUD_ML_PREDICTIONS_TOTAL = Counter(
+    "fraud_ml_predictions_total",
+    "Total ML fraud predictions attempted",
+    ["outcome"],
+)
+FRAUD_ML_HIGH_RISK_TOTAL = Counter(
+    "fraud_ml_high_risk_total",
+    "ML predictions at or above the documented high-risk threshold",
+)
 OUTBOX_PENDING_EVENTS = Gauge(
     "outbox_pending_events",
     "Fraud outbox events waiting to be published",
@@ -62,6 +71,16 @@ def record_assessment_failure() -> None:
 def record_duplicate_event() -> None:
     """Increment the duplicate-event counter."""
     FRAUD_DUPLICATE_EVENTS_TOTAL.inc()
+
+
+def record_ml_prediction(outcome: str) -> None:
+    """Increment the ML prediction counter (bounded 'outcome' label)."""
+    FRAUD_ML_PREDICTIONS_TOTAL.labels(outcome=outcome).inc()
+
+
+def record_ml_high_risk() -> None:
+    """Increment the ML high-risk counter."""
+    FRAUD_ML_HIGH_RISK_TOTAL.inc()
 
 
 def record_outbox_backlog(count: int) -> None:

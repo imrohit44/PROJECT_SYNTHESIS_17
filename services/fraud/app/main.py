@@ -19,6 +19,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from services.common.observability import CorrelationIdMiddleware, configure_structlog
 from services.common.tracing import configure_tracing
+from services.fraud.ml.model import FraudModelLoadError, load_model
 from sqlalchemy.orm import Session
 
 from .infrastructure.database import Base, engine, get_db
@@ -39,6 +40,9 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 OTLP_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 OTEL_ENABLED = os.getenv("OTEL_TRACING_ENABLED", "false").lower() == "true"
 RUN_MIGRATIONS = os.getenv("RUN_MIGRATIONS", "true").lower() == "true"
+# Phase 12: ML combination weights (documented defaults; configurable).
+ML_RULE_WEIGHT = float(os.getenv("ML_RULE_WEIGHT", "0.6"))
+ML_ML_WEIGHT = float(os.getenv("ML_ML_WEIGHT", "0.4"))
 
 configure_structlog(SERVICE_NAME, LOG_LEVEL)
 configure_tracing(SERVICE_NAME, OTLP_ENDPOINT, OTEL_ENABLED)
@@ -47,6 +51,14 @@ logger = structlog.get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    # Load the ML model ONCE at startup. A missing or invalid artifact is a
+    # fail-fast startup error, never a silent "ML disabled" state.
+    try:
+        model = load_model()
+    except FraudModelLoadError as error:
+        logger.error("fraud_model_load_failed", error=str(error))
+        raise
+
     if not RUN_MIGRATIONS:
         Base.metadata.create_all(bind=engine)
 
@@ -55,6 +67,9 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
             group_id=KAFKA_CONSUMER_GROUP,
             topic=KAFKA_TOPIC,
+            model=model,
+            rule_weight=ML_RULE_WEIGHT,
+            ml_weight=ML_ML_WEIGHT,
         )
     )
     publisher_thread = OutboxPublisherThread(
@@ -66,6 +81,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         "fraud_service_started",
         topic=KAFKA_TOPIC,
         consumer_group=KAFKA_CONSUMER_GROUP,
+        model_version=model.metadata.model_version,
+        ml_threshold=model.metadata.threshold,
+        rule_weight=ML_RULE_WEIGHT,
+        ml_weight=ML_ML_WEIGHT,
     )
     try:
         yield
@@ -141,5 +160,9 @@ def get_risk_assessment(
         "risk_level": assessment.risk_level,
         "reasons": assessment.reasons,
         "correlation_id": assessment.correlation_id,
+        "rule_score": assessment.rule_score,
+        "ml_probability": assessment.ml_probability,
+        "combined_score": assessment.combined_score,
+        "model_version": assessment.model_version,
         "created_at": assessment.created_at.isoformat(),
     }

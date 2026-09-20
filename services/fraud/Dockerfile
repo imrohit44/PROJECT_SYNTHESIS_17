@@ -18,6 +18,8 @@ COPY services/fraud/pyproject.toml ./services/fraud/pyproject.toml
 COPY services/fraud/alembic.ini ./services/fraud/alembic.ini
 COPY services/fraud/alembic ./services/fraud/alembic
 COPY services/fraud/app ./services/fraud/app
+COPY services/fraud/ml ./services/fraud/ml
+COPY services/fraud/models ./services/fraud/models
 COPY services/fraud/tests ./services/fraud/tests
 COPY docker/fraud-entrypoint.sh ./docker/fraud-entrypoint.sh
 

@@ -31,10 +31,13 @@ from services.common.tracing import (
     extract_header,
     get_tracer,
 )
+from services.fraud.ml.model import FraudModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..application.events import EventEnvelope
+from ..domain.models import RiskAssessment
+from ..domain.risk import CombinedRiskEngine
 from ..domain.rules import RuleEngine
 from .database import SessionLocal
 from .metrics import (
@@ -42,6 +45,8 @@ from .metrics import (
     record_assessment_failure,
     record_duplicate_event,
     record_event_consumed,
+    record_ml_high_risk,
+    record_ml_prediction,
 )
 from .models import FraudAssessmentModel, ProcessedEventModel
 from .outbox import add_outbox_event
@@ -55,10 +60,25 @@ RISK_ASSESSED = "risk.assessed"
 class FraudConsumer:
     """Turns transfer.completed events into fraud assessments."""
 
-    def __init__(self, bootstrap_servers: str, group_id: str, topic: str) -> None:
+    def __init__(
+        self,
+        bootstrap_servers: str,
+        group_id: str,
+        topic: str,
+        model: FraudModel | None = None,
+        rule_weight: float = 0.6,
+        ml_weight: float = 0.4,
+    ) -> None:
         self._topic = topic
         self._group_id = group_id
-        self._rule_engine = RuleEngine()
+        # Deterministic rules remain the foundation; when a model artifact is
+        # provided the combined engine adds the ML probability signal.
+        self._rules = RuleEngine()
+        self._combined: CombinedRiskEngine | None = (
+            CombinedRiskEngine(model, rule_weight=rule_weight, ml_weight=ml_weight)
+            if model is not None
+            else None
+        )
         self._consumer = Consumer(
             {
                 "bootstrap.servers": bootstrap_servers,
@@ -179,7 +199,23 @@ class FraudConsumer:
 
         correlation_id = get_correlation_id()
         traceparent = current_traceparent()
-        assessment = self._rule_engine.evaluate(event_id, str(transaction_id), amount)
+
+        try:
+            assessment = self._evaluate(event_id, str(transaction_id), amount, payload)
+        except Exception as error:
+            # Fail the assessment clearly instead of pretending ML succeeded.
+            # Banking has already committed; Kafka offset stays uncommitted
+            # semantics intact because the event is simply not recorded here.
+            record_ml_prediction("failure")
+            logger.error(
+                "fraud_ml_prediction_failed",
+                event_id=event_id,
+                error=str(error),
+            )
+            return "failed"
+        record_ml_prediction("success")
+        if "ML_HIGH_RISK" in assessment.reasons:
+            record_ml_high_risk()
 
         db.add(ProcessedEventModel(event_id=event_id, consumer_group=self._group_id))
         db.add(
@@ -191,6 +227,10 @@ class FraudConsumer:
                 risk_level=assessment.risk_level.value,
                 reasons=assessment.reasons,
                 correlation_id=correlation_id,
+                rule_score=assessment.rule_score,
+                ml_probability=assessment.ml_probability,
+                combined_score=assessment.risk_score,
+                model_version=assessment.model_version,
             )
         )
         add_outbox_event(
@@ -206,6 +246,9 @@ class FraudConsumer:
                     "risk_score": assessment.risk_score,
                     "risk_level": assessment.risk_level.value,
                     "reasons": assessment.reasons,
+                    "rule_score": assessment.rule_score,
+                    "ml_probability": assessment.ml_probability,
+                    "model_version": assessment.model_version,
                 },
             ),
             correlation_id=correlation_id,
@@ -226,8 +269,22 @@ class FraudConsumer:
             transaction_id=assessment.transaction_id,
             risk_level=assessment.risk_level.value,
             risk_score=assessment.risk_score,
+            ml_probability=assessment.ml_probability,
+            combined_score=assessment.risk_score,
+            model_version=assessment.model_version,
         )
         return "created"
+
+    def _evaluate(
+        self,
+        event_id: str,
+        transaction_id: str,
+        amount: Decimal,
+        payload: dict[str, Any],
+    ) -> RiskAssessment:
+        if self._combined is not None:
+            return self._combined.evaluate(event_id, transaction_id, amount, payload)
+        return self._rules.evaluate(event_id, transaction_id, amount)
 
 
 class FraudConsumerThread(threading.Thread):

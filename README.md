@@ -36,6 +36,18 @@ OpenTelemetry/Jaeger tracing, Prometheus metrics, provisioned Grafana,
 and real readiness checks. Runtime verification is documented in
 `docs/verification/phase-11.md`.
 
+**Phase 12 - ML Fraud Detection (current)**
+
+Phase 12 trains a scikit-learn GradientBoosting fraud model on a deterministic
+synthetic dataset and blends it with the Phase 10 deterministic rules
+(`combined_score = 0.6 * rule_score + 0.4 * ml_probability`, threshold 0.86).
+The model artifact lives in `services/fraud/models/`, the shared
+training/runtime feature layer in `services/fraud/ml/`. Retrain with
+`python -m services.fraud.ml.train`, evaluate with
+`python -m services.fraud.ml.evaluate`. See
+`docs/architecture/phase-12.md`, `docs/learning/phase-12.md` and
+`docs/verification/phase-12.md`.
+
 ## Technology stack currently implemented
 
 - Python 3.12+
@@ -268,7 +280,7 @@ Phase 6 keeps browser E2E tests as a documented smoke target rather than adding 
 | 9 | Kafka + Event-Driven Architecture |
 | 10 | Microservices |
 | 11 | Observability (verified; see `docs/verification/phase-11.md`) |
-| 12 | ML Fraud Detection |
+| 12 | ML Fraud Detection (verified; see `docs/verification/phase-12.md`) |
 | 13 | Neo4j + Fraud Graph |
 | 14 | LLM Banking Agents |
 | 15 | Real-Time + WhatsApp |
