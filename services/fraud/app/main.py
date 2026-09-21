@@ -19,6 +19,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from services.common.observability import CorrelationIdMiddleware, configure_structlog
 from services.common.tracing import configure_tracing
+from services.fraud.graph import GraphClient, GraphRiskAnalyzer, GraphSettings
 from services.fraud.ml.model import FraudModelLoadError, load_model
 from sqlalchemy.orm import Session
 
@@ -43,10 +44,16 @@ RUN_MIGRATIONS = os.getenv("RUN_MIGRATIONS", "true").lower() == "true"
 # Phase 12: ML combination weights (documented defaults; configurable).
 ML_RULE_WEIGHT = float(os.getenv("ML_RULE_WEIGHT", "0.6"))
 ML_ML_WEIGHT = float(os.getenv("ML_ML_WEIGHT", "0.4"))
+# Phase 13: Neo4j is advisory. A missing client/config degrades to a
+# rules + ML only service; it must never block fraud assessments.
+GRAPH_ENABLED = os.getenv("GRAPH_ENABLED", "true").lower() == "true"
 
 configure_structlog(SERVICE_NAME, LOG_LEVEL)
 configure_tracing(SERVICE_NAME, OTLP_ENDPOINT, OTEL_ENABLED)
 logger = structlog.get_logger(__name__)
+
+# Set during lifespan; advisory-only, used by /ready for graph status.
+_graph_analyzer: GraphRiskAnalyzer | None = None
 
 
 @asynccontextmanager
@@ -62,6 +69,20 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     if not RUN_MIGRATIONS:
         Base.metadata.create_all(bind=engine)
 
+    graph_client: GraphClient | None = None
+    graph_analyzer: GraphRiskAnalyzer | None = None
+    if GRAPH_ENABLED:
+        # One driver for the whole application lifetime; non-fatal on failure.
+        graph_client = GraphClient(GraphSettings.from_env())
+        graph_client.connect()
+        graph_analyzer = GraphRiskAnalyzer(graph_client)
+        global _graph_analyzer
+        _graph_analyzer = graph_analyzer
+        logger.info(
+            "fraud_graph_client_initialized",
+            graph_available=graph_analyzer.is_available(),
+        )
+
     consumer_thread = FraudConsumerThread(
         FraudConsumer(
             bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
@@ -70,6 +91,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             model=model,
             rule_weight=ML_RULE_WEIGHT,
             ml_weight=ML_ML_WEIGHT,
+            graph=graph_analyzer,
         )
     )
     publisher_thread = OutboxPublisherThread(
@@ -85,12 +107,15 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         ml_threshold=model.metadata.threshold,
         rule_weight=ML_RULE_WEIGHT,
         ml_weight=ML_ML_WEIGHT,
+        graph_version=graph_analyzer.graph_version if graph_analyzer else None,
     )
     try:
         yield
     finally:
         consumer_thread.stop()
         publisher_thread.stop()
+        if graph_client is not None:
+            graph_client.close()
         logger.info("fraud_service_stopped")
 
 
@@ -125,8 +150,14 @@ def health_check() -> dict[str, str]:
 
 @app.get("/ready", summary="Readiness probe")
 def readiness_check(response: Response) -> dict[str, object]:
-    """Readiness: verifies PostgreSQL and Kafka with bounded timeouts."""
-    report = readiness_report(KAFKA_BOOTSTRAP_SERVERS)
+    """Readiness: verifies PostgreSQL and Kafka with bounded timeouts.
+
+    Neo4j status is reported as an advisory field and never gates readiness.
+    """
+    graph_available = (
+        _graph_analyzer.is_available() if _graph_analyzer is not None else None
+    )
+    report = readiness_report(KAFKA_BOOTSTRAP_SERVERS, graph_available)
     ready = is_ready(report)
     response.status_code = 200 if ready else 503
     return {"status": "ready" if ready else "not_ready", "dependencies": report}
@@ -164,5 +195,10 @@ def get_risk_assessment(
         "ml_probability": assessment.ml_probability,
         "combined_score": assessment.combined_score,
         "model_version": assessment.model_version,
+        "graph_score": assessment.graph_score,
+        "graph_adjustment": assessment.graph_adjustment,
+        "final_score": assessment.final_score,
+        "graph_signals": assessment.graph_signals,
+        "graph_version": assessment.graph_version,
         "created_at": assessment.created_at.isoformat(),
     }

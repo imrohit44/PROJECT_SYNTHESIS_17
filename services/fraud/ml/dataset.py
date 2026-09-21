@@ -14,12 +14,13 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
+from .features import FEATURE_COLUMNS as FEATURE_COLUMNS
+
 DATASET_VERSION = "phase12-v1"
 RANDOM_SEED = 42
 
 # The feature contract lives in features.py (the shared training/runtime
 # layer); re-exported here for training and evaluation convenience.
-from .features import FEATURE_COLUMNS as FEATURE_COLUMNS
 
 TARGET_COLUMN = "is_fraud"
 

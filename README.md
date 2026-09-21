@@ -36,17 +36,16 @@ OpenTelemetry/Jaeger tracing, Prometheus metrics, provisioned Grafana,
 and real readiness checks. Runtime verification is documented in
 `docs/verification/phase-11.md`.
 
-**Phase 12 - ML Fraud Detection (current)**
+**Phase 13 - Neo4j + Graph Fraud Analysis (current)**
 
-Phase 12 trains a scikit-learn GradientBoosting fraud model on a deterministic
-synthetic dataset and blends it with the Phase 10 deterministic rules
-(`combined_score = 0.6 * rule_score + 0.4 * ml_probability`, threshold 0.86).
-The model artifact lives in `services/fraud/models/`, the shared
-training/runtime feature layer in `services/fraud/ml/`. Retrain with
-`python -m services.fraud.ml.train`, evaluate with
-`python -m services.fraud.ml.evaluate`. See
-`docs/architecture/phase-12.md`, `docs/learning/phase-12.md` and
-`docs/verification/phase-12.md`.
+Phase 13 projects `transfer.completed` events into a Neo4j Community 5.26
+relationship graph (`Customer`/`Account`/`Transaction` nodes) and adds a
+deterministic graph signal (`graph_score`, `graph_adjustment`, `final_score`,
+`fraud-graph-v1`) alongside the Phase 12 rule + ML baseline. Neo4j is an
+optional analytical projection: the Fraud assessment still completes with the
+rule + ML result when the graph is unavailable. See
+`docs/architecture/phase-13.md`, `docs/learning/phase-13.md` and
+`docs/verification/phase-13.md`.
 
 ## Technology stack currently implemented
 
@@ -281,7 +280,7 @@ Phase 6 keeps browser E2E tests as a documented smoke target rather than adding 
 | 10 | Microservices |
 | 11 | Observability (verified; see `docs/verification/phase-11.md`) |
 | 12 | ML Fraud Detection (verified; see `docs/verification/phase-12.md`) |
-| 13 | Neo4j + Fraud Graph |
+| 13 | Neo4j + Fraud Graph (verified; see `docs/verification/phase-13.md`) |
 | 14 | LLM Banking Agents |
 | 15 | Real-Time + WhatsApp |
 | 16 | CI/CD + Cloud |

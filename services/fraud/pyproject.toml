@@ -24,6 +24,7 @@ dependencies = [
     "scikit-learn>=1.5,<2.0",
     "numpy>=2.0,<3.0",
     "joblib>=1.4,<2.0",
+    "neo4j>=5.25,<6.0",
 ]
 
 [project.optional-dependencies]

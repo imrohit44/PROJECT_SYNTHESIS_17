@@ -23,6 +23,12 @@ class FraudAssessmentModel(Base):
     ml_probability: Mapped[float | None] = mapped_column(Float, nullable=True)
     combined_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     model_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Phase 13 graph fields (additive, nullable; NULL when graph unavailable).
+    graph_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    graph_adjustment: Mapped[float | None] = mapped_column(Float, nullable=True)
+    final_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    graph_signals: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    graph_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )

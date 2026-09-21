@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import threading
 import time
+from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -31,13 +32,14 @@ from services.common.tracing import (
     extract_header,
     get_tracer,
 )
+from services.fraud.graph import GraphRiskAnalyzer
 from services.fraud.ml.model import FraudModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..application.events import EventEnvelope
 from ..domain.models import RiskAssessment
-from ..domain.risk import CombinedRiskEngine
+from ..domain.risk import CombinedRiskEngine, map_level
 from ..domain.rules import RuleEngine
 from .database import SessionLocal
 from .metrics import (
@@ -45,6 +47,10 @@ from .metrics import (
     record_assessment_failure,
     record_duplicate_event,
     record_event_consumed,
+    record_graph_failure,
+    record_graph_operation,
+    record_graph_projection,
+    record_graph_signal,
     record_ml_high_risk,
     record_ml_prediction,
 )
@@ -55,6 +61,15 @@ logger = structlog.get_logger(__name__)
 
 TRANSFER_COMPLETED = "transfer.completed"
 RISK_ASSESSED = "risk.assessed"
+
+
+def event_occurred_ts(event: dict[str, Any]) -> float:
+    """Epoch seconds for the event, defaulting to now when unparsable."""
+    raw = event.get("occurred_at")
+    try:
+        return datetime.fromisoformat(str(raw).replace("Z", "+00:00")).timestamp()
+    except (TypeError, ValueError):
+        return datetime.now(UTC).timestamp()
 
 
 class FraudConsumer:
@@ -68,6 +83,7 @@ class FraudConsumer:
         model: FraudModel | None = None,
         rule_weight: float = 0.6,
         ml_weight: float = 0.4,
+        graph: GraphRiskAnalyzer | None = None,
     ) -> None:
         self._topic = topic
         self._group_id = group_id
@@ -79,6 +95,8 @@ class FraudConsumer:
             if model is not None
             else None
         )
+        # Phase 13: optional graph analyzer (Neo4j advisory dependency).
+        self._graph = graph
         self._consumer = Consumer(
             {
                 "bootstrap.servers": bootstrap_servers,
@@ -217,20 +235,96 @@ class FraudConsumer:
         if "ML_HIGH_RISK" in assessment.reasons:
             record_ml_high_risk()
 
+        # Phase 13: graph projection + analysis. Neo4j is advisory — on any
+        # failure the graph contribution becomes neutral (0.0) and the
+        # assessment still completes on the rule + ML baseline.
+        combined_score = assessment.risk_score
+        graph_score: float | None = None
+        graph_adjustment: float | None = None
+        graph_signals: list[str] = []
+        graph_version: str | None = None
+        graph_available = False
+        if self._graph is not None:
+            source_account_id = str(payload.get("source_account_id", ""))
+            destination_account_id = str(payload.get("destination_account_id", ""))
+            graph_version = self._graph.graph_version
+            try:
+                self._graph.project(
+                    source_account_id=source_account_id,
+                    destination_account_id=destination_account_id,
+                    source_customer_id=str(payload.get("source_customer_id", "")),
+                    destination_customer_id=str(
+                        payload.get("destination_customer_id", "")
+                    ),
+                    transaction_id=str(transaction_id),
+                    amount=str(payload.get("amount", "0")),
+                    created_ts=event_occurred_ts(event),
+                )
+                record_graph_projection("success")
+            except Exception as error:
+                record_graph_projection("failure")
+                record_graph_failure("project")
+                logger.warning(
+                    "fraud_graph_projection_failed",
+                    event_id=event_id,
+                    error=str(error),
+                )
+                graph_score, graph_adjustment = 0.0, 0.0
+            else:
+                try:
+                    analysis = self._graph.analyze_transfer(
+                        source_account_id, destination_account_id
+                    )
+                    graph_available = True
+                    graph_score = analysis.graph_score
+                    graph_signals = analysis.graph_signals
+                    graph_adjustment = self._graph.adjustment_for(graph_score)
+                    record_graph_operation("analyze", "success")
+                    for signal in graph_signals:
+                        record_graph_signal(signal)
+                except Exception as error:
+                    # Graceful degradation: neutral graph contribution.
+                    graph_score, graph_adjustment = 0.0, 0.0
+                    record_graph_failure("analyze")
+                    record_graph_operation("analyze", "failure")
+                    logger.warning(
+                        "fraud_graph_unavailable",
+                        event_id=event_id,
+                        error=str(error),
+                    )
+
+        if graph_adjustment is not None:
+            final_score = min(1.0, combined_score + graph_adjustment)
+            risk_level = map_level(final_score)
+            reasons = assessment.reasons + [
+                signal for signal in graph_signals if signal not in assessment.reasons
+            ]
+        else:
+            final_score = combined_score
+            risk_level = assessment.risk_level
+            reasons = assessment.reasons
+
         db.add(ProcessedEventModel(event_id=event_id, consumer_group=self._group_id))
         db.add(
             FraudAssessmentModel(
                 assessment_id=assessment.assessment_id,
                 event_id=assessment.event_id,
                 transaction_id=assessment.transaction_id,
-                risk_score=assessment.risk_score,
-                risk_level=assessment.risk_level.value,
-                reasons=assessment.reasons,
+                # risk_score stays the Phase 12 rule + ML baseline
+                # (combined_score); final_score adds the graph contribution.
+                risk_score=combined_score,
+                risk_level=risk_level.value,
+                reasons=reasons,
                 correlation_id=correlation_id,
                 rule_score=assessment.rule_score,
                 ml_probability=assessment.ml_probability,
-                combined_score=assessment.risk_score,
+                combined_score=combined_score,
                 model_version=assessment.model_version,
+                graph_score=graph_score,
+                graph_adjustment=graph_adjustment,
+                final_score=final_score,
+                graph_signals=graph_signals,
+                graph_version=graph_version,
             )
         )
         add_outbox_event(
@@ -243,12 +337,17 @@ class FraudConsumer:
                     "assessment_id": assessment.assessment_id,
                     "event_id": event_id,
                     "transaction_id": assessment.transaction_id,
-                    "risk_score": assessment.risk_score,
-                    "risk_level": assessment.risk_level.value,
-                    "reasons": assessment.reasons,
+                    "risk_score": combined_score,
+                    "risk_level": risk_level.value,
+                    "reasons": reasons,
                     "rule_score": assessment.rule_score,
                     "ml_probability": assessment.ml_probability,
                     "model_version": assessment.model_version,
+                    "graph_score": graph_score,
+                    "graph_adjustment": graph_adjustment,
+                    "final_score": final_score,
+                    "graph_signals": graph_signals,
+                    "graph_version": graph_version,
                 },
             ),
             correlation_id=correlation_id,
@@ -262,16 +361,21 @@ class FraudConsumer:
             logger.info("fraud_duplicate_event", event_id=event_id)
             return "duplicate"
 
-        record_assessment_created(assessment.risk_level.value)
+        record_assessment_created(risk_level.value)
         logger.info(
             "fraud_assessment_created",
             event_id=event_id,
             transaction_id=assessment.transaction_id,
-            risk_level=assessment.risk_level.value,
-            risk_score=assessment.risk_score,
+            risk_level=risk_level.value,
+            risk_score=combined_score,
             ml_probability=assessment.ml_probability,
-            combined_score=assessment.risk_score,
+            combined_score=combined_score,
             model_version=assessment.model_version,
+            graph_score=graph_score,
+            graph_adjustment=graph_adjustment,
+            final_score=final_score,
+            graph_version=graph_version,
+            graph_available=graph_available,
         )
         return "created"
 

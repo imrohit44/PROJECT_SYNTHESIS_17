@@ -39,14 +39,27 @@ def check_kafka(bootstrap_servers: str) -> bool:
     return True
 
 
-def readiness_report(bootstrap_servers: str) -> dict[str, str]:
-    """Return per-dependency readiness as ``ok`` or ``unavailable``."""
-    return {
+def readiness_report(
+    bootstrap_servers: str, graph_available: bool | None = None
+) -> dict[str, str]:
+    """Return per-dependency readiness as ``ok`` or ``unavailable``.
+
+    ``neo4j`` is an ADVISORY entry: the graph is an analytical enrichment, not
+    a baseline dependency, so its status is reported but never gates readiness.
+    """
+    report = {
         "postgres": "ok" if check_postgres() else "unavailable",
         "kafka": "ok" if check_kafka(bootstrap_servers) else "unavailable",
     }
+    if graph_available is not None:
+        report["neo4j"] = "ok" if graph_available else "unavailable"
+    return report
+
+
+# Only these dependencies gate readiness; advisory entries (e.g. neo4j) do not.
+REQUIRED_DEPENDENCIES: tuple[str, ...] = ("postgres", "kafka")
 
 
 def is_ready(report: dict[str, str]) -> bool:
-    """Return True only when every dependency reported ``ok``."""
-    return all(status == "ok" for status in report.values())
+    """Return True only when every REQUIRED dependency reported ``ok``."""
+    return all(report.get(dependency) == "ok" for dependency in REQUIRED_DEPENDENCIES)

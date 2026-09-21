@@ -43,6 +43,26 @@ FRAUD_ML_HIGH_RISK_TOTAL = Counter(
     "fraud_ml_high_risk_total",
     "ML predictions at or above the documented high-risk threshold",
 )
+FRAUD_GRAPH_QUERIES_TOTAL = Counter(
+    "fraud_graph_queries_total",
+    "Graph analysis operations attempted",
+    ["operation", "result"],
+)
+FRAUD_GRAPH_FAILURES_TOTAL = Counter(
+    "fraud_graph_failures_total",
+    "Graph operations that failed (Neo4j unavailable or errored)",
+    ["operation"],
+)
+FRAUD_GRAPH_PROJECTION_TOTAL = Counter(
+    "fraud_graph_projection_total",
+    "Transfer projections written to Neo4j",
+    ["result"],
+)
+FRAUD_GRAPH_RISK_SIGNALS_TOTAL = Counter(
+    "fraud_graph_risk_signals_total",
+    "Graph risk signals raised, by bounded signal type",
+    ["signal_type"],
+)
 OUTBOX_PENDING_EVENTS = Gauge(
     "outbox_pending_events",
     "Fraud outbox events waiting to be published",
@@ -81,6 +101,26 @@ def record_ml_prediction(outcome: str) -> None:
 def record_ml_high_risk() -> None:
     """Increment the ML high-risk counter."""
     FRAUD_ML_HIGH_RISK_TOTAL.inc()
+
+
+def record_graph_operation(operation: str, result: str) -> None:
+    """Increment the graph operation counter (bounded operation/result labels)."""
+    FRAUD_GRAPH_QUERIES_TOTAL.labels(operation=operation, result=result).inc()
+
+
+def record_graph_failure(operation: str) -> None:
+    """Increment the graph failure counter for a bounded operation label."""
+    FRAUD_GRAPH_FAILURES_TOTAL.labels(operation=operation).inc()
+
+
+def record_graph_projection(result: str) -> None:
+    """Increment the graph projection counter (bounded result label)."""
+    FRAUD_GRAPH_PROJECTION_TOTAL.labels(result=result).inc()
+
+
+def record_graph_signal(signal_type: str) -> None:
+    """Increment a graph risk-signal counter (bounded signal_type label)."""
+    FRAUD_GRAPH_RISK_SIGNALS_TOTAL.labels(signal_type=signal_type).inc()
 
 
 def record_outbox_backlog(count: int) -> None:

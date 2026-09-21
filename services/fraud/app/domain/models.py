@@ -23,3 +23,9 @@ class RiskAssessment:
     rule_score: float | None = None
     ml_probability: float | None = None
     model_version: str | None = None
+    # Phase 13 graph fields. None means "graph analysis unavailable".
+    graph_score: float | None = None
+    graph_adjustment: float | None = None
+    final_score: float | None = None
+    graph_signals: list[str] = field(default_factory=list)
+    graph_version: str | None = None

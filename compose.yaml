@@ -122,6 +122,34 @@ services:
     networks:
       - pybank
 
+  neo4j:
+    # Pinned Neo4j 5.x Community image (no Enterprise-only features).
+    image: neo4j:5.26-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-pybank_neo4j_password}
+      # Local-learning memory footprint; explicit rather than defaults.
+      NEO4J_server_memory_heap_max__size: 512M
+      NEO4J_server_memory_pagecache_size: 256M
+    ports:
+      - "${NEO4J_HTTP_HOST_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_HOST_PORT:-7687}:7687"
+    volumes:
+      - pybank_neo4j_data:/data
+    healthcheck:
+      # The password lives inside NEO4J_AUTH (neo4j/<password>); NEO4J_PASSWORD
+      # itself is not a valid Neo4j setting, so it is parsed here instead.
+      test:
+        [
+          "CMD-SHELL",
+          "cypher-shell -u neo4j -p \"$(echo $$NEO4J_AUTH | cut -d/ -f2)\" 'RETURN 1' >/dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+    networks:
+      - pybank
+
   fraud:
     build:
       # Build context is the repository root so the shared services/common
@@ -129,6 +157,8 @@ services:
       # deployable: it has its own Dockerfile, dependencies and migrations.
       context: .
       dockerfile: services/fraud/Dockerfile
+    ports:
+      - "${FRAUD_HOST_PORT:-8001}:8000"
     environment:
       APP_NAME: ${APP_NAME:-PyBankFraud}
       APP_ENV: ${APP_ENV:-docker-development}
@@ -144,8 +174,15 @@ services:
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
       OTEL_TRACING_ENABLED: ${OTEL_TRACING_ENABLED:-true}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318/v1/traces}
-    ports:
-      - "${FRAUD_HOST_PORT:-8001}:8000"
+      NEO4J_URI: ${NEO4J_URI:-bolt://neo4j:7687}
+      NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-pybank_neo4j_password}
+      GRAPH_LOOKBACK_HOURS: ${GRAPH_LOOKBACK_HOURS:-24}
+      GRAPH_WEIGHT: ${GRAPH_WEIGHT:-0.25}
+      GRAPH_MAX_ADJUSTMENT: ${GRAPH_MAX_ADJUSTMENT:-0.15}
+      # Explicit escape hatch: GRAPH_ENABLED=false degrades fraud to the
+      # Phase 12 rule + ML baseline without touching Neo4j at all.
+      GRAPH_ENABLED: ${GRAPH_ENABLED:-true}
     depends_on:
       postgres:
         condition: service_healthy
@@ -153,6 +190,11 @@ services:
         condition: service_healthy
       jaeger:
         condition: service_healthy
+      # Neo4j is an ADVISORY dependency: fraud degrades gracefully when it is
+      # unavailable, so startup only waits if it is present, never fails on it.
+      neo4j:
+        condition: service_healthy
+        required: false
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
       interval: 10s
@@ -229,6 +271,7 @@ services:
 
 volumes:
   pybank_postgres_data:
+  pybank_neo4j_data:
 
 networks:
   pybank:
