@@ -1,6 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { tokenStorage } from "./storage";
-import type { ErrorResponse, TokenResponse } from "../types/api";
+import type {
+  AssistantChatResponse,
+  ErrorResponse,
+  TokenResponse,
+} from "../types/api";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
 
@@ -45,4 +49,9 @@ api.interceptors.response.use(
 export function apiMessage(error: unknown, fallback = "Something went wrong.") {
   if (axios.isAxiosError<ErrorResponse>(error)) return error.response?.data.error.message ?? fallback;
   return fallback;
+}
+
+export async function sendAssistantMessage(message: string) {
+  const { data } = await api.post<AssistantChatResponse>("/assistant/chat", { message });
+  return data;
 }

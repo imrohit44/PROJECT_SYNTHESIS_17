@@ -36,7 +36,20 @@ OpenTelemetry/Jaeger tracing, Prometheus metrics, provisioned Grafana,
 and real readiness checks. Runtime verification is documented in
 `docs/verification/phase-11.md`.
 
-**Phase 13 - Neo4j + Graph Fraud Analysis (current)**
+**Phase 14 — LLM Banking Assistant (current)**
+
+Phase 14 adds an authenticated, read-only assistant (`POST
+/api/v1/assistant/chat`): an LLM chooses among exactly four allowlisted tools
+(`get_account_summary`, `get_recent_transactions`, `get_transaction_details`,
+`get_fraud_assessment`), and the backend executes them against the JWT
+principal through the existing service layer. The model never supplies
+identity, never reaches a database directly, and cannot perform mutations.
+Provider configuration is optional (`LLM_PROVIDER`/`LLM_API_KEY`); without it
+the endpoint returns an explicit 503 while the rest of the API is unaffected.
+See `docs/architecture/phase-14.md`, `docs/learning/phase-14.md` and
+`docs/verification/phase-14.md`.
+
+**Phase 13 - Neo4j + Graph Fraud Analysis**
 
 Phase 13 projects `transfer.completed` events into a Neo4j Community 5.26
 relationship graph (`Customer`/`Account`/`Transaction` nodes) and adds a

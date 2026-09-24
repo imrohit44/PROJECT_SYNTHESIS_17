@@ -17,7 +17,12 @@ vi.mock("../app/AuthContext", () => ({
 }));
 
 describe("Login", () => {
-  beforeEach(() => login.mockReset());
+  // Keep the body braced: `mockReset()` returns the mock function, and an
+  // expression-bodied hook would make the runner invoke the mock again as a
+  // post-test cleanup (see Assistant.test.tsx).
+  beforeEach(() => {
+    login.mockReset();
+  });
 
   it("submits credentials and navigates after success", async () => {
     login.mockResolvedValue(undefined);

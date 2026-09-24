@@ -54,3 +54,17 @@ export interface LoginRequest {
   email: string;
   password: string;
 }
+
+export type ToolCallStatus = "success" | "error" | "failed";
+
+export interface AssistantToolCall {
+  tool: string;
+  status: ToolCallStatus;
+  detail: string | null;
+}
+
+export interface AssistantChatResponse {
+  response: string;
+  conversation_id: string | null;
+  tool_calls: AssistantToolCall[];
+}

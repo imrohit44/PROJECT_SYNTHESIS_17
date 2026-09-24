@@ -8,6 +8,7 @@ import { Accounts } from "../pages/Accounts";
 import { CreateAccount } from "../pages/CreateAccount";
 import { AccountDetails } from "../pages/AccountDetails";
 import { Transactions } from "../pages/Transactions";
+import { Assistant } from "../pages/Assistant";
 import { Transfer } from "../pages/Transfer";
 import { AdminUsers } from "../pages/AdminUsers";
 import { Profile } from "../pages/Profile";
@@ -23,6 +24,7 @@ export function App() {
         <Route path="/accounts/new" element={<CreateAccount />} />
         <Route path="/accounts/:accountId" element={<AccountDetails />} />
         <Route path="/transactions" element={<Transactions />} />
+        <Route path="/assistant" element={<Assistant />} />
         <Route path="/transfer" element={<Transfer />} />
         <Route path="/profile" element={<Profile />} />
         <Route element={<AdminRoute />}><Route path="/admin/users" element={<AdminUsers />} /></Route>

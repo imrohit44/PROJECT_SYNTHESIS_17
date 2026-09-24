@@ -60,6 +60,37 @@ class Settings(BaseSettings):
     otel_exporter_otlp_endpoint: str | None = Field(
         default=None, validation_alias="OTEL_EXPORTER_OTLP_ENDPOINT"
     )
+    # --- Phase 14: LLM banking assistant (optional, read-only) ---
+    llm_provider: str = Field(default="", validation_alias="LLM_PROVIDER")
+    llm_model: str = Field(default="", validation_alias="LLM_MODEL")
+    llm_api_key: str = Field(default="", validation_alias="LLM_API_KEY")
+    llm_base_url: str = Field(
+        default="https://api.openai.com/v1", validation_alias="LLM_BASE_URL"
+    )
+    llm_timeout_seconds: float = Field(
+        default=20.0, validation_alias="LLM_TIMEOUT_SECONDS"
+    )
+    llm_max_output_tokens: int = Field(
+        default=512, validation_alias="LLM_MAX_OUTPUT_TOKENS"
+    )
+    max_tool_calls_per_request: int = Field(
+        default=3, validation_alias="LLM_MAX_TOOL_CALLS"
+    )
+    max_assistant_message_length: int = Field(
+        default=2000, validation_alias="ASSISTANT_MAX_INPUT_CHARS"
+    )
+    assistant_rate_limit: int = Field(
+        default=10, validation_alias="ASSISTANT_RATE_LIMIT"
+    )
+    assistant_rate_window_seconds: int = Field(
+        default=60, validation_alias="ASSISTANT_RATE_WINDOW_SECONDS"
+    )
+    fraud_service_url: str = Field(
+        default="http://fraud:8000", validation_alias="FRAUD_SERVICE_URL"
+    )
+    fraud_service_timeout_seconds: float = Field(
+        default=5.0, validation_alias="FRAUD_SERVICE_TIMEOUT_SECONDS"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
