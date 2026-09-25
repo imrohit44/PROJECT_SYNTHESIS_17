@@ -92,6 +92,39 @@ class Settings(BaseSettings):
         default=5.0, validation_alias="FRAUD_SERVICE_TIMEOUT_SECONDS"
     )
 
+    # --- Phase 15: Real-time WebSockets & WhatsApp Notifications ---
+    realtime_consumer_group: str = Field(
+        default="pybank-realtime-consumer",
+        validation_alias="REALTIME_CONSUMER_GROUP",
+    )
+    # The WebSocket handshake cannot carry an Authorization header, so the JWT is
+    # exchanged for a short-lived single-use ticket. Keeping it brief limits the
+    # window in which a ticket captured from a log could be replayed.
+    websocket_ticket_ttl_seconds: int = Field(
+        default=30,
+        validation_alias="WEBSOCKET_TICKET_TTL_SECONDS",
+        ge=5,
+        le=300,
+    )
+    whatsapp_enabled: bool = Field(default=False, validation_alias="WHATSAPP_ENABLED")
+    whatsapp_provider: str = Field(
+        default="cloud_api", validation_alias="WHATSAPP_PROVIDER"
+    )
+    whatsapp_api_url: str = Field(
+        default="https://graph.facebook.com/v18.0",
+        validation_alias="WHATSAPP_API_URL",
+    )
+    whatsapp_access_token: str = Field(
+        default="", validation_alias="WHATSAPP_ACCESS_TOKEN"
+    )
+    whatsapp_phone_number_id: str = Field(
+        default="", validation_alias="WHATSAPP_PHONE_NUMBER_ID"
+    )
+    whatsapp_sender_id: str = Field(default="", validation_alias="WHATSAPP_SENDER_ID")
+    whatsapp_timeout_seconds: float = Field(
+        default=5.0, validation_alias="WHATSAPP_TIMEOUT_SECONDS"
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

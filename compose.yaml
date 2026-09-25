@@ -97,6 +97,17 @@ services:
       ASSISTANT_RATE_WINDOW_SECONDS: ${ASSISTANT_RATE_WINDOW_SECONDS:-60}
       FRAUD_SERVICE_URL: ${FRAUD_SERVICE_URL:-http://fraud:8000}
       FRAUD_SERVICE_TIMEOUT_SECONDS: ${FRAUD_SERVICE_TIMEOUT_SECONDS:-5}
+      # Phase 15: real-time consumer group + optional outbound WhatsApp.
+      # WHATSAPP_ENABLED=false keeps banking and WebSocket delivery fully
+      # functional without any external provider calls.
+      REALTIME_CONSUMER_GROUP: ${REALTIME_CONSUMER_GROUP:-pybank-realtime-consumer}
+      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
+      WHATSAPP_PROVIDER: ${WHATSAPP_PROVIDER:-cloud_api}
+      WHATSAPP_API_URL: ${WHATSAPP_API_URL:-https://graph.facebook.com/v18.0}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_SENDER_ID: ${WHATSAPP_SENDER_ID:-}
+      WHATSAPP_TIMEOUT_SECONDS: ${WHATSAPP_TIMEOUT_SECONDS:-5}
     ports:
       - "${BACKEND_HOST_PORT:-8000}:8000"
     depends_on:

@@ -28,6 +28,30 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
+**Phase 15 — Real-Time Communication (current)**
+
+Phase 15 adds three things and deliberately no new service, database, or
+Kafka cluster:
+
+1. **WebSocket real-time delivery** — `GET /api/v1/realtime/ticket` mints a
+   single-use, short-lived ticket, and `WS /api/v1/ws` exchanges it for an
+   authenticated connection. This keeps the JWT out of the URL, so credentials
+   never land in proxy or browser history logs. A process-local connection
+   manager fans messages out per user.
+2. **Event-driven notifications** — a Kafka consumer inside the existing
+   Banking service maps `transfer.completed` and `risk.assessed` onto
+   channel-neutral notifications and dispatches them to WebSocket and WhatsApp
+   adapters. Banking never pushes to a socket directly.
+3. **Outbound WhatsApp adapter** — provider-agnostic, configuration-driven, and
+   strictly outbound. Replies are never interpreted, so no WhatsApp message can
+   move money. If it is unconfigured or failing, banking is unaffected and the
+   failure is logged and counted.
+
+The frontend gained `useRealtime()`: connection status, typed messages, bounded
+reconnect backoff, and duplicate-connection prevention across re-renders. See
+`docs/architecture/phase-15.md`, `docs/learning/phase-15.md` and
+`docs/verification/phase-15.md`.
+
 **Phase 11 - Observability (verified 2026-09-19)**
 
 Phases 0 through 10 are complete. Phase 11 adds structlog JSON logging,
@@ -36,7 +60,7 @@ OpenTelemetry/Jaeger tracing, Prometheus metrics, provisioned Grafana,
 and real readiness checks. Runtime verification is documented in
 `docs/verification/phase-11.md`.
 
-**Phase 14 — LLM Banking Assistant (current)**
+**Phase 14 — LLM Banking Assistant**
 
 Phase 14 adds an authenticated, read-only assistant (`POST
 /api/v1/assistant/chat`): an LLM chooses among exactly four allowlisted tools
@@ -88,6 +112,8 @@ rule + ML result when the graph is unavailable. See
 - Prometheus metrics
 - Apache Kafka event transport
 - Independent Fraud microservice
+- WebSockets with single-use ticket authentication
+- Event-driven notification channels (WebSocket, WhatsApp)
 - Jaeger, Prometheus, and Grafana observability stack
 
 Future technologies are roadmap items, not current dependencies.
@@ -243,6 +269,8 @@ PyBank/
 │   │   ├── core/logging.py    # Standard logging setup
 │   │   ├── domain/             # Framework-independent banking rules
 │   │   ├── infrastructure/     # SQLAlchemy models, sessions, and mappers
+│   │   ├── notifications/      # Channel-neutral notification model and adapters
+│   │   ├── realtime/           # WebSocket manager, message contract, tickets
 │   │   └── main.py             # FastAPI application entrypoint
 │   └── tests/                  # API and domain behavior tests
 ├── frontend/                   # React + TypeScript client

@@ -35,6 +35,48 @@ OUTBOX_PUBLISH_FAILURES_TOTAL = Counter(
 )
 
 
+# --- Phase 15: Real-time and Notification metrics ---
+# Prometheus labels are strictly bounded: channel, event_type, result, status
+REALTIME_WEBSOCKET_CONNECTIONS_TOTAL = Counter(
+    "realtime_websocket_connections_total",
+    "Total WebSocket connections established",
+)
+REALTIME_WEBSOCKET_DISCONNECTS_TOTAL = Counter(
+    "realtime_websocket_disconnects_total",
+    "Total WebSocket connections closed",
+)
+REALTIME_MESSAGES_SENT_TOTAL = Counter(
+    "realtime_messages_sent_total",
+    "Total messages delivered over WebSockets",
+    ["event_type"],
+)
+REALTIME_MESSAGE_FAILURES_TOTAL = Counter(
+    "realtime_message_failures_total",
+    "Total WebSocket delivery failures",
+    ["event_type"],
+)
+NOTIFICATION_DISPATCH_TOTAL = Counter(
+    "notification_dispatch_total",
+    "Total notifications dispatched across channels",
+    ["channel", "event_type", "result"],
+)
+NOTIFICATION_DISPATCH_FAILURES_TOTAL = Counter(
+    "notification_dispatch_failures_total",
+    "Total notification dispatch failures",
+    ["channel", "event_type"],
+)
+WHATSAPP_MESSAGES_SENT_TOTAL = Counter(
+    "whatsapp_messages_sent_total",
+    "Total WhatsApp messages successfully sent",
+    ["result"],
+)
+WHATSAPP_MESSAGE_FAILURES_TOTAL = Counter(
+    "whatsapp_message_failures_total",
+    "Total WhatsApp message failures",
+    ["result"],
+)
+
+
 def record_transfer_success() -> None:
     """Increment the successful transfer counter."""
     TRANSFERS_TOTAL.inc()

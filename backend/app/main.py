@@ -41,6 +41,18 @@ from backend.app.infrastructure.metrics import (
 from backend.app.infrastructure.outbox import OutboxRepository
 from backend.app.infrastructure.persistence.database import create_session_factory
 from backend.app.infrastructure.readiness import is_ready, readiness_report
+from backend.app.notifications.consumer import (
+    RealtimeConsumerThread,
+    RealtimeKafkaConsumer,
+)
+from backend.app.notifications.service import (
+    NotificationChannel,
+    NotificationService,
+    WebSocketChannel,
+    WhatsAppChannel,
+)
+from backend.app.notifications.whatsapp import MetaCloudWhatsAppProvider
+from backend.app.realtime.manager import get_websocket_manager
 from services.common.observability import (
     CORRELATION_ID_HEADER,
     CorrelationIdMiddleware,
@@ -67,7 +79,9 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         kafka_enabled=settings.kafka_enabled,
         kafka_topic=KAFKA_TOPIC,
     )
-    workers: list[OutboxPublisherThread | AuditConsumerThread] = []
+    workers: list[
+        OutboxPublisherThread | AuditConsumerThread | RealtimeConsumerThread
+    ] = []
     if settings.kafka_enabled:
         session_factory = create_session_factory(settings.database_url)
         producer = KafkaEventProducer(settings.kafka_bootstrap_servers, KAFKA_TOPIC)
@@ -86,6 +100,40 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
                 )
             )
         )
+        # Phase 15: Kafka -> notification fan-out. Fail-closed for the worker,
+        # fail-open for banking: a consumer construction failure must never take
+        # the core API offline.
+        try:
+            ws_manager = get_websocket_manager()
+            provider = MetaCloudWhatsAppProvider(
+                api_url=settings.whatsapp_api_url,
+                phone_number_id=settings.whatsapp_phone_number_id,
+                access_token=settings.whatsapp_access_token,
+                timeout_seconds=settings.whatsapp_timeout_seconds,
+            )
+            channels: list[NotificationChannel] = [WebSocketChannel(ws_manager)]
+            if settings.whatsapp_enabled:
+                channels.append(
+                    WhatsAppChannel(
+                        provider,
+                        session_factory,
+                        enabled=settings.whatsapp_enabled,
+                    )
+                )
+            notification_service = NotificationService(channels)
+            workers.append(
+                RealtimeConsumerThread(
+                    RealtimeKafkaConsumer(
+                        bootstrap_servers=settings.kafka_bootstrap_servers,
+                        topic=KAFKA_TOPIC,
+                        group_id=settings.realtime_consumer_group,
+                        session_factory=session_factory,
+                        notification_service=notification_service,
+                    )
+                )
+            )
+        except Exception as error:
+            logger.warning("realtime_consumer_disabled", error=str(error))
         for worker in workers:
             worker.start()
     try:
