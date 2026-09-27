@@ -4,6 +4,9 @@
 !.env.example
 !.env.production.example
 
+# Database backups (Phase 17): dumps contain real data and must never be committed
+backups/
+
 # Python
 __pycache__/
 *.py[cod]

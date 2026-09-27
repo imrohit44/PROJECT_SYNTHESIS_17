@@ -16,8 +16,12 @@ class Settings(BaseSettings):
         default="postgresql+psycopg://pybank:pybank@localhost:5432/pybank",
         validation_alias="DATABASE_URL",
     )
+    # Phase 17 hardening: TokenService refuses secrets shorter than 32
+    # characters, so even the development default must clear that floor.
+    # Production overrides this via docker-compose.prod.yml, which fails fast
+    # when JWT_SECRET is unset. Generate a real secret with: openssl rand -hex 32
     jwt_secret: str = Field(
-        default="change-this-development-secret",
+        default="change-this-development-secret-min-32-chars",
         validation_alias="JWT_SECRET",
     )
     jwt_algorithm: str = Field(default="HS256", validation_alias="JWT_ALGORITHM")

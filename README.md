@@ -28,7 +28,33 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 16 — CI/CD and Cloud (current)**
+**Phase 17 — Production Hardening: Security, Reliability, Recovery (current)**
+
+Phase 17 adds no new feature, service, database, or orchestration layer. It
+tightens what Phases 0-16 already built:
+
+1. **JWT hardening** — `TokenService` now pins validation to HS256 only
+   (closing algorithm-confusion/`alg=none` vectors), rejects secrets shorter
+   than 32 characters at construction, and refuses any non-HS256 configuration.
+   New regression tests cover forged, foreign-signed, expired, and
+   wrong-purpose tokens (`backend/tests/security/test_tokens.py`).
+2. **Reliability audit** — transfers already take `SELECT … FOR UPDATE` in
+   deterministic (sorted) account order, every outbound HTTP call (LLM, fraud
+   service, WhatsApp) and every readiness probe runs under a bounded timeout,
+   and Kafka consumers commit offsets only after durable processing. The audit
+   found no blind retries over money movement.
+3. **Dependency audit** — `pip-audit` now reports **no known vulnerabilities**
+   after moving dev tooling to pytest ≥ 9.0.3 (fixes CVE-2025-71176);
+   `npm audit` shows only dev-time vitest advisories that never ship in the
+   static production bundle (details in `docs/verification/phase-17.md`).
+4. **Backup and restore** — `scripts/backup_postgres.sh` produces verified,
+   timestamped `pg_dump` archives of both databases; `scripts/restore_postgres.sh`
+   restores only into a *new* database and refuses to touch an existing one, so
+   recovery is provable without any destructive reset of live volumes.
+
+See `docs/verification/phase-17.md`.
+
+**Phase 16 — CI/CD and Cloud**
 
 Phase 16 makes PyBank automatically tested, versioned, and deployable, and
 deliberately adds no new runtime component, database, or Kafka cluster:

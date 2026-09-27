@@ -35,8 +35,10 @@ dev = [
     "httpx>=0.28,<1.0",
     "mypy>=1.14,<2.0",
     "pandas>=2.2,<4.0",
-    "pytest>=8.3,<9.0",
-    "pytest-asyncio>=0.25,<1.0",
+    # Phase 17: pytest >= 9.0.3 fixes PYSEC-2026-1845 / CVE-2025-71176;
+    # pytest-asyncio 1.x is the pytest-9-compatible line.
+    "pytest>=9.0.3,<10.0",
+    "pytest-asyncio>=1.4,<2.0",
     "pytest-cov>=6.0,<7.0",
     "ruff>=0.9,<1.0",
 ]

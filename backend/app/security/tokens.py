@@ -10,12 +10,22 @@ class TokenError(Exception):
     """Raised when a JWT cannot be trusted or has the wrong purpose."""
 
 
+# Hardening: the service only ever issues HS256 tokens, so it must only ever
+# accept HS256 tokens. Allowing the caller to choose any algorithm invites
+# algorithm-confusion attacks (a public key presented as an HMAC secret).
+_ALLOWED_ALGORITHMS = ("HS256",)
+
+
 class TokenService:
     def __init__(
         self, secret: str, algorithm: str, access_minutes: int, refresh_days: int
     ) -> None:
+        if not secret or len(secret) < 32:
+            raise TokenError("JWT secret must be at least 32 characters")
+        if algorithm.upper() != _ALLOWED_ALGORITHMS[0]:
+            raise TokenError(f"Unsupported JWT algorithm: {algorithm}")
         self._secret = secret
-        self._algorithm = algorithm
+        self._algorithm = _ALLOWED_ALGORITHMS[0]
         self._access_minutes = access_minutes
         self._refresh_days = refresh_days
 
