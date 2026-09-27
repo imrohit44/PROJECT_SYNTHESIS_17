@@ -101,6 +101,15 @@ jobs:
 
       - name: Pytest
         working-directory: services/fraud
+        # CI installs only the fraud package (`pip install -e ./services/fraud`),
+        # which exposes `app.*` but not the repository-root `services.fraud.*`
+        # namespace used by several tests. Pointing PYTHONPATH at the workspace
+        # root (which pytest does NOT do by itself here, because the ini's
+        # `pythonpath = ["."]` resolves to services/fraud/) makes both the
+        # `app.*` and `services.fraud.*` imports resolve in a clean runner.
+        # This affects only the CI test environment, not runtime configuration.
+        env:
+          PYTHONPATH: "${{ github.workspace }}"
         run: pytest
 
   frontend:
@@ -150,6 +159,27 @@ jobs:
         run: docker compose config --quiet
 
       - name: Validate production compose override
+        # Validation-only dummy secrets. The production overlay intentionally
+        # uses fail-fast `${VAR:?...}` interpolation, so `config --quiet`
+        # would otherwise abort before validating anything.
+        #
+        # These values are never deployed and never persisted: they exist only
+        # in this step's environment to let Compose finish interpolation and
+        # prove the YAML structure merges cleanly. The real production `.env`
+        # is still required by deploy/deploy.sh (which refuses to run without
+        # real values), and the same `${VAR:?...}` expressions remain in
+        # docker-compose.prod.yml so a genuine production start still fails
+        # fast when a secret is missing.
+        #
+        # NEO4J_PASSWORD is one example. The same treatment is applied to all
+        # six fail-fast variables used by the overlay.
+        env:
+          JWT_SECRET: ci-validation-only-not-a-secret
+          FRONTEND_ORIGIN: https://ci-validation.invalid
+          POSTGRES_PASSWORD: ci-validation-only-not-a-secret
+          NEO4J_PASSWORD: ci-validation-only-not-a-secret
+          GRAFANA_ADMIN_USER: ci-validation
+          GRAFANA_ADMIN_PASSWORD: ci-validation-only-not-a-secret
         run: docker compose -f compose.yaml -f docker-compose.prod.yml config --quiet
 
       # Building the three deployable images proves the Dockerfiles and their
