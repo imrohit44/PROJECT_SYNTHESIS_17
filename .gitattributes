@@ -1,0 +1,13 @@
+# Phase 16: deployment targets a Linux host (AWS EC2). A shell script with CRLF
+# line endings fails on Linux with "syntax error near unexpected token $'do\r'",
+# which would break every deployment. Force LF for anything executed on the
+# server, and for the CI/CD definitions so workflow YAML is portable too.
+* text=auto eol=lf
+
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.conf text eol=lf
+
+# Windows-only tooling that genuinely needs CRLF.
+*.ps1 text eol=crlf

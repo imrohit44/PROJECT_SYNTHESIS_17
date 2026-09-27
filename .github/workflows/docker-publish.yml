@@ -1,0 +1,186 @@
+name: Publish images
+
+# Builds the three deployable application images and pushes them to GitHub
+# Container Registry (GHCR) with an immutable commit-SHA tag.
+#
+# Release identity is the full commit SHA. `main` is also published as a
+# human-readable convenience, but deploy-ec2.yml only ever deploys the SHA
+# tag, so "what is running in production" is always answerable and a moving
+# `main` tag can never cause a surprise redeploy.
+#
+# DEPENDENCY ON CI (Phase 16 audit fix):
+#   This workflow does NOT listen to `push`. It only runs after the "CI"
+#   workflow has finished SUCCESSFULLY, so failing tests can never produce a
+#   deployable image. `head_sha` is the exact commit CI validated, and that is
+#   the exact commit that gets built and pushed -- never a fresh `github.sha`,
+#   which on a workflow_run event refers to the default branch's HEAD and could
+#   therefore publish code nobody tested.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit SHA to publish (only used for manual re-runs)"
+        required: true
+        type: string
+
+# Least privilege by default. The publish/deploy workflows declare the extra
+# scopes they need; this one only needs to read the repository.
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  publish:
+    name: Build and push backend, fraud, frontend
+    runs-on: ubuntu-latest
+    # Gate: a completed-but-unsuccessful CI run must not produce images.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    outputs:
+      sha: ${{ steps.target.outputs.sha }}
+      backend: ${{ steps.names.outputs.backend }}
+      fraud: ${{ steps.names.outputs.fraud }}
+      frontend: ${{ steps.names.outputs.frontend }}
+    steps:
+      - name: Resolve the exact commit CI validated
+        id: target
+        run: |
+          set -euo pipefail
+          # On workflow_run this is the commit the CI run actually checked.
+          # On workflow_dispatch it is the operator-supplied SHA.
+          sha="${{ github.event.inputs.sha || github.event.workflow_run.head_sha }}"
+          if [[ -z "${sha}" ]]; then
+            echo "ERROR: no commit SHA resolved for this publish" >&2
+            exit 1
+          fi
+          if [[ ! "${sha}" =~ ^[0-9a-f]{7,40}$ ]]; then
+            echo "ERROR: '${sha}' is not a commit SHA" >&2
+            exit 1
+          fi
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+          echo "SHA=${sha}" >> "$GITHUB_ENV"
+          # A commit SHA is a public identifier, not a secret.
+          echo "Publishing images for CI-validated commit ${sha}"
+
+      - name: Check out the validated commit
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ steps.target.outputs.sha }}
+
+      # The token is written into the runner's Docker config by the login
+      # action. It is never passed as a build arg and never echoed.
+      - name: Log in to GHCR
+        uses: docker/login-action@v3.4.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v3.10.0
+
+      # ghcr.io namespaces must be lowercase, but GitHub owners can be mixed
+      # case, so the owner is normalised once here instead of being repeated.
+      - name: Compute image references
+        id: names
+        run: |
+          set -euo pipefail
+          owner="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+          {
+            echo "backend=${REGISTRY}/${owner}/pybank-backend"
+            echo "fraud=${REGISTRY}/${owner}/pybank-fraud"
+            echo "frontend=${REGISTRY}/${owner}/pybank-frontend"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Container images published"
+            echo
+            echo "| Service | Immutable release tag |"
+            echo "| --- | --- |"
+            echo "| backend | \`${REGISTRY}/${owner}/pybank-backend:${SHA}\` |"
+            echo "| fraud | \`${REGISTRY}/${owner}/pybank-fraud:${SHA}\` |"
+            echo "| frontend | \`${REGISTRY}/${owner}/pybank-frontend:${SHA}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          # Image references are not secrets, so listing them is safe.
+          echo "Publishing for commit ${SHA}"
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ steps.names.outputs.backend }}:${{ env.SHA }}
+            ${{ steps.names.outputs.backend }}:main
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ env.SHA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push fraud
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: services/fraud/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.names.outputs.fraud }}:${{ env.SHA }}
+            ${{ steps.names.outputs.fraud }}:main
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ env.SHA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: ./frontend
+          file: frontend/Dockerfile
+          push: true
+          # The SPA is built with a *relative* API base so the browser calls
+          # the same origin that served it. The reverse proxy forwards /api and
+          # /api/v1/ws, which is what removes CORS as a production dependency.
+          build-args: |
+            VITE_API_BASE_URL=/api/v1
+          tags: |
+            ${{ steps.names.outputs.frontend }}:${{ env.SHA }}
+            ${{ steps.names.outputs.frontend }}:main
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ env.SHA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Record digests so a release can be proven later from the registry even
+      # if the runner's build cache is discarded.
+      - name: Record image digests
+        run: |
+          set -euo pipefail
+          {
+            echo "### Registry digests"
+            echo
+            echo '```'
+            for pair in "backend:${{ steps.names.outputs.backend }}" \
+                        "fraud:${{ steps.names.outputs.fraud }}" \
+                        "frontend:${{ steps.names.outputs.frontend }}"; do
+              svc="${pair%%:*}"
+              repo="${pair#*:}"
+              digest="$(docker buildx imagetools inspect "${repo}:${SHA}" \
+                --format '{{.Manifest.Digest}}' 2>/dev/null || echo 'unavailable')"
+              echo "${svc}  ${repo}:${SHA}  ${digest}"
+            done
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

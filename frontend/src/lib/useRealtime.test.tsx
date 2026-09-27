@@ -7,7 +7,7 @@ import { tokenStorage } from "./storage";
 // short-lived, single-use ticket over the normal authenticated API.
 // `vi.mock` is hoisted above imports, so the mock fn must be hoisted with it.
 const { post } = vi.hoisted(() => ({
-  post: vi.fn(async (..._args: unknown[]) => ({
+  post: vi.fn(async () => ({
     data: { ticket: "short-lived-ticket" },
   })),
 }));

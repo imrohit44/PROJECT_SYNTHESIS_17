@@ -28,7 +28,45 @@ Each phase should leave the previous phase understandable and runnable. Complexi
 
 ## Current phase
 
-**Phase 15 — Real-Time Communication (current)**
+**Phase 16 — CI/CD and Cloud (current)**
+
+Phase 16 makes PyBank automatically tested, versioned, and deployable, and
+deliberately adds no new runtime component, database, or Kafka cluster:
+
+1. **CI pipeline** — `.github/workflows/ci.yml` runs on every push and pull
+   request: backend pytest/Ruff/MyPy, fraud pytest/Ruff/MyPy, frontend
+   ESLint/TypeScript/Vitest/production build, plus Compose validation and all
+   three image builds.
+2. **Immutable container release** — `docker-publish.yml` runs *only* after CI
+   succeeds, builds the exact commit CI validated, and pushes
+   `ghcr.io/imrohit44/pybank-{backend,fraud,frontend}:<commit-sha>`. `main` is
+   also tagged for humans, but deployment never uses it.
+3. **Cloud deployment** — `deploy-ec2.yml` deploys a published SHA over SSH to
+   a single AWS EC2 host running Docker Compose, waits for `/health` and
+   `/ready`, then smoke tests. `deploy/rollback.sh` restores a previous SHA
+   using the same command, since releases are immutable.
+
+The chain is enforced in executable workflow logic, not in comments:
+
+```
+push main → CI → [conclusion == success] → Publish → [conclusion == success] → Deploy
+```
+
+**Security properties.** In production (`docker-compose.prod.yml` layered over
+`compose.yaml`) only Nginx on 80/443 is public. The two application services
+bind `127.0.0.1`, and PostgreSQL, Redis, Kafka, Neo4j, Prometheus, Grafana,
+Jaeger and the Fraud service publish **no** host port at all. Required
+secrets use Compose's fail-fast syntax, so the stack refuses to start rather
+than falling back to a development default. `docker compose down -v` appears
+nowhere as an action, and `deploy.sh` aborts the deployment if it ever does.
+
+**Local development is unaffected.** `docker compose up` still works exactly as
+before; the production file is an overlay, not a replacement.
+
+See `docs/architecture/phase-16.md`, `docs/learning/phase-16.md` and
+`docs/verification/phase-16.md`.
+
+**Phase 15 — Real-Time Communication**
 
 Phase 15 adds three things and deliberately no new service, database, or
 Kafka cluster:

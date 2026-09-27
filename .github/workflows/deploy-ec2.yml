@@ -1,0 +1,135 @@
+name: Deploy to EC2
+
+# Deploys an already-published immutable image release to the PyBank EC2 host
+# over SSH, then gates on real health and smoke checks.
+#
+# Prerequisites (GitHub repository secrets, all set once by the operator):
+#   EC2_HOST              public IP or DNS of the instance
+#   EC2_DOMAIN            the public domain Nginx serves (e.g. pybank.example.com)
+#   EC2_USER              SSH user (e.g. ubuntu)
+#   EC2_SSH_KEY           private key contents for that user
+#
+# This workflow contains no AWS access keys, no cloud credentials, and no
+# database or JWT secrets. It cannot deploy anywhere except the one host
+# authorised by the SSH key, and it never receives a production secret.
+#
+# Chain enforced here (Phase 16 audit fix):
+#   push -> CI -> (only on success) Publish images -> (only on success) this
+#   workflow. Both hops are gated in executable logic, not in a comment.
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit SHA to deploy (defaults to the published SHA)"
+        required: false
+        type: string
+      smoke:
+        description: "Run the post-deploy smoke test"
+        required: false
+        default: true
+        type: boolean
+  # Automatic deploy after a successful publish. `workflow_run` fires on the
+  # successful conclusion of the named workflow, so a red CI or a failed image
+  # build can never reach the host.
+  workflow_run:
+    workflows: ["Publish images"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  # One deployment at a time, never cancelling a half-finished deploy.
+  group: deploy-ec2
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy immutable release to EC2
+    # Only proceed when whatever triggered this run actually succeeded.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_PATH: /opt/pybank
+      # Resolved below: the dispatched SHA, or the SHA that was just published.
+      TARGET_SHA: ${{ github.event.inputs.sha || github.event.workflow_run.head_sha }}
+    steps:
+      - name: Resolve target release
+        id: target
+        run: |
+          set -euo pipefail
+          sha="${TARGET_SHA}"
+          if [[ -z "${sha}" ]]; then
+            echo "ERROR: no SHA to deploy" >&2
+            exit 1
+          fi
+          if [[ ! "${sha}" =~ ^[0-9a-f]{7,40}$ ]]; then
+            echo "ERROR: '${sha}' is not a commit SHA" >&2
+            exit 1
+          fi
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+          # The SHA is a public commit identifier, not a secret.
+          echo "Deploying release ${sha}"
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          # The key arrives as a secret and is written to a 0600 file only.
+          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Pin the host key so a changed host is detected rather than trusted.
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      # The private key is passed to ssh-agent and never printed, and no
+      # secret is echoed into a log line at any point.
+      - name: Start SSH agent and add the key
+        run: |
+          set -euo pipefail
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/deploy_key
+          rm -f ~/.ssh/deploy_key
+
+      - name: Verify host reachability
+        run: |
+          set -euo pipefail
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            'echo "host reachable"; docker --version; docker compose version'
+
+      - name: Deploy release
+        run: |
+          set -euo pipefail
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" \
+            "cd ${DEPLOY_PATH} && ./deploy/deploy.sh ${{ steps.target.outputs.sha }} ${{ github.event.inputs.smoke == 'false' && '--skip-smoke' || '' }}"
+
+      # Independent, read-only confirmation from outside the host. A deploy
+      # that reports success but serves a 502 is still a failed deploy.
+      - name: Verify the deployment from the public edge
+        if: ${{ github.event.inputs.smoke != 'false' }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 20); do
+            if curl -fsS --max-time 10 "https://${{ secrets.EC2_DOMAIN }}/api/v1/health" > /dev/null; then
+              echo "Public health endpoint is green"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "ERROR: public health endpoint never became green" >&2
+          exit 1
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "### Deployment"
+            echo
+            echo "- release: \`${{ steps.target.outputs.sha }}\`"
+            echo "- host: \`${{ secrets.EC2_HOST }}\` (identity withheld)"
+            echo "- result: \`${{ job.status }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,187 @@
+name: CI
+
+# Validates every push and pull request before a deployment can occur.
+# A red build here is the signal that blocks the image publish + deploy
+# workflows, so this pipeline is intentionally fast: no cloud stack is
+# started, only image builds and configuration validation.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least privilege by default. The publish/deploy workflows declare the extra
+# scopes they need; this one only needs to read the repository.
+permissions:
+  contents: read
+
+# Action pinning note (Phase 16): the usual hardening step is to pin each
+# action to a full 40-character commit SHA. These refs are pinned to exact
+# release tags (v4.2.2, v5.6.0, v4.4.0, v3.10.0, v6.18.0) because the
+# GitHub API was rate-limited (HTTP 403) from the build environment used to
+# author this file, so no SHA could be verified. An unverified SHA is worse
+# than a tag: a wrong SHA fails the whole run. Phase 17 should convert these
+# to verified SHAs once the tags can be resolved through an authenticated
+# API call.
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (pytest, ruff, mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-python@v5.6.0
+        with:
+          # 3.12 matches the Dockerfile base image, the ruff target-version and
+          # the mypy python_version setting, so CI checks exactly what ships.
+          python-version: '3.12'
+
+      # There is no requirements.txt in this project: dependencies are declared
+      # in pyproject.toml and installed the same way the Dockerfile installs them.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Ruff lint
+        run: ruff check backend/app backend/tests
+
+      - name: Ruff format check
+        run: ruff format --check backend/app backend/tests
+
+      - name: MyPy
+        run: mypy backend/app
+
+      - name: Pytest
+        run: pytest backend/tests -q
+
+  fraud:
+    name: Fraud service (pytest, ruff, mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-python@v5.6.0
+        with:
+          # 3.12 matches the fraud service's shipped runtime
+          # (services/fraud/Dockerfile: python:3.12-slim), so CI checks the
+          # exact interpreter the container runs.
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: services/fraud/pyproject.toml
+
+      # There is no requirements.txt: the fraud service declares its
+      # dependencies in services/fraud/pyproject.toml, exactly as its
+      # Dockerfile installs them (`pip install ./services/fraud`).
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "./services/fraud[dev]"
+
+      # The fraud service is an independent deployable with its own
+      # pyproject.toml (ruff config) and mypy.ini. Running from its own
+      # directory makes the tool configs resolve natively, which is how the
+      # project is already linted and type-checked.
+      - name: Ruff lint
+        working-directory: services/fraud
+        run: ruff check app tests
+
+      - name: Ruff format check
+        working-directory: services/fraud
+        run: ruff format --check app tests
+
+      - name: MyPy
+        working-directory: services/fraud
+        run: mypy app
+
+      - name: Pytest
+        working-directory: services/fraud
+        run: pytest
+
+  frontend:
+    name: Frontend (vitest, eslint, tsc, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript type check
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+      # Builds with the same relative API base URL used in production so the
+      # exact artefact that ships is the one that is type-checked and built
+      # here. Vite inlines VITE_* at build time.
+      - name: Production build
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: /api/v1
+
+  docker-validate:
+    name: Docker (compose + image builds)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: docker/setup-buildx-action@v3.10.0
+
+      - name: Validate local compose file
+        run: docker compose config --quiet
+
+      - name: Validate production compose override
+        run: docker compose -f compose.yaml -f docker-compose.prod.yml config --quiet
+
+      # Building the three deployable images proves the Dockerfiles and their
+      # build contexts are valid without starting the full stack.
+      - name: Build backend image
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: pybank-backend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build fraud image
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: services/fraud/Dockerfile
+          push: false
+          tags: pybank-fraud:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: ./frontend
+          file: frontend/Dockerfile
+          push: false
+          tags: pybank-frontend:ci
+          build-args: |
+            VITE_API_BASE_URL=/api/v1
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

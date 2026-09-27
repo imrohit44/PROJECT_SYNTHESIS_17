@@ -1,0 +1,114 @@
+# PyBank production Compose override (Phase 16).
+#
+# This file does NOT replace compose.yaml. It is layered on top of it:
+#
+#     docker compose -f compose.yaml -f docker-compose.prod.yml up -d
+#
+# Keeping the same base file guarantees that local development and production
+# run the *same* services, the same migrations and the same health checks. This
+# override only changes three things:
+#
+#   1. Application services are pulled as immutable versioned images instead of
+#      being built on the host.
+#   2. Host ports are removed from every internal service, so PostgreSQL,
+#      Redis, Kafka, Neo4j, Prometheus, Grafana and Jaeger are reachable only
+#      on the private compose network.
+#   3. Production-safe configuration: no development defaults, required
+#      secrets, restart policies.
+#
+# SAFETY: this file never runs `docker compose down -v`, never removes a
+# volume, and never recreates a database. The named volumes and the
+# `infrastructure/postgres` init scripts come from the base file untouched, so
+# existing banking and fraud data survives every deployment.
+#
+# The only public entry points on the host are 80/443, served by the host-level
+# Nginx in deploy/nginx/. Backend and frontend are bound to 127.0.0.1 so the
+# reverse proxy can reach them while the internet cannot.
+
+services:
+  # ------------------------------------------------------------------ app ---
+  backend:
+    # Immutable tag. The deploy script writes the commit SHA into .env.deploy,
+    # so "which code is running" is always answerable.
+    image: ${PYBANK_BACKEND_IMAGE:-ghcr.io/imrohit44/pybank-backend:0.1.0}
+    restart: unless-stopped
+    # Replaced (not appended to) by the override tag below: the host port is
+    # bound to loopback only, so Nginx can proxy to it and the public cannot.
+    ports: !override
+      - "127.0.0.1:${BACKEND_BIND_PORT:-8000}:8000"
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      PYBANK_DEBUG: "false"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      # Production must set these; Compose fails fast if they are missing
+      # rather than silently falling back to a development default.
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set for production}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?FRONTEND_ORIGIN must be set for production}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set for production}
+      # Single-origin deployment: the SPA and the API are served from the same
+      # host through Nginx, so no wildcard CORS is used in production.
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-}
+      # Migrations stay additive and run before the new code serves traffic.
+      RUN_MIGRATIONS: "true"
+
+  fraud:
+    image: ${PYBANK_FRAUD_IMAGE:-ghcr.io/imrohit44/pybank-fraud:0.1.0}
+    restart: unless-stopped
+    # Not reachable from the host at all. The banking service calls it over the
+    # private compose network; nothing on the public internet can.
+    ports: !reset []
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      PYBANK_DEBUG: "false"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set for production}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:?NEO4J_PASSWORD must be set for production}
+      RUN_MIGRATIONS: "true"
+
+  frontend:
+    image: ${PYBANK_FRONTEND_IMAGE:-ghcr.io/imrohit44/pybank-frontend:0.1.0}
+    restart: unless-stopped
+    ports: !override
+      - "127.0.0.1:${FRONTEND_BIND_PORT:-8080}:80"
+
+  # ------------------------------------------------------------ internals ---
+  # Everything below is private. `ports: !reset []` removes the base file's
+  # published port so the service is reachable only over the `pybank` network.
+  # These are the ports that must never be public:
+  #   5432 PostgreSQL | 6379 Redis | 9092 Kafka | 7474/7687 Neo4j
+  #   9090 Prometheus | 3000 Grafana | 16686 Jaeger
+
+  postgres:
+    ports: !reset []
+    restart: unless-stopped
+
+  redis:
+    restart: unless-stopped
+
+  kafka:
+    restart: unless-stopped
+
+  neo4j:
+    ports: !reset []
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?NEO4J_PASSWORD must be set for production}
+
+  jaeger:
+    ports: !reset []
+    restart: unless-stopped
+
+  prometheus:
+    ports: !reset []
+    restart: unless-stopped
+
+  grafana:
+    ports: !reset []
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD must be set for production}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_ALLOW_SIGN_UP: "false"
