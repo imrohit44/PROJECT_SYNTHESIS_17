@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Phase 08 — A cache that PostgreSQL outranks",
+    "output": "public/archify/evolution/phase-08.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "viewBox": [
+      1330,
+      820
+    ],
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": {
+          "label": "Browser UI"
+        },
+        "backend": {
+          "label": "Services"
+        },
+        "database": {
+          "label": "State stores"
+        },
+        "cloud": {
+          "label": "Edge & ops"
+        },
+        "security": {
+          "label": "Identity"
+        },
+        "messagebus": {
+          "label": "Event bus"
+        },
+        "external": {
+          "label": "People & gates"
+        }
+      }
+    }
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 6,
+    "gapX": 92,
+    "gapY": 112
+  },
+  "components": [
+    {
+      "id": "react",
+      "type": "frontend",
+      "label": "React SPA",
+      "sublabel": "Vite build",
+      "tag": "presentation only",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "cache-aside reads",
+      "tag": "never the ledger · new",
+      "row": 0,
+      "col": 2
+    },
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Customer",
+      "sublabel": "browser",
+      "row": 1,
+      "col": 0
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Banking API",
+      "sublabel": ":8000 /api/v1",
+      "tag": "translate; domain decides",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "tests",
+      "type": "external",
+      "label": "Test suite",
+      "sublabel": "pytest, ruff, mypy",
+      "tag": "gates every change",
+      "row": 2,
+      "col": 1
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "Domain core",
+      "sublabel": "framework-free rules",
+      "tag": "no web or ORM imports",
+      "row": 2,
+      "col": 2
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "money + outbox",
+      "tag": "the only ledger",
+      "row": 2,
+      "col": 3
+    },
+    {
+      "id": "security",
+      "type": "security",
+      "label": "Auth",
+      "sublabel": "JWT, Argon2id",
+      "tag": "identity is not money",
+      "row": 3,
+      "col": 1
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Request path",
+      "wraps": [
+        "client",
+        "api"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Private state",
+      "wraps": [
+        "postgres"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "client-to-api",
+      "from": "client",
+      "to": "api",
+      "label": "HTTP",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-to-react",
+      "from": "api",
+      "to": "react",
+      "label": "REST",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "api-to-domain",
+      "from": "api",
+      "to": "domain",
+      "label": "domain rules",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 28
+    },
+    {
+      "id": "api-to-postgres",
+      "from": "api",
+      "to": "postgres",
+      "label": "tx + outbox",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "top",
+      "labelSegment": 2
+    },
+    {
+      "id": "api-to-security",
+      "from": "api",
+      "to": "security",
+      "label": "verifies JWT",
+      "variant": "dashed",
+      "labelDy": 20
+    },
+    {
+      "id": "tests-to-api",
+      "from": "tests",
+      "to": "api",
+      "label": "gates every change",
+      "variant": "dashed",
+      "labelDy": -32,
+      "labelSegment": 2
+    },
+    {
+      "id": "api-to-redis",
+      "from": "api",
+      "to": "redis",
+      "label": "cache reads",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDx": 24
+    }
+  ],
+  "cards": []
+}

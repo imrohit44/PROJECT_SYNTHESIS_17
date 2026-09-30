@@ -1,0 +1,414 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Phase 15 — Kafka talks to services, WebSockets talk to people",
+    "output": "public/archify/evolution/phase-15.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "viewBox": [
+      1330,
+      820
+    ],
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": {
+          "label": "Browser UI"
+        },
+        "backend": {
+          "label": "Services"
+        },
+        "database": {
+          "label": "State stores"
+        },
+        "cloud": {
+          "label": "Edge & ops"
+        },
+        "security": {
+          "label": "Identity"
+        },
+        "messagebus": {
+          "label": "Event bus"
+        },
+        "external": {
+          "label": "People & gates"
+        }
+      }
+    }
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 6,
+    "gapX": 92,
+    "gapY": 112
+  },
+  "components": [
+    {
+      "id": "react",
+      "type": "frontend",
+      "label": "React SPA",
+      "sublabel": "Vite build",
+      "tag": "presentation only",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "cache-aside reads",
+      "tag": "never the ledger",
+      "row": 0,
+      "col": 2
+    },
+    {
+      "id": "consumers",
+      "type": "backend",
+      "label": "Consumers",
+      "sublabel": "audit + WhatsApp push",
+      "row": 0,
+      "col": 3
+    },
+    {
+      "id": "observ",
+      "type": "cloud",
+      "label": "Observability",
+      "sublabel": "metrics + dashboards",
+      "tag": "outside the request path",
+      "row": 0,
+      "col": 4
+    },
+    {
+      "id": "client",
+      "type": "external",
+      "label": "Customer",
+      "sublabel": "browser, WebSocket",
+      "row": 1,
+      "col": 0
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Banking API",
+      "sublabel": ":8000 /api/v1, /ws",
+      "tag": "auth, money, events, WS",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "kafka",
+      "type": "messagebus",
+      "label": "Kafka",
+      "sublabel": "topic pybank.events",
+      "tag": "at-least-once",
+      "row": 1,
+      "col": 3
+    },
+    {
+      "id": "fraud",
+      "type": "backend",
+      "label": "Fraud Service",
+      "sublabel": "rules, model, graph",
+      "tag": "own consumer group",
+      "row": 1,
+      "col": 4
+    },
+    {
+      "id": "neo4j",
+      "type": "database",
+      "label": "Neo4j",
+      "sublabel": "money-movement graph",
+      "tag": "advisory only",
+      "row": 1,
+      "col": 5
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "AI Assistant",
+      "sublabel": "read-only tools",
+      "tag": "backend enforces limits",
+      "row": 2,
+      "col": 0
+    },
+    {
+      "id": "tests",
+      "type": "external",
+      "label": "Test suite",
+      "sublabel": "pytest, ruff, mypy",
+      "tag": "gates every change",
+      "row": 2,
+      "col": 1
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "Domain core",
+      "sublabel": "framework-free rules",
+      "tag": "no web or ORM imports",
+      "row": 2,
+      "col": 2
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "pybank + pybank_fraud",
+      "tag": "the only ledger",
+      "row": 2,
+      "col": 3
+    },
+    {
+      "id": "ml",
+      "type": "database",
+      "label": "ML model",
+      "sublabel": "fraud-model-v1",
+      "tag": "threshold-gated",
+      "row": 2,
+      "col": 4
+    },
+    {
+      "id": "security",
+      "type": "security",
+      "label": "Auth",
+      "sublabel": "JWT, Argon2id",
+      "tag": "identity is not money",
+      "row": 3,
+      "col": 1
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Request path",
+      "wraps": [
+        "client",
+        "api"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Event backbone",
+      "wraps": [
+        "kafka",
+        "consumers"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Private state",
+      "wraps": [
+        "postgres",
+        "ml"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Fraud intelligence",
+      "wraps": [
+        "fraud",
+        "neo4j"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "client-to-api",
+      "from": "client",
+      "to": "api",
+      "label": "HTTP",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-to-react",
+      "from": "api",
+      "to": "react",
+      "label": "REST",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "api-to-domain",
+      "from": "api",
+      "to": "domain",
+      "label": "domain rules",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 28
+    },
+    {
+      "id": "api-to-postgres",
+      "from": "api",
+      "to": "postgres",
+      "label": "tx + outbox",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "top",
+      "labelSegment": 2
+    },
+    {
+      "id": "api-to-security",
+      "from": "api",
+      "to": "security",
+      "label": "verifies JWT",
+      "variant": "dashed",
+      "labelDy": 20
+    },
+    {
+      "id": "tests-to-api",
+      "from": "tests",
+      "to": "api",
+      "label": "gates every change",
+      "variant": "dashed",
+      "labelDy": -32,
+      "labelSegment": 2
+    },
+    {
+      "id": "api-to-redis",
+      "from": "api",
+      "to": "redis",
+      "label": "cache reads",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDx": 24
+    },
+    {
+      "id": "api-to-kafka",
+      "from": "api",
+      "to": "kafka",
+      "label": "outbox rows",
+      "variant": "emphasis"
+    },
+    {
+      "id": "kafka-to-consumers",
+      "from": "kafka",
+      "to": "consumers",
+      "label": "consume",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "kafka-to-fraud",
+      "from": "kafka",
+      "to": "fraud",
+      "label": "transfer.completed",
+      "variant": "emphasis",
+      "labelDy": 28
+    },
+    {
+      "id": "fraud-to-kafka",
+      "from": "fraud",
+      "to": "kafka",
+      "label": "risk.assessed",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "fraud-to-ml",
+      "from": "fraud",
+      "to": "ml",
+      "label": "scores with model",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 28
+    },
+    {
+      "id": "fraud-to-neo4j",
+      "from": "fraud",
+      "to": "neo4j",
+      "label": "projects graph",
+      "variant": "dashed"
+    },
+    {
+      "id": "fraud-to-observ",
+      "from": "fraud",
+      "to": "observ",
+      "label": "metrics",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDy": -44
+    },
+    {
+      "id": "api-to-observ",
+      "from": "api",
+      "to": "observ",
+      "label": "metrics + traces",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "right",
+      "via": [
+        [
+          650,
+          286
+        ],
+        [
+          650,
+          550
+        ],
+        [
+          1316,
+          550
+        ],
+        [
+          1316,
+          110
+        ]
+      ],
+      "labelSegment": 2
+    },
+    {
+      "id": "agent-to-api",
+      "from": "agent",
+      "to": "api",
+      "label": "read-only tools",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          200,
+          462
+        ],
+        [
+          200,
+          360
+        ],
+        [
+          440,
+          360
+        ],
+        [
+          440,
+          286
+        ]
+      ],
+      "labelSegment": 2
+    },
+    {
+      "id": "consumers-to-client",
+      "from": "consumers",
+      "to": "client",
+      "label": "pushes updates",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          766,
+          60
+        ],
+        [
+          100,
+          60
+        ]
+      ],
+      "labelSegment": 1
+    }
+  ],
+  "cards": []
+}

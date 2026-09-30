@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Fraud Pipeline — from committed transfer to risk.assessed",
+    "output": "public/archify/fraud-pipeline.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "viewBox": [1080, 700],
+    "views": [
+      { "id": "primary-path", "label": "Primary path", "focus": ["ledger", "topic", "features", "ml", "assessments"], "note": "A committed row becomes an event, then a score, then a stored assessment." },
+      { "id": "model-signal", "label": "Model signal", "focus": ["features", "ml", "assessments"], "note": "The ML probability only counts when it clears the trained threshold." },
+      { "id": "graph-signal", "label": "Graph signal", "focus": ["features", "graph", "assessments"], "note": "Relationship evidence can only ever add a bounded bonus." },
+      { "id": "signal-fan-in", "label": "Signal fan-in", "focus": ["rules", "ml", "graph", "assessments"], "note": "Three independent signals land in one auditable assessment row." }
+    ]
+  },
+  "stages": [
+    { "label": "Commit" },
+    { "label": "Transport" },
+    { "label": "Features" },
+    { "label": "Score" },
+    { "label": "Store" }
+  ],
+  "nodes": [
+    { "id": "ledger", "type": "database", "label": "Ledger + outbox", "sublabel": "one transaction", "tag": "outbox thread publishes", "stage": 0, "row": 0 },
+    { "id": "topic", "type": "messagebus", "label": "pybank.events", "sublabel": "single topic", "tag": "at-least-once", "stage": 1, "row": 0 },
+    { "id": "features", "type": "backend", "label": "Feature builder", "sublabel": "features.py", "tag": "bounded window", "stage": 2, "row": 0 },
+    { "id": "rules", "type": "backend", "label": "Rule engine", "sublabel": "deterministic rules", "tag": "risk.py", "stage": 3, "row": 0 },
+    { "id": "ml", "type": "backend", "label": "ML scorer", "sublabel": "fraud-model-v1", "tag": "threshold 0.86", "stage": 3, "row": 1 },
+    { "id": "graph", "type": "backend", "label": "Graph risk", "sublabel": "fraud-graph-v1", "tag": "max +0.15", "stage": 3, "row": 2 },
+    { "id": "assessments", "type": "database", "label": "Assessment row", "sublabel": "fraud_assessments", "tag": "then risk.assessed", "stage": 4, "row": 0 }
+  ],
+  "flows": [
+    { "id": "row", "from": "ledger", "to": "topic", "label": "outbox event", "variant": "emphasis", "route": "straight", "fromSide": "right", "toSide": "left" },
+    { "id": "consume", "from": "topic", "to": "features", "label": "payload", "variant": "emphasis", "route": "straight", "fromSide": "right", "toSide": "left", "classification": "at-least-once" },
+    { "id": "features-to-rules", "from": "features", "to": "rules", "label": "rule signals", "route": "straight", "fromSide": "right", "toSide": "left", "labelAt": [637, 136] },
+    { "id": "features-to-ml", "from": "features", "to": "ml", "label": "features", "variant": "emphasis", "fromSide": "right", "toSide": "left", "channelX": 630, "labelAt": [598, 214] },
+    { "id": "features-to-graph", "from": "features", "to": "graph", "label": "graph links", "variant": "security", "fromSide": "right", "toSide": "left", "channelX": 650, "labelAt": [690, 322], "classification": "PII touch" },
+    { "id": "rules-to-assess", "from": "rules", "to": "assessments", "label": "rule score", "route": "straight", "fromSide": "right", "toSide": "left", "labelAt": [852, 118] },
+    { "id": "ml-to-assess", "from": "ml", "to": "assessments", "label": "probability", "variant": "emphasis", "fromSide": "right", "toSide": "left", "channelX": 840, "labelAt": [800, 200] },
+    { "id": "graph-to-assess", "from": "graph", "to": "assessments", "label": "risk bonus", "variant": "dashed", "fromSide": "right", "toSide": "left", "channelX": 862, "labelAt": [820, 330], "classification": "max 0.15" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "One real run", "items": ["rule_score 0.8 from the LARGE_TRANSACTION rule (amount above 10,000)", "ml_probability 0.9890 from fraud-model-v1, above the 0.86 threshold", "combined 0.8756, then a capped graph bonus of 0.15, final score 1.0 HIGH"] },
+    { "dot": "amber", "title": "Signals that cannot run wild", "items": ["Rules are deterministic and unit tested one threshold at a time", "The graph contribution is min(0.15, 0.25 x graph_score), so relationships can never dominate", "A missing graph or model degrades the score signal, never the committed transfer"] },
+    { "dot": "emerald", "title": "Why the pipeline is shaped this way", "items": ["Scoring reads a committed event, so it can be replayed and recomputed", "Each consumer group owns one job, so a slow scorer cannot delay the ledger", "Every assessment is stored beside the score inputs that produced it"] }
+  ]
+}
