@@ -1,235 +1,311 @@
-# PyBank
+# Project Synthesis 17
 
-## Overview
+[![CI](https://github.com/imrohit44/PyBank/actions/workflows/ci.yml/badge.svg)](https://github.com/imrohit44/PyBank/actions/workflows/ci.yml)
 
-PyBank is a progressive software engineering learning project for building a production-inspired banking platform. The repository intentionally grows in stages so each technology is introduced when its problem is clear.
+A learning-driven banking platform that evolves from a simple object-oriented core into a distributed system through 17 engineering stages.
 
-## Aim
+Project Synthesis 17 began as a simple banking system and grew incrementally: a new engineering layer was introduced only when the previous stage created a concrete problem or requirement. The banking domain is the vehicle; the engineering evolution is the subject. The repository contains 17 stages, Phase 0 through Phase 16.
 
-The aim is to learn how a system evolves from a small, well-structured application into a secure, observable, distributed platform without skipping the engineering fundamentals.
+## What is Project Synthesis 17?
 
-## Objectives
+Project Synthesis 17 is a banking platform built as an engineering exercise. Customers, savings and current accounts, deposits, withdrawals, transfers, and transaction history sit on top of a modular backend, a React frontend, and -- once the architecture demands it -- event transport, an independent fraud service, and production deployment.
 
-- Build clear Python modules and boundaries.
-- Learn API design, testing, configuration, and operational practices.
-- Introduce infrastructure only when the application needs it.
-- Document the reasoning behind important decisions.
+It was built to study how real systems grow. Most sample projects present a finished architecture; this one records the path to it. Each stage is a small, runnable system, and each new technology arrives with the problem that justifies it: PostgreSQL when in-memory state stops being honest, Redis when reads need a cache, Kafka when services must react without calling each other.
 
-## Learning philosophy
+That discipline is the development approach. The recurring loop is: simple system, real engineering problem, architectural decision, new capability, new trade-off, next stage. Complexity is earned, and every stage stays understandable on its own.
 
-PyBank evolves through:
+The 17-stage structure exists so the evolution can be followed end to end -- from an object-oriented core to a containerized, observable, event-driven platform -- with documentation at each step and verification where it matters.
+
+## What You Can Explore
+
+- Model a banking domain with object-oriented design and financial invariants.
+- Build a versioned REST API with FastAPI, Pydantic schemas, and OpenAPI docs.
+- Persist financial data with PostgreSQL, SQLAlchemy 2, and Alembic migrations.
+- Implement JWT authentication, refresh tokens, and role-based authorization.
+- Build a React 19 + TypeScript banking interface with routing and data fetching.
+- Set up pytest markers, coverage, Ruff, MyPy, ESLint, and TypeScript checks.
+- Containerize the system with Docker Compose across ten services.
+- Add Redis caching and a shared login rate-limit store.
+- Implement event-driven workflows with Kafka and a transactional outbox.
+- Extract an independent fraud and risk service with its own database.
+- Add structured logging, Prometheus metrics, OpenTelemetry traces, and Grafana dashboards.
+- Combine rule-based, ML, and graph-based fraud scoring into one assessment.
+- Project transfer history into a Neo4j relationship graph.
+- Integrate a read-only LLM banking assistant behind four allowlisted tools.
+- Deliver authenticated realtime updates over WebSockets with ticket-based auth.
+- Send outbound-only WhatsApp notifications driven by Kafka events.
+- Ship immutable container releases through CI to a cloud host.
+
+## Key Capabilities
+
+### Banking
+
+- Customer management, savings and current accounts
+- Deposits, withdrawals, and transfers with deterministic locking order
+- Transaction history and per-account statements
+- Versioned API (`/api/v1`) serving customers, accounts, transfers, users, auth, health, assistant, and realtime tickets
+
+### Security
+
+- Argon2 password hashing; JWT access tokens (15 minutes) and refresh tokens (7 days)
+- HS256-only token validation; secrets under 32 characters refused at startup
+- RBAC with an admin role; server-side account ownership enforcement
+- Redis-backed login rate limiting with local fallback; assistant rate limiting
+- Security headers, CORS allow-list, input validation via Pydantic
+- Structured audit logging of security events without sensitive values
+- Configuration validated at startup; secrets only through environment variables
+
+### Distributed Systems
+
+- Apache Kafka event transport with correlation ID and trace headers
+- Transactional outbox: events committed with the business write, relayed by a publisher thread
+- At-least-once delivery with idempotent, deduplicating consumers
+- Independent fraud service with its own database, migrations, and Kafka consumer groups
+- Bounded timeouts on every outbound HTTP call and readiness probe
+
+### Fraud and Intelligence
+
+- Deterministic rule scoring combined with trained ML scoring (scikit-learn) under configurable weights
+- Neo4j relationship projection producing a bounded graph adjustment; fraud degrades to rules plus ML when the graph is unavailable
+- Single risk assessment combining rules, model, and graph signals
+- Read-only LLM assistant: four allowlisted tools, no direct database or model-driven identity access, mutations impossible, explicit 503 when unconfigured
+
+### Realtime
+
+- Authenticated WebSockets via short-lived, single-use tickets (`POST /api/v1/ws/ticket` with the WebSocket at `/api/v1/ws`); raw JWTs are never accepted in query strings
+- Kafka-driven notification service mapping transfers and risk assessments to channel-neutral messages
+- WebSocket and outbound-only WhatsApp adapters; banking is unaffected when channels fail
+- React `useRealtime` hook with status, typed messages, and bounded reconnect backoff
+
+### Operations
+
+- Docker Compose development stack plus an additive production overlay
+- Liveness (`/health`), readiness (`/ready`), and Prometheus (`/metrics`) endpoints on both Python services
+- Prometheus, Grafana with provisioned dashboards, Jaeger all-in-one for OpenTelemetry traces, structured JSON logging
+- CI pipeline, immutable GHCR releases, SSH-based EC2 deployment with health verification and SHA rollback
+- Verified `pg_dump` backup and restore tooling with overwrite protection
+
+## Architecture Evolution
+
+The repository contains 17 engineering stages, from Phase 0 through Phase 16. Each phase is documented under `docs/architecture/` and `docs/learning/`, with runtime verification for Phases 11 through 16 under `docs/verification/`.
+
+| Phase | Focus | Main Addition |
+| --- | --- | --- |
+| 0 | Foundation | Python project layout, tooling, and conventions |
+| 1 | Domain | Banking domain model and financial invariants |
+| 2 | API | FastAPI application layer with versioned routes |
+| 3 | Persistence | PostgreSQL, SQLAlchemy 2, and Alembic migrations |
+| 4 | Security | JWT authentication, RBAC, and ownership enforcement |
+| 5 | Frontend | React + TypeScript client with auth and banking pages |
+| 6 | Quality | Pytest suites, coverage, Ruff, and MyPy |
+| 7 | Containers | Docker images and a ten-service Compose stack |
+| 8 | Performance | Redis cache and shared rate-limit store |
+| 9 | Events | Kafka with a transactional outbox |
+| 10 | Services | Independent fraud and risk service |
+| 11 | Observability | Structured logs, metrics, traces, and dashboards |
+| 12 | ML | Trained fraud model combined with rule scoring |
+| 13 | Graph | Neo4j relationship projection and graph adjustment |
+| 14 | AI | Read-only LLM banking assistant |
+| 15 | Realtime | Ticket-authenticated WebSockets and notification adapters |
+| 16 | Production | CI pipeline, immutable releases, and cloud deployment |
+
+## Technology Stack
+
+### Backend
+
+| Technology | Version |
+| --- | --- |
+| Python | >= 3.12 (CI and images use 3.12) |
+| FastAPI | >= 0.115, < 1.0 |
+| Uvicorn (standard) | >= 0.34, < 1.0 |
+| SQLAlchemy | >= 2.0, < 3.0 |
+| Alembic | >= 1.14, < 2.0 |
+| psycopg (binary) | >= 3.2, < 4.0 |
+| Pydantic Settings | >= 2.6, < 3.0 |
+| PyJWT | >= 2.9, < 3.0 |
+| argon2-cffi | >= 23.1, < 26.0 |
+| httpx | >= 0.28, < 1.0 |
+| email-validator | >= 2.2, < 3.0 |
+
+### Frontend
+
+| Technology | Version |
+| --- | --- |
+| React / React DOM | ^19.1.1 |
+| TypeScript | ~5.9.2 |
+| Vite | ^7.1.3 |
+| Tailwind CSS | ^4.1.12 |
+| React Router | ^7.8.2 |
+| TanStack React Query | ^5.87.0 |
+| Axios | ^1.11.0 |
+| lucide-react | ^0.468.0 |
+
+### Data and Messaging
+
+| Technology | Version |
+| --- | --- |
+| PostgreSQL | 18 (Compose image) |
+| Redis | 7.4-alpine (Compose image) |
+| Neo4j Community | 5.26-community (Compose image) |
+| Apache Kafka (KRaft) | 3.9.1 (Compose image) |
+| confluent-kafka (Python client) | >= 2.6, < 3.0 |
+
+### AI and ML
+
+| Technology | Version |
+| --- | --- |
+| scikit-learn | >= 1.5, < 2.0 |
+| numpy | >= 2.0, < 3.0 |
+| joblib | >= 1.4, < 2.0 |
+| neo4j (Python driver) | >= 5.25, < 6.0 |
+| pandas (ML training and dev) | >= 2.2, < 4.0 |
+| LLM provider client | HTTP-based, configured via `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY` |
+
+### Observability
+
+| Technology | Version |
+| --- | --- |
+| structlog | >= 24.1, < 25.0 |
+| prometheus-client | >= 0.20, < 1.0 |
+| OpenTelemetry API / SDK / OTLP exporter | >= 1.29, < 2.0 |
+| FastAPI OpenTelemetry instrumentation | >= 0.50b0 |
+| Jaeger all-in-one | 1.62.0 (Compose image) |
+| Prometheus | v3.1.0 (Compose image) |
+| Grafana | 11.5.1 (Compose image) |
+
+### Infrastructure
+
+| Technology | Notes |
+| --- | --- |
+| Docker / Docker Compose | Backend, fraud, and frontend images; ten-service dev stack |
+| Nginx | Serves the production SPA build; TLS reverse proxy config in `deploy/nginx/` |
+| GitHub Actions | CI, image publishing, and EC2 deployment workflows |
+| GHCR | Immutable per-commit backend, fraud, and frontend images |
+| AWS EC2 | Single-host Docker Compose deployment target |
+
+## Architecture
+
+The browser loads the React SPA from Nginx and talks to the banking API over `/api/v1`, with realtime updates arriving over authenticated WebSockets. The backend persists to PostgreSQL, caches in Redis, and emits domain events through a transactional outbox to Kafka. The fraud service consumes transfer events, scores them with rules, a trained model, and the Neo4j graph projection, and returns assessments to the API and event stream. Metrics flow to Prometheus and Grafana; traces flow to Jaeger.
 
 ```text
-Modular Monolith -> Production Backend -> Event-Driven Architecture
-                 -> Microservices -> AI-Enabled Distributed System
+Browser (React SPA)
+  |
+Nginx (static SPA + TLS reverse proxy in production)
+  |
+Banking API (FastAPI :8000) ---- HTTP ---- Fraud service (FastAPI :8001)
+  |        |        |                               |
+PostgreSQL Redis   Kafka topics               PostgreSQL (fraud DB)
+(Banking) (cache,  (transfer events,               |
+ rate limit) risk assessments)              Rules + ML model + Neo4j graph
+  |        |        |
+  |        |     Consumers: audit, notifications (WebSocket, WhatsApp)
+  |
+/health /ready /metrics --> Prometheus --> Grafana
+Traces (OTLP) --> Jaeger
 ```
 
-Each phase should leave the previous phase understandable and runnable. Complexity is earned by a concrete requirement, not added for appearance.
+## Repository Structure
 
-## Current phase
-
-**Phase 17 — Production Hardening: Security, Reliability, Recovery (current)**
-
-Phase 17 adds no new feature, service, database, or orchestration layer. It
-tightens what Phases 0-16 already built:
-
-1. **JWT hardening** — `TokenService` now pins validation to HS256 only
-   (closing algorithm-confusion/`alg=none` vectors), rejects secrets shorter
-   than 32 characters at construction, and refuses any non-HS256 configuration.
-   New regression tests cover forged, foreign-signed, expired, and
-   wrong-purpose tokens (`backend/tests/security/test_tokens.py`).
-2. **Reliability audit** — transfers already take `SELECT … FOR UPDATE` in
-   deterministic (sorted) account order, every outbound HTTP call (LLM, fraud
-   service, WhatsApp) and every readiness probe runs under a bounded timeout,
-   and Kafka consumers commit offsets only after durable processing. The audit
-   found no blind retries over money movement.
-3. **Dependency audit** — `pip-audit` now reports **no known vulnerabilities**
-   after moving dev tooling to pytest ≥ 9.0.3 (fixes CVE-2025-71176);
-   `npm audit` shows only dev-time vitest advisories that never ship in the
-   static production bundle (details in `docs/verification/phase-17.md`).
-4. **Backup and restore** — `scripts/backup_postgres.sh` produces verified,
-   timestamped `pg_dump` archives of both databases; `scripts/restore_postgres.sh`
-   restores only into a *new* database and refuses to touch an existing one, so
-   recovery is provable without any destructive reset of live volumes.
-
-See `docs/verification/phase-17.md`.
-
-**Phase 16 — CI/CD and Cloud**
-
-Phase 16 makes PyBank automatically tested, versioned, and deployable, and
-deliberately adds no new runtime component, database, or Kafka cluster:
-
-1. **CI pipeline** — `.github/workflows/ci.yml` runs on every push and pull
-   request: backend pytest/Ruff/MyPy, fraud pytest/Ruff/MyPy, frontend
-   ESLint/TypeScript/Vitest/production build, plus Compose validation and all
-   three image builds.
-2. **Immutable container release** — `docker-publish.yml` runs *only* after CI
-   succeeds, builds the exact commit CI validated, and pushes
-   `ghcr.io/imrohit44/pybank-{backend,fraud,frontend}:<commit-sha>`. `main` is
-   also tagged for humans, but deployment never uses it.
-3. **Cloud deployment** — `deploy-ec2.yml` deploys a published SHA over SSH to
-   a single AWS EC2 host running Docker Compose, waits for `/health` and
-   `/ready`, then smoke tests. `deploy/rollback.sh` restores a previous SHA
-   using the same command, since releases are immutable.
-
-The chain is enforced in executable workflow logic, not in comments:
-
-```
-push main → CI → [conclusion == success] → Publish → [conclusion == success] → Deploy
+```text
+.
+├── .github/workflows/      # CI, GHCR publishing, EC2 deployment
+├── alembic/                # Banking-service database migrations
+├── backend/
+│   ├── app/
+│   │   ├── api/v1/         # Routers: auth, customers, accounts, transfers, users, assistant, ws
+│   │   ├── application/    # Use cases coordinating domain and persistence
+│   │   ├── assistant/      # Read-only LLM tools executed against the JWT principal
+│   │   ├── core/           # Typed settings, logging, readiness dependencies
+│   │   ├── domain/         # Framework-independent banking rules
+│   │   ├── infrastructure/ # SQLAlchemy models, sessions, Kafka, outbox, cache
+│   │   ├── llm/            # Provider client abstraction
+│   │   ├── notifications/  # Kafka consumer plus WebSocket and WhatsApp adapters
+│   │   ├── realtime/       # Ticket store, WebSocket manager, message contract
+│   │   └── security/       # JWT tokens, passwords, RBAC, rate limiting, audit
+│   └── tests/              # unit, integration, security, persistence, realtime, assistant suites
+├── services/
+│   ├── fraud/              # Independent service: API, Kafka, rules, ML, graph, own migrations
+│   └── common/             # Shared observability helpers
+├── frontend/               # React + TypeScript client (Vite, Tailwind, Router, Query)
+├── docs/
+│   ├── architecture/       # Phase 0-16 design records
+│   ├── learning/           # Beginner-friendly phase explanations
+│   └── verification/       # Runtime verification for Phases 11-16 plus hardening audits
+├── infrastructure/         # Prometheus config, Grafana provisioning, Postgres init
+├── docker/                 # Entrypoints and Compose verification scripts
+├── deploy/                 # Production overlay scripts plus Nginx config
+├── scripts/                # PostgreSQL backup and restore tooling
+├── showcase/               # Synthesis Explorer: visual tour of the 17-stage evolution
+├── compose.yaml            # Ten-service development stack
+├── docker-compose.prod.yml # Production overlay (private services, required secrets)
+├── Dockerfile              # Banking API image
+├── pyproject.toml          # Backend dependencies, pytest, coverage, Ruff, MyPy
+├── alembic.ini             # Migration configuration
+├── .env.example            # Development configuration template
+└── .env.production.example # Production configuration template
 ```
 
-**Security properties.** In production (`docker-compose.prod.yml` layered over
-`compose.yaml`) only Nginx on 80/443 is public. The two application services
-bind `127.0.0.1`, and PostgreSQL, Redis, Kafka, Neo4j, Prometheus, Grafana,
-Jaeger and the Fraud service publish **no** host port at all. Required
-secrets use Compose's fail-fast syntax, so the stack refuses to start rather
-than falling back to a development default. `docker compose down -v` appears
-nowhere as an action, and `deploy.sh` aborts the deployment if it ever does.
+Only the directories above are part of the documented layout. Generated output such as `backups/`, `artifacts/`, and build folders is gitignored and intentionally omitted.
 
-**Local development is unaffected.** `docker compose up` still works exactly as
-before; the production file is an overlay, not a replacement.
+## Getting Started
 
-See `docs/architecture/phase-16.md`, `docs/learning/phase-16.md` and
-`docs/verification/phase-16.md`.
-
-**Phase 15 — Real-Time Communication**
-
-Phase 15 adds three things and deliberately no new service, database, or
-Kafka cluster:
-
-1. **WebSocket real-time delivery** — `GET /api/v1/realtime/ticket` mints a
-   single-use, short-lived ticket, and `WS /api/v1/ws` exchanges it for an
-   authenticated connection. This keeps the JWT out of the URL, so credentials
-   never land in proxy or browser history logs. A process-local connection
-   manager fans messages out per user.
-2. **Event-driven notifications** — a Kafka consumer inside the existing
-   Banking service maps `transfer.completed` and `risk.assessed` onto
-   channel-neutral notifications and dispatches them to WebSocket and WhatsApp
-   adapters. Banking never pushes to a socket directly.
-3. **Outbound WhatsApp adapter** — provider-agnostic, configuration-driven, and
-   strictly outbound. Replies are never interpreted, so no WhatsApp message can
-   move money. If it is unconfigured or failing, banking is unaffected and the
-   failure is logged and counted.
-
-The frontend gained `useRealtime()`: connection status, typed messages, bounded
-reconnect backoff, and duplicate-connection prevention across re-renders. See
-`docs/architecture/phase-15.md`, `docs/learning/phase-15.md` and
-`docs/verification/phase-15.md`.
-
-**Phase 11 - Observability (verified 2026-09-19)**
-
-Phases 0 through 10 are complete. Phase 11 adds structlog JSON logging,
-correlation IDs, Kafka `correlation_id` + `traceparent` headers,
-OpenTelemetry/Jaeger tracing, Prometheus metrics, provisioned Grafana,
-and real readiness checks. Runtime verification is documented in
-`docs/verification/phase-11.md`.
-
-**Phase 14 — LLM Banking Assistant**
-
-Phase 14 adds an authenticated, read-only assistant (`POST
-/api/v1/assistant/chat`): an LLM chooses among exactly four allowlisted tools
-(`get_account_summary`, `get_recent_transactions`, `get_transaction_details`,
-`get_fraud_assessment`), and the backend executes them against the JWT
-principal through the existing service layer. The model never supplies
-identity, never reaches a database directly, and cannot perform mutations.
-Provider configuration is optional (`LLM_PROVIDER`/`LLM_API_KEY`); without it
-the endpoint returns an explicit 503 while the rest of the API is unaffected.
-See `docs/architecture/phase-14.md`, `docs/learning/phase-14.md` and
-`docs/verification/phase-14.md`.
-
-**Phase 13 - Neo4j + Graph Fraud Analysis**
-
-Phase 13 projects `transfer.completed` events into a Neo4j Community 5.26
-relationship graph (`Customer`/`Account`/`Transaction` nodes) and adds a
-deterministic graph signal (`graph_score`, `graph_adjustment`, `final_score`,
-`fraud-graph-v1`) alongside the Phase 12 rule + ML baseline. Neo4j is an
-optional analytical projection: the Fraud assessment still completes with the
-rule + ML result when the graph is unavailable. See
-`docs/architecture/phase-13.md`, `docs/learning/phase-13.md` and
-`docs/verification/phase-13.md`.
-
-## Technology stack currently implemented
+### Prerequisites
 
 - Python 3.12+
-- FastAPI
-- Uvicorn
-- Pydantic Settings
-- Pydantic request/response schemas
-- Versioned REST API
-- SQLAlchemy 2
-- PostgreSQL via psycopg
-- Alembic migrations
-- Argon2id password hashing
-- JWT authentication
-- Role-based authorization
-- React + TypeScript
-- Vite + Tailwind CSS
-- React Router
-- Axios
-- TanStack React Query
-- pytest, pytest-asyncio, and HTTPX
-- pytest-cov
-- Ruff
-- MyPy configuration
-- structlog JSON logging
-- OpenTelemetry OTLP tracing
-- Prometheus metrics
-- Apache Kafka event transport
-- Independent Fraud microservice
-- WebSockets with single-use ticket authentication
-- Event-driven notification channels (WebSocket, WhatsApp)
-- Jaeger, Prometheus, and Grafana observability stack
+- Node.js 22+
+- Docker Desktop with Docker Compose (for the full stack)
+- A local PostgreSQL instance (only for running the backend outside Docker)
 
-Future technologies are roadmap items, not current dependencies.
+### Clone
 
-## Getting started
-
-### 1. Create a virtual environment
-
-```powershell
-python -m venv .venv
-.\\.venv\\Scripts\\Activate.ps1
+```bash
+git clone https://github.com/imrohit44/PyBank.git
+cd PyBank
 ```
 
-On macOS or Linux, activate with `source .venv/bin/activate`.
+The checked-out directory is `PyBank`; the project itself is titled Project Synthesis 17. Several runtime identifiers predate that title and still use the historical name, including environment variables (`PYBANK_*`), the Compose volume prefix, and the container image names.
 
-### 2. Install dependencies
-
-```powershell
-python -m pip install -e ".[dev]"
-```
-
-### 3. Configure local settings
+### Environment
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Edit `.env` with a local PostgreSQL `DATABASE_URL`. It is ignored by Git and must never contain credentials that are committed.
+`.env` is gitignored. The development defaults run the stack without real credentials; production uses `.env.production.example`, where required secrets fail fast if unset.
 
-### 4. Prepare the database
-
-Create a local PostgreSQL database, then run:
+### Run with Docker
 
 ```powershell
+docker compose up -d
+```
+
+This starts PostgreSQL, Redis, Kafka, the banking API, the frontend, the fraud service, Neo4j, Jaeger, Prometheus, and Grafana. Open the frontend at <http://localhost:8080> and check the API at <http://localhost:8000/health>.
+
+### Run locally
+
+Backend:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
 alembic upgrade head
-```
-
-To reverse the schema during development:
-
-```powershell
-alembic downgrade base
-```
-
-### 5. Start the application
-
-```powershell
 python -m uvicorn backend.app.main:app --reload
 ```
 
-Open the generated OpenAPI UI at <http://127.0.0.1:8000/docs>. The liveness endpoint is <http://127.0.0.1:8000/api/v1/health>.
+Frontend:
 
-### 6. Run tests and quality checks
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open the OpenAPI UI at <http://127.0.0.1:8000/docs>. Persistence tests use a dedicated database configured through `PYBANK_TEST_DATABASE_URL`; never point it at a development or production database.
+
+## Testing
+
+Backend (repository root):
 
 ```powershell
 python -m pytest
@@ -237,9 +313,16 @@ python -m pytest -m unit
 python -m pytest -m integration
 python -m pytest -m security
 python -m pytest --cov=backend --cov-report=term-missing
-ruff check .
-ruff format --check .
-python -m mypy backend
+```
+
+Fraud service:
+
+```powershell
+cd services/fraud
+python -m pytest
+ruff check app tests
+ruff format --check app tests
+mypy app
 ```
 
 Frontend:
@@ -253,142 +336,62 @@ npm run typecheck
 npm run build
 ```
 
-PostgreSQL-specific tests require a dedicated test database:
+Quality gates (repository root):
 
 ```powershell
-$env:PYBANK_TEST_DATABASE_URL="postgresql+psycopg://pybank_test:pybank_test@localhost:5432/pybank_test"
-python -m pytest backend/tests/integration/persistence
+ruff check backend/app backend/tests
+ruff format --check backend/app backend/tests
+mypy backend/app
 ```
 
-Do not point `PYBANK_TEST_DATABASE_URL` at a normal development or production database.
+Coverage enforces a 60 percent floor for the backend. Kafka-dependent tests run against the Compose stack; Redis tests use a fake client or a local instance. The full matrix also runs in CI on every push and pull request.
 
-## Docker quick start
+## Security
 
-Prerequisites:
+Implemented mechanisms, without implying absolute security:
 
-- Docker
-- Docker Compose
+- Argon2 password hashing; no plaintext credentials stored
+- Short-lived JWT access tokens with refresh rotation; HS256-only validation
+- Minimum 32-character JWT secrets enforced at startup
+- Admin/user roles with server-side account ownership checks
+- Redis-backed login rate limiting with per-endpoint assistant limits
+- Hardening headers, restrictive CORS origin, Pydantic input validation
+- Audit log entries for auth and security events, excluding sensitive values
+- Ticket-based WebSocket auth so bearer tokens never appear in URLs or logs
+- Idempotent event processing so retried deliveries cannot double-apply effects
+- Assistants and adapters cannot mutate banking state
+- Secrets supplied only through environment files that are never committed
+- Backups restore into new databases only; deployment scripts ban destructive volume removal
 
-Create local configuration if needed:
+The frontend stores tokens in `sessionStorage` for this learning client. That storage is readable by page JavaScript, so it is not presented as a hardened production token strategy.
 
-```powershell
-Copy-Item .env.example .env
-```
+## Engineering Characteristics
 
-Build and start the stack:
+- Domain logic isolated from frameworks, persistence, and transport
+- Application services coordinate use cases across the domain boundary
+- Money movement guarded by deterministic database locking order
+- State changes and outbound events committed atomically via the outbox
+- Consumers process at-least-once deliveries idempotently
+- Fraud runs as an independently deployable service with its own schema
+- Analytical systems (graph, ML, assistant) degrade gracefully instead of blocking banking
+- Health, readiness, and metrics endpoints on every Python service
+- One Compose definition for development; a strictly additive overlay for production
+- Every stage reproducible from versioned images, migrations, and checked-in configuration
 
-```powershell
-docker compose build
-docker compose up
-```
+## Status
 
-Or start detached:
+The repository is a completed learning and engineering project covering Phase 0 through Phase 16. The implementation, documentation, and verification tooling described above are present in the tree.
 
-```powershell
-docker compose up -d
-```
+Verification was executed in an environment with the Compose stack running; external integrations and the cloud deployment path additionally require environment-specific credentials and infrastructure. `docs/verification/` marks anything that could not be executed as pending rather than passing. `phase-17.md` and `phase-17-cleanup.md` record a later hardening audit (token validation, reliability checks, dependency review, backups), not a new implementation stage.
 
-Open the frontend at <http://localhost:8080>. Verify the backend at
-<http://localhost:8000/api/v1/health>.
+## Documentation
 
-Useful commands:
-
-```powershell
-docker compose ps
-docker compose logs
-docker compose logs backend
-docker compose down
-```
-
-The Docker database is stored in the named volume `pybank_postgres_data`.
-`docker compose down` keeps that data. To intentionally reset the Docker
-database:
-
-```powershell
-docker compose down -v
-docker compose up -d
-```
-
-Detailed Docker notes are in `docs/architecture/phase-7.md` and
-`docs/learning/phase-7.md`.
-
-Phase 8 adds Redis to the Docker stack as a cache and shared login rate-limit
-store. Redis is reached by the backend as `redis://redis:6379/0` inside Compose.
-Host development can use `REDIS_URL=redis://localhost:6379/0`. See
-`docs/architecture/phase-8.md` and `docs/learning/phase-8.md`.
-
-Phase 9 adds Kafka through a transactional outbox. Kafka is reached as
-`kafka:9092` inside Compose and transports events from durable PostgreSQL outbox
-rows. See `docs/architecture/phase-9.md` and `docs/learning/phase-9.md`.
-
-## Project structure
-
-```text
-PyBank/
-├── backend/
-│   ├── app/
-│   │   ├── api/               # HTTP routers, schemas, serializers, errors
-│   │   ├── application/       # Use cases coordinating domain and persistence
-│   │   ├── core/config.py     # Typed environment configuration
-│   │   ├── core/logging.py    # Standard logging setup
-│   │   ├── domain/             # Framework-independent banking rules
-│   │   ├── infrastructure/     # SQLAlchemy models, sessions, and mappers
-│   │   ├── notifications/      # Channel-neutral notification model and adapters
-│   │   ├── realtime/           # WebSocket manager, message contract, tickets
-│   │   └── main.py             # FastAPI application entrypoint
-│   └── tests/                  # API and domain behavior tests
-├── frontend/                   # React + TypeScript client
-├── docs/
-│   ├── architecture/         # System boundaries and evolution
-│   └── learning/              # Beginner-friendly explanations
-├── infrastructure/            # Reserved for later deployment work
-├── .env.example               # Safe configuration template
-├── pyproject.toml              # Dependencies and tool configuration
-└── README.md
-```
-
-The existing root `main.py` is legacy standalone OOP learning code. It remains intentionally separate and untouched. The current PyBank architecture lives under `backend/`, with Phase 1 banking rules under `backend/app/domain/` and Phase 2 HTTP adapters under `backend/app/api/`.
-
-Phase 4 stores authentication users in PostgreSQL through migration `0002_users`. Phase 5 stores browser tokens in `sessionStorage` for this learning client; this is XSS-readable and is not presented as a hardened production banking strategy. See the Phase 5 security documentation for the production alternative.
-
-Phase 6 keeps browser E2E tests as a documented smoke target rather than adding Playwright before Dockerized orchestration exists. The high-value E2E suite should be automated in Phase 7 or Phase 16 using the Phase 6 quality gate.
-
-## Security principles
-
-- Never commit secrets or hardcode credentials.
-- Never store plaintext passwords.
-- Keep JWT secrets in environment-backed configuration.
-- Enforce account ownership server-side.
-- Use role-based authorization for administrative operations.
-- Rate-limit authentication attempts.
-- Log security events without sensitive values.
-- Validate configuration at startup.
-- Keep dependencies minimal and reviewed.
-- Do not expose unnecessary debugging information in production.
-- Do not use `eval()`.
-- Treat all client input as untrusted.
-
-## Roadmap
-
-| Phase | Focus |
-|---:|---|
-| 0 | Project Foundation |
-| 1 | Banking Domain + OOP |
-| 2 | FastAPI Backend |
-| 3 | PostgreSQL + SQLAlchemy + Alembic |
-| 4 | Authentication + Security |
-| 5 | React + TypeScript Frontend |
-| 6 | Testing + Code Quality |
-| 7 | Docker + Docker Compose |
-| 8 | Redis + Performance |
-| 9 | Kafka + Event-Driven Architecture |
-| 10 | Microservices |
-| 11 | Observability (verified; see `docs/verification/phase-11.md`) |
-| 12 | ML Fraud Detection (verified; see `docs/verification/phase-12.md`) |
-| 13 | Neo4j + Fraud Graph (verified; see `docs/verification/phase-13.md`) |
-| 14 | LLM Banking Agents |
-| 15 | Real-Time + WhatsApp |
-| 16 | CI/CD + Cloud |
-| 17 | Production Hardening |
-
-Recommended initial commit after review: `chore: initialize PyBank project foundation`.
+- `docs/architecture/phase-0.md` through `phase-16.md` — design record for each stage
+- `docs/learning/phase-0.md` through `phase-16.md` — approachable explanation of each stage
+- `docs/verification/phase-11.md` through `phase-16.md` — runtime verification evidence
+- `docs/verification/phase-17.md`, `phase-17-cleanup.md` — hardening audit records
+- `showcase/` — Synthesis Explorer, the visual tour of the 17-stage evolution
+- `deploy/` and `docker-compose.prod.yml` — production deployment procedure
+- `scripts/` — database backup and restore procedure
+- `services/fraud/README.md` — fraud service notes
+- `infrastructure/README.md` — observability and database initialization notes
