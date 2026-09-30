@@ -348,7 +348,8 @@ Coverage enforces a 60 percent floor for the backend. Kafka-dependent tests run 
 
 ## Security
 
-Implemented mechanisms, without implying absolute security:
+Implemented mechanisms, without implying absolute security. To report a
+potential vulnerability, see [SECURITY.md](SECURITY.md):
 
 - Argon2 password hashing; no plaintext credentials stored
 - Short-lived JWT access tokens with refresh rotation; HS256-only validation
@@ -395,3 +396,8 @@ Verification was executed in an environment with the Compose stack running; exte
 - `scripts/` — database backup and restore procedure
 - `services/fraud/README.md` — fraud service notes
 - `infrastructure/README.md` — observability and database initialization notes
+- `SECURITY.md` — how to report a potential vulnerability
+
+## License
+
+MIT. See [LICENSE](LICENSE).

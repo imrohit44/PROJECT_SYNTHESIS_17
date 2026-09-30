@@ -38,21 +38,25 @@ frontend/node_modules/
 frontend/dist/
 frontend/coverage/
 
+# Root tooling leftovers (do not confuse with intentionally tracked
+# model, docs, Archify, or migration artifacts).
+# `node_modules/` at the repo root is a stray install artifact: the real
+# dependency manifests live in `frontend/` and `showcase/`, and installed
+# dependencies belong outside version control.
+node_modules/
+coverage/
+*.tmp
 # Synthesis Explorer (showcase)
 showcase/node_modules/
 showcase/dist/
 showcase/coverage/
 
 # Phase 11 generated verification artifacts
-# Raw logs, JUnit XML, JSON captures, pytest temp output and metric snapshots
+# Raw JUnit XML, JSON captures, pytest temp output and metric snapshots
 # that are produced during verification must not pollute the source tree.
+# Phase 11 diagnostic logs (`phase11_*.log`, `phase14_*.json`) are documented
+# evidence and stay tracked, so do not ignore `*.log` globally.
 artifacts/
-*.log
 *.xml
 .pytest-tmp*/
-.pytest-tmp-p11/
-phase11_*.log
-phase11_*.xml
-phase11_*.json
-*.tmp
 
