@@ -39,7 +39,7 @@ dev = [
     # pytest-asyncio 1.x is the pytest-9-compatible line.
     "pytest>=9.0.3,<10.0",
     "pytest-asyncio>=1.4,<2.0",
-    "pytest-cov>=6.0,<7.0",
+    "pytest-cov>=6.0,<8.0",
     "ruff>=0.9,<1.0",
 ]
 
