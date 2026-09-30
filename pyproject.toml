@@ -25,7 +25,7 @@ dependencies = [
     "opentelemetry-sdk>=1.29,<2.0",
     "opentelemetry-api>=1.29,<2.0",
     "opentelemetry-exporter-otlp-proto-http>=1.29,<2.0",
-    "opentelemetry-instrumentation-fastapi>=0.50b0",
+    "opentelemetry-instrumentation-fastapi>=0.66b0",
     # Phase 14 runtime dependency: the assistant's LLM client
     # (backend/app/llm/client.py) and the fraud-assessment tool
     # (backend/app/assistant/tools.py) call HTTP APIs at request time, so
