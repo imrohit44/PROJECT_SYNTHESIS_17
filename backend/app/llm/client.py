@@ -46,6 +46,15 @@ class LLMClient:
     def model(self) -> str:
         return self._model
 
+    @property
+    def is_configured(self) -> bool:
+        """True when a provider key and model are present.
+
+        The assistant reads this to decide whether a real provider can answer
+        or whether the deterministic fallback should. It never exposes the key.
+        """
+        return bool(self._api_key and self._model)
+
     def _extract_tool_calls(self, raw_message: dict[str, Any]) -> list[LLMToolCall]:
         calls: list[LLMToolCall] = []
         for call in raw_message.get("tool_calls") or []:
@@ -67,7 +76,7 @@ class LLMClient:
         messages: list[LLMMessage],
         tools: list[LLMToolSpec],
     ) -> LLMResponse:
-        if not self._api_key or not self._model:
+        if not self.is_configured:
             raise LLMNotConfiguredError(
                 "LLM provider is not configured (LLM_PROVIDER/LLM_API_KEY)"
             )

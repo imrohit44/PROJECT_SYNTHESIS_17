@@ -63,8 +63,16 @@ export interface AssistantToolCall {
   detail: string | null;
 }
 
+export type AssistantMode = "llm" | "fallback";
+
+export interface AssistantStatus {
+  available: boolean;
+  mode: AssistantMode;
+}
+
 export interface AssistantChatResponse {
   response: string;
   conversation_id: string | null;
   tool_calls: AssistantToolCall[];
+  mode?: AssistantMode | null;
 }

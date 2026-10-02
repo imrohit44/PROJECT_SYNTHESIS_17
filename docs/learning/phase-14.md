@@ -72,6 +72,28 @@ and IDs in labels would be both an operational and a privacy problem.
 The rest of the app depends only on `generate_with_tools()`. Swapping providers
 means changing base URL/model/key — not touching the agent, tools, or API.
 
+### 9. A demo should not dead-end on credentials
+
+Without an API key the assistant used to answer `503 "The banking assistant is
+not configured"`, even though every read-only tool was available. The fix was not
+a second AI system: it was a **deterministic assistant behind the same seam**.
+
+```text
+LLM_API_KEY set  -> existing provider -> existing tools
+LLM_API_KEY unset -> deterministic fallback -> the same tools
+```
+
+The fallback exposes `generate_with_tools()` and a `model` attribute, so the
+agent loop, the registry, and the JWT-derived `AgentContext` are literally the
+same code. It recognises a handful of intents, calls the same tools, and renders
+only what those tools returned — no model, no provider, no new dependency, no
+container. Anything it does not recognise returns the list of supported
+questions instead of a guess.
+
+The lesson: the same seam that made the provider swappable also made "answer
+without a provider" a small, safe change. Design the interface around the
+*decision* you want to be able to make later.
+
 ## Frontend note (the Vitest "unhandled rejection" mystery
 
 The assistant page's test initially failed intermittently with what looked
@@ -91,7 +113,7 @@ bodies braced whenever the last expression could be a function.
   exact tool calls (including hostile ones) — no paid API needed.
 - Security tests build two customers and assert Bob's IDs never appear in
   Alice's observations, even when the "model" asks for everything.
-- Endpoint tests cover 401, 422, 429, 503 (not configured), tool-error
+- Endpoint tests cover 401, 422, 429, 503 (provider error), fallback mode, tool-error
   surfacing, and rate limiting before the model runs.
 - Frontend: React Testing Library + mocked `sendAssistantMessage`.
 

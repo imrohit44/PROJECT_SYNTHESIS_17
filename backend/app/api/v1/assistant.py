@@ -1,9 +1,11 @@
 """Phase 14 API: read-only banking assistant.
 
 The LLM proposes tool calls; this layer builds the authorization context from
-the authenticated JWT principal, so the model can never supply identity. The
-assistant is optional: when LLM configuration is absent the endpoint returns an
-explicit 503 while the rest of the banking API is unaffected.
+the authenticated JWT principal, so the model can never supply identity. Two
+modes answer a request: the configured LLM provider, and - when no provider is
+configured - a lightweight deterministic fallback that uses the same
+allowlisted read-only tools. Either way the assistant stays optional and
+read-only, and banking endpoints are never affected.
 """
 
 from __future__ import annotations
@@ -22,9 +24,11 @@ from backend.app.assistant.agent import (
     AgentService,
     AgentToolsExceededError,
 )
+from backend.app.assistant.fallback import select_engine
 from backend.app.assistant.metrics import record_chat, record_tool_call
 from backend.app.assistant.registry import AgentContext
 from backend.app.assistant.schemas import (
+    AssistantStatus,
     ChatRequest,
     ChatResponse,
     ToolCallRecord,
@@ -85,7 +89,10 @@ def chat(
         fraud_service_url=settings.fraud_service_url,
         timeout=settings.fraud_service_timeout_seconds,
     )
-    agent = AgentService(llm=llm, registry=registry, settings=settings)
+    # A configured provider keeps the Phase 14 path; otherwise the same agent
+    # loop runs against the deterministic fallback over the same tools.
+    engine, mode = select_engine(llm)
+    agent = AgentService(llm=engine, registry=registry, settings=settings)
 
     tracer = get_tracer(__name__)
     try:
@@ -132,6 +139,24 @@ def chat(
         tool_calls=len(records),
         rounds=result.rounds,
         model=result.model,
+        mode=mode,
         prompt_version=result.prompt_version,
     )
-    return ChatResponse(response=result.response, tool_calls=records)
+    return ChatResponse(response=result.response, tool_calls=records, mode=mode)
+
+
+@router.get(
+    "/status",
+    response_model=AssistantStatus,
+    summary="Assistant availability and answering mode",
+)
+def assistant_status(
+    _user: CurrentUser = Depends(get_current_user),
+    llm: LLMClient = Depends(get_llm_client),
+) -> AssistantStatus:
+    """Report that the assistant is available and which mode will answer.
+
+    Only the mode is exposed: no provider name, endpoint, or credential.
+    """
+    _, mode = select_engine(llm)
+    return AssistantStatus(available=True, mode=mode)
