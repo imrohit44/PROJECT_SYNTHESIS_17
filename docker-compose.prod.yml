@@ -1,4 +1,4 @@
-# PyBank production Compose override (Phase 16).
+# Project Synthesis 17 production Compose override (Phase 16).
 #
 # This file does NOT replace compose.yaml. It is layered on top of it:
 #

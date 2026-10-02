@@ -38,7 +38,7 @@ Constraints are database-enforced rules such as foreign keys, unique email, posi
 
 ## 10. Indexes
 
-An index is an additional lookup structure. It makes common reads faster, such as finding an account's transactions, but increases storage and write cost. PyBank adds only indexes justified by current queries.
+An index is an additional lookup structure. It makes common reads faster, such as finding an account's transactions, but increases storage and write cost. Project Synthesis 17 adds only indexes justified by current queries.
 
 ## 11. Alembic migrations
 
@@ -46,7 +46,7 @@ Alembic records schema changes as versioned Python migrations. `alembic upgrade 
 
 ## 12. Object-relational impedance mismatch
 
-Objects support inheritance, identity, and behavior; relational tables support rows, columns, and relationships. PyBank uses one accounts table with an `account_type` discriminator rather than forcing the Python inheritance tree into multiple tables. Mappers handle the translation.
+Objects support inheritance, identity, and behavior; relational tables support rows, columns, and relationships. Project Synthesis 17 uses one accounts table with an `account_type` discriminator rather than forcing the Python inheritance tree into multiple tables. Mappers handle the translation.
 
 ## 13. Failure boundaries
 

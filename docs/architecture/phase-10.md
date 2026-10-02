@@ -2,7 +2,7 @@
 
 ## Architecture
 
-This phase introduces the first independent microservice in the PyBank ecosystem: the Fraud/Risk Service. 
+This phase introduces the first independent microservice in the Project Synthesis 17 ecosystem: the Fraud/Risk Service. 
 
 ### Why Microservices?
 Microservices allow teams to independently develop, deploy, and scale specific domains of an application. The fraud domain is an excellent candidate for extraction because:

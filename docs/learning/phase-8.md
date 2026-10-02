@@ -1,6 +1,6 @@
 # Phase 8 Learning - Redis
 
-Redis is an in-memory data store. PyBank uses it for performance and shared
+Redis is an in-memory data store. Project Synthesis 17 uses it for performance and shared
 coordination, not as the banking ledger.
 
 ## Why Redis Exists
@@ -10,7 +10,7 @@ with repeated reads and shared counters such as login rate limiting.
 
 ## Cache-Aside
 
-PyBank uses cache-aside:
+Project Synthesis 17 uses cache-aside:
 
 ```text
 request
@@ -37,7 +37,7 @@ PostgreSQL transaction > Redis cache
 
 ## Serialization
 
-PyBank stores explicit JSON-compatible API representations in Redis. It does not
+Project Synthesis 17 stores explicit JSON-compatible API representations in Redis. It does not
 pickle domain objects. This keeps Decimal, enum, and datetime handling visible
 and safer.
 
@@ -63,7 +63,7 @@ Backend B --> Redis login counter
 Backend C /
 ```
 
-PyBank uses simple `INCR` plus `EXPIRE`. If Redis is down, the limiter fails
+Project Synthesis 17 uses simple `INCR` plus `EXPIRE`. If Redis is down, the limiter fails
 open so users are not locked out because a performance dependency failed. A
 production system might choose differently.
 

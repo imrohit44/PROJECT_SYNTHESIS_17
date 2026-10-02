@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PyBank PostgreSQL restore (Phase 17).
+# Project Synthesis 17 PostgreSQL restore (hardening audit: docs/verification/phase-17.md).
 #
 # Restores a pg_dump archive produced by scripts/backup_postgres.sh INTO A NEW,
 # PREVIOUSLY NON-EXISTENT DATABASE inside the postgres container. This is a

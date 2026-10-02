@@ -2,7 +2,7 @@
 
 ## 1. What is a REST API?
 
-A REST API exposes resources and operations through HTTP methods and URLs. PyBank uses `POST` to create or perform a state-changing operation and `GET` to retrieve customers, accounts, and transaction history.
+A REST API exposes resources and operations through HTTP methods and URLs. Project Synthesis 17 uses `POST` to create or perform a state-changing operation and `GET` to retrieve customers, accounts, and transaction history.
 
 ## 2. What FastAPI does
 
@@ -10,7 +10,7 @@ FastAPI receives HTTP requests, selects route functions, validates input through
 
 ## 3. What Pydantic does
 
-Pydantic validates and parses request data into typed Python objects. In PyBank, it rejects arbitrary float money values at the API boundary and keeps request and response contracts explicit.
+Pydantic validates and parses request data into typed Python objects. In Project Synthesis 17, it rejects arbitrary float money values at the API boundary and keeps request and response contracts explicit.
 
 ## 4. Request versus response schemas
 

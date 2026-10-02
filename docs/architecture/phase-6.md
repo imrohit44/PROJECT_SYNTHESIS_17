@@ -1,6 +1,6 @@
 # Phase 6 Architecture
 
-Phase 6 makes PyBank safer to change. The goal is a deliberate feedback system, not a high test count.
+Phase 6 makes Project Synthesis 17 safer to change. The goal is a deliberate feedback system, not a high test count.
 
 ## Testing pyramid
 
@@ -78,7 +78,7 @@ Backend coverage uses `pytest-cov` with branch coverage and excludes tests. The 
 
 Frontend coverage uses Vitest V8 coverage. Initial thresholds are deliberately modest: lines/functions/statements 20 percent, branches 15 percent.
 
-Coverage is a signal, not proof. PyBank prioritizes failure paths, security paths, ownership, rollback, and money movement over artificial 100 percent coverage.
+Coverage is a signal, not proof. Project Synthesis 17 prioritizes failure paths, security paths, ownership, rollback, and money movement over artificial 100 percent coverage.
 
 ## Static quality
 

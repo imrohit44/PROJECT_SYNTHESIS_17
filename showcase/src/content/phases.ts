@@ -1,5 +1,6 @@
 /**
- * The seventeen phases of Project Synthesis 17, in the order they were built.
+ * The 17 stages of Project Synthesis 17, Phase 0 through Phase 16, in the
+ * order they were built.
  *
  * Every fact here comes from `docs/architecture/phase-N.md` in the banking
  * repository. Nothing is invented: if a phase did not ship something, this

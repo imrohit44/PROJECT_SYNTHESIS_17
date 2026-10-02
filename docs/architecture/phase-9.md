@@ -34,7 +34,7 @@ Compose network.
 
 ## Event Topic
 
-PyBank uses one topic:
+Project Synthesis 17 uses one topic:
 
 ```text
 pybank.events

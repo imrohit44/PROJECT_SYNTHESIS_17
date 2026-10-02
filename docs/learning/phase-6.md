@@ -12,7 +12,7 @@ Coverage measures which code ran during tests. Linting catches style and common 
 
 ## Why
 
-Future phases will add Docker, Redis, Kafka, microservices, ML, graphs, agents, and cloud infrastructure. Each addition increases the number of ways PyBank can break. Phase 6 creates fast feedback before that complexity arrives.
+Future phases will add Docker, Redis, Kafka, microservices, ML, graphs, agents, and cloud infrastructure. Each addition increases the number of ways Project Synthesis 17 can break. Phase 6 creates fast feedback before that complexity arrives.
 
 ## Problem prevented
 

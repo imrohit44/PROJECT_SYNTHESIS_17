@@ -117,7 +117,7 @@ reach over the internet.
 **ALTERNATIVES** — Kubernetes, ECS, Heroku, Render, Fly.io, Lambda.
 
 **WHY NOT KUBERNETES** — A control plane that schedules containers across many
-machines. PyBank is one educational stack. Kubernetes would add a large
+machines. Project Synthesis 17 is one educational stack. Kubernetes would add a large
 operational surface (etcd, control plane, manifests, ingress controllers) and
 teach nothing about CI/CD that Compose does not. It is Phase 17+ at the earliest,
 and probably not even then for this project.

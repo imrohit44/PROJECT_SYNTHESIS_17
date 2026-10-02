@@ -62,7 +62,7 @@ export function CrossfadeStage({ phase }: CrossfadeStageProps) {
           <iframe
             key={index}
             className={index === active && slot.loaded ? "stage__frame is-active" : "stage__frame"}
-            title={`PyBank architecture after phase ${slot.phase} — Archify diagram`}
+            title={`Project Synthesis 17 architecture after Phase ${slot.phase} — Archify diagram`}
             src={slot.src}
             onLoad={() => handleLoad(index)}
           />

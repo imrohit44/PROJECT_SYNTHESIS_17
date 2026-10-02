@@ -1,7 +1,7 @@
 /**
  * The footer: provenance and the exact commands that regenerate everything
- * on the page. The backend, services and frontend of PyBank are untouched by
- * this project; Archify runs only as a build-time compiler.
+ * on the page. The backend, services and frontend of Project Synthesis 17 are
+ * untouched by this project; Archify runs only as a build-time compiler.
  */
 export function SiteFooter() {
   return (

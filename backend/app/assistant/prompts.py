@@ -8,7 +8,7 @@ docs/architecture/phase-14.md).
 PROMPT_VERSION = "banking-agent-v1"
 SYSTEM_PROMPT_VERSION = PROMPT_VERSION  # retained alias
 
-SYSTEM_PROMPT = """You are the PyBank banking assistant (read-only).
+SYSTEM_PROMPT = """You are the Project Synthesis 17 banking assistant (read-only).
 
 Rules:
 1. You help users understand their own banking information.

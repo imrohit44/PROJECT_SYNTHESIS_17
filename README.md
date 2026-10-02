@@ -16,6 +16,12 @@ That discipline is the development approach. The recurring loop is: simple syste
 
 The 17-stage structure exists so the evolution can be followed end to end -- from an object-oriented core to a containerized, observable, event-driven platform -- with documentation at each step and verification where it matters.
 
+## Project Identity
+
+**Project Synthesis 17 is the official name of this project.** The system was originally developed under the internal name PyBank. Internal identifiers keep that historical namespace so the implementation stays stable: Python modules, database names (`pybank`, `pybank_fraud`), Kafka topics (`pybank.events`), Docker and Compose service names, environment variables (`PYBANK_*`), Redis keys, and Grafana dashboards all still use `pybank`.
+
+Those identifiers are implementation details, not a second product. They are kept deliberately: renaming them would be a refactor with no benefit to a reader of the project.
+
 ## What You Can Explore
 
 - Model a banking domain with object-oriented design and financial invariants.
@@ -263,7 +269,7 @@ git clone https://github.com/imrohit44/PyBank.git
 cd PyBank
 ```
 
-The checked-out directory is `PyBank`; the project itself is titled Project Synthesis 17. Several runtime identifiers predate that title and still use the historical name, including environment variables (`PYBANK_*`), the Compose volume prefix, and the container image names.
+The checked-out directory is `PyBank`, the repository name. Runtime identifiers -- environment variables (`PYBANK_*`), the Compose volume prefix, the container image names, and the API's `APP_NAME` -- keep the historical namespace as well; see [Project Identity](#project-identity).
 
 ### Environment
 

@@ -2,7 +2,7 @@
 
 ## 1. What is a domain model?
 
-A domain model is a software representation of the important concepts and rules in a problem area. PyBank's domain model represents customers, accounts, transactions, and banking operations without knowing how requests arrive or data is stored.
+A domain model is a software representation of the important concepts and rules in a problem area. Project Synthesis 17's domain model represents customers, accounts, transactions, and banking operations without knowing how requests arrive or data is stored.
 
 ## 2. What is a domain entity?
 
@@ -46,7 +46,7 @@ Specific exceptions such as `InvalidAmountError`, `InsufficientFundsError`, and 
 
 ## 11. Why Decimal is used
 
-Binary floating-point cannot represent many decimal fractions exactly. Repeated operations with `float` can produce values such as `0.30000000000000004`. `Decimal` represents decimal arithmetic intentionally, and PyBank rounds to cents with `ROUND_HALF_EVEN` at its money boundary.
+Binary floating-point cannot represent many decimal fractions exactly. Repeated operations with `float` can produce values such as `0.30000000000000004`. `Decimal` represents decimal arithmetic intentionally, and Project Synthesis 17 rounds to cents with `ROUND_HALF_EVEN` at its money boundary.
 
 ## 12. Why business logic should not live in API routes
 

@@ -1,6 +1,6 @@
 /**
- * "Why seventeen phases" — the editorial argument for the project's shape,
- * drawn from what the phase docs actually do.
+ * "Why 17 stages" — the editorial argument for the project's shape, drawn
+ * from what the phase docs actually do.
  */
 const principles = [
   {
@@ -25,7 +25,7 @@ export function WhySection() {
   return (
     <section className="why" id="why">
       <header className="section-head">
-        <h2>Why seventeen phases</h2>
+        <h2>Why 17 stages</h2>
         <p>
           Because a system is reviewable when its growth is reviewable. Four rules held on every
           one of them.

@@ -4,16 +4,16 @@
 export function HeroSection() {
   return (
     <section className="hero">
-      <p className="hero__eyebrow">Project Synthesis 17 · PyBank · a working banking system</p>
+      <p className="hero__eyebrow">Project Synthesis 17 · a working banking system</p>
       <h1 className="hero__title">
         One system.
         <br />
         Seventeen decisions.
       </h1>
       <p className="hero__lead">
-        PyBank was grown, not designed. Seventeen phases, each answering a problem the previous
-        system actually had — and each writing down what the change cost. Press play and watch
-        the architecture arrive in the order it really shipped.
+        Project Synthesis 17 was grown, not designed. 17 stages, from Phase 0 through Phase 16 —
+        each answering a problem the previous system actually had, and each writing down what the
+        change cost. Press play and watch the architecture arrive in the order it really shipped.
       </p>
       <div className="hero__actions">
         <a className="button button--solid" href="#evolution">
@@ -30,7 +30,7 @@ export function HeroSection() {
       </div>
       <dl className="hero__facts">
         <div>
-          <dt>Phases</dt>
+          <dt>Stages (Phase 0 → Phase 16)</dt>
           <dd>17</dd>
         </div>
         <div>

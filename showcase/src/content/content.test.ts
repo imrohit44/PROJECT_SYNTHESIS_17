@@ -26,7 +26,7 @@ function readFrame(phase: number): IrFrame {
 }
 
 describe("phase content", () => {
-  it("covers seventeen phases numbered 0 to 16 with unique ids", () => {
+  it("covers 17 stages numbered 0 to 16 with unique ids", () => {
     expect(phases).toHaveLength(17);
     expect(phases.map((phase) => phase.number)).toEqual(Array.from({ length: 17 }, (_, i) => i));
     expect(new Set(phases.map((phase) => phase.id)).size).toBe(17);

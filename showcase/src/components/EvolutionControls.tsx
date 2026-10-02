@@ -2,7 +2,8 @@
  * Transport for the Evolution Engine.
  *
  * One row: step back, play or pause, step forward, a range scrubber spanning
- * all seventeen phases, and the current phase's number and title. The native
+ * all 17 stages (Phase 0 through Phase 16), and the current stage's number
+ * and title. The native
  * range input carries keyboard scrubbing (arrows, Home/End, PageUp/PageDown)
  * and screen-reader semantics with it, so the row needs no extra key handling.
  */

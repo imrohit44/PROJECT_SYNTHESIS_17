@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PyBank PostgreSQL backup (Phase 17).
+# Project Synthesis 17 PostgreSQL backup (hardening audit: docs/verification/phase-17.md).
 #
 # Produces logical pg_dump archives of the banking and fraud databases using
 # the pg_dump client already present in the postgres container. Because it

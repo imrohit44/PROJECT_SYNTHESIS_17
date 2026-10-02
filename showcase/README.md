@@ -1,8 +1,12 @@
-# Synthesis Explorer — Project Synthesis 17 (PyBank)
+# Synthesis Explorer — Project Synthesis 17
 
 This folder is a **read-only museum** for the banking system in the repository
-root. It visualises PyBank without modifying it: no file outside `showcase/`
+root. It visualises Project Synthesis 17 without modifying it: no file outside `showcase/`
 (plus `.gitignore` entries for its own build outputs) is touched.
+
+The site presents **17 engineering stages, from Phase 0 through Phase 16**. The project's
+original internal name, `pybank`, survives only in implementation identifiers such as Python
+modules, database names, Kafka topics, service names, and environment variables.
 
 ## What lives here
 
@@ -13,7 +17,7 @@ root. It visualises PyBank without modifying it: no file outside `showcase/`
 | `vendor/archify/` | The Archify compiler, vendored so builds never need the network. App code never imports it. |
 | `tools/archify.mjs` | Build-time wrapper: `validate-all` / `deliver-all` over every IR in `archify/`. |
 | `tools/score_scenarios.py` | Runs the fraud service's own pipeline (rules + committed `fraud-model-v1` + bounded graph maths) and writes `src/content/scenarios.generated.ts`. |
-| `src/content/` | Typed museum content: 17 phases, the artifact registry, and the generated scenario scores. |
+| `src/content/` | Typed museum content: 17 stages (Phase 0 through Phase 16), the artifact registry, and the generated scenario scores. |
 | `src/components/`, `src/pages/` | The React app (React 19 + Vite 7 + React Router 7). |
 
 ## Develop

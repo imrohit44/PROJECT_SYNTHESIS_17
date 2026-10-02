@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pybank"
 version = "0.1.0"
-description = "A progressive software engineering learning project for banking systems."
+description = "Project Synthesis 17: a progressive software engineering learning project for banking systems."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PyBank production deployment (Phase 16).
+# Project Synthesis 17 production deployment (Phase 16).
 #
 # Pulls a specific immutable image release onto this host and starts it.
 # The deployment identity is the commit SHA passed in as $1, never `latest`
