@@ -1,1 +1,1 @@
-# PyBank fraud ML package (Phase 12).
+# Project Synthesis 17 fraud ML package (Phase 12).

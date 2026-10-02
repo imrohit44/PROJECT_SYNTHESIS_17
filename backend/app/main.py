@@ -1,4 +1,4 @@
-"""PyBank Banking API entrypoint.
+"""Project Synthesis 17 Banking API entrypoint.
 
 Observability wiring lives here:
 

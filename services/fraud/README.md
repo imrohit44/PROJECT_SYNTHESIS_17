@@ -1,6 +1,6 @@
-# PyBank Fraud Service
+# Project Synthesis 17 Fraud Service
 
-This is the independent Fraud/Risk microservice for PyBank.
+This is the independent Fraud/Risk microservice for Project Synthesis 17. It owns the `pybank_fraud` database; the `pybank` names in the commands below are real database and user names.
 
 ## Local Development
 

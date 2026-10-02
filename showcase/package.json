@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Synthesis Explorer — the interactive engineering museum for Project Synthesis 17 (PyBank).",
+  "description": "Synthesis Explorer — the interactive engineering museum for Project Synthesis 17, 17 stages from Phase 0 through Phase 16.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

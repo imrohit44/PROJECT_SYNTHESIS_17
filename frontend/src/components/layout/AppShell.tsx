@@ -20,7 +20,7 @@ export function AppShell() {
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark">P</span>
-          <span>PyBank</span>
+          <span>Project Synthesis 17</span>
         </div>
         <div className="profile">
           <div className="avatar">{user?.email.slice(0, 1).toUpperCase()}</div>

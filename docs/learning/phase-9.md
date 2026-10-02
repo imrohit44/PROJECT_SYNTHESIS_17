@@ -9,7 +9,7 @@ showing what it has processed.
 
 ## Why Kafka
 
-PyBank uses Kafka to teach decoupling. A transfer can complete immediately in
+Project Synthesis 17 uses Kafka to teach decoupling. A transfer can complete immediately in
 PostgreSQL while audit processing happens later.
 
 Kafka is not the banking ledger. PostgreSQL remains the source of truth.
@@ -24,7 +24,7 @@ publish Kafka event
 ```
 
 If the app crashes between those steps, the database changed but the event is
-lost. PyBank uses the transactional outbox pattern instead.
+lost. Project Synthesis 17 uses the transactional outbox pattern instead.
 
 ## Transactional Outbox
 
@@ -40,7 +40,7 @@ A background publisher later sends outbox events to Kafka.
 
 ## Delivery and Duplicates
 
-PyBank treats Kafka delivery as at least once. Events may be delivered more than
+Project Synthesis 17 treats Kafka delivery as at least once. Events may be delivered more than
 once. Consumers must be idempotent.
 
 The audit consumer stores processed `event_id` values in PostgreSQL. If the same

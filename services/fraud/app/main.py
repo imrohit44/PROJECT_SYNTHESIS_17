@@ -1,4 +1,4 @@
-"""PyBank Fraud / Risk service.
+"""Project Synthesis 17 Fraud / Risk service.
 
 Runs as an independent FastAPI service. It consumes transfer.completed events
 from Kafka, evaluates deterministic risk rules, stores fraud_assessments in its

@@ -2,9 +2,9 @@
 
 ## What authentication is
 
-Authentication verifies identity. PyBank accepts an email and password, verifies the password against an Argon2id hash, and issues signed JWT tokens.
+Authentication verifies identity. Project Synthesis 17 accepts an email and password, verifies the password against an Argon2id hash, and issues signed JWT tokens.
 
-## Why PyBank needs it
+## Why Project Synthesis 17 needs it
 
 Before Phase 4, anyone who knew an account ID could call banking endpoints. Authentication gives the application a reliable caller identity that authorization policies can use.
 
@@ -26,7 +26,7 @@ JWT is used here because it is understandable and works well for a modular API. 
 
 ## Authorization and RBAC
 
-Authorization decides what an authenticated user may do. PyBank has `customer` and `admin` roles. The admin-only user listing demonstrates role-based access control. Ownership policies separately verify that a customer owns the account involved in a request.
+Authorization decides what an authenticated user may do. Project Synthesis 17 has `customer` and `admin` roles. The admin-only user listing demonstrates role-based access control. Ownership policies separately verify that a customer owns the account involved in a request.
 
 ## Account ownership
 

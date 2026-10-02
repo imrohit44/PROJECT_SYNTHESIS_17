@@ -1,6 +1,6 @@
 name: Deploy to EC2
 
-# Deploys an already-published immutable image release to the PyBank EC2 host
+# Deploys an already-published immutable image release to the Project Synthesis 17 EC2 host
 # over SSH, then gates on real health and smoke checks.
 #
 # Prerequisites (GitHub repository secrets, all set once by the operator):

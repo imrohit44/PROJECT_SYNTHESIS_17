@@ -19,7 +19,7 @@ as a line that stays open both ways.
 | Overhead per message | New connection / headers | Near-zero after upgrade |
 | Fits | "What is my balance?" | "Your transfer just landed" |
 
-PyBank already used HTTP correctly: the dashboard asked "what are my
+Project Synthesis 17 already used HTTP correctly: the dashboard asked "what are my
 transactions?" and got an answer. The problem is **polling** — asking again
 every few seconds wastes requests, adds load, and still shows stale data for
 most of the interval.
@@ -154,7 +154,7 @@ Keeping them apart is why WhatsApp being down cannot fail a transfer.
 True exactly-once would require idempotent consumers, deduplication, and
 provider-side idempotency keys across a network boundary nobody controls.
 
-So PyBank is honest: **at-least-once, best-effort, idempotent where cheap.**
+So Project Synthesis 17 is honest: **at-least-once, best-effort, idempotent where cheap.**
 Duplicate notifications are tolerated and keyed by `event_id`; duplicates never
 touch financial state. Claiming otherwise would be a lie the architecture
 cannot keep.
@@ -180,7 +180,7 @@ Bob, a third connected customer (Carol) received **nothing**.
 
 ## 12. Why distributed WebSocket infrastructure is deferred
 
-PyBank's connection manager is **process-local**: sockets live in one process's
+Project Synthesis 17's connection manager is **process-local**: sockets live in one process's
 memory. That is fine for one replica and honest to document as a limitation.
 
 Scaling to several replicas needs shared fan-out. If the Fraud service publishes
@@ -195,7 +195,7 @@ rather than half-built.
 
 ## 13. A real-world example
 
-Priya has the PyBank dashboard open on her laptop, and WhatsApp notifications on
+Priya has the Project Synthesis 17 dashboard open on her laptop, and WhatsApp notifications on
 her phone. She sends ₹2,500 to a friend.
 
 1. She presses **Send**. The browser POSTs `/transfers` with her JWT.

@@ -18,7 +18,7 @@ each line is JSON with fields such as `event`, `level`, `service`, `timestamp`
 and `correlation_id`. A log pipeline can then filter and aggregate without
 guessing with regular expressions.
 
-structlog lets PyBank build that line from a processor chain instead of
+structlog lets Project Synthesis 17 build that line from a processor chain instead of
 hand-formatting strings.
 
 Phase 11 runtime result: Banking and Fraud container application logs are pure
@@ -27,7 +27,7 @@ JSON objects; readiness responses contain only `ok`/`unavailable`.
 ## Correlation IDs
 
 A correlation ID is one identifier attached to everything that belongs to the
-same unit of work, such as one HTTP request. PyBank reads `X-Correlation-ID`,
+same unit of work, such as one HTTP request. Project Synthesis 17 reads `X-Correlation-ID`,
 generates a UUID when the client did not send one, puts it on the response, and
 binds it to a context variable so background threads can log the same value.
 
@@ -83,7 +83,7 @@ Phase 11 runtime result: Jaeger contains Banking HTTP spans and Fraud
 
 ## Hygiene
 
-Do not log secrets, tokens, passwords, or full request bodies. PyBank's runtime
+Do not log secrets, tokens, passwords, or full request bodies. Project Synthesis 17's runtime
 check verifies that synthetic credentials never appear in the container logs.
 Correlation IDs supplied by a client should be length-limited and validated so
 they cannot inject content into logs or response headers.

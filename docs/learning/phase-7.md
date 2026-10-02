@@ -1,14 +1,14 @@
 # Phase 7 Learning - Docker + Docker Compose
 
 Docker packages an application with the operating-system pieces it needs to run.
-For PyBank, that means a repeatable backend, frontend, and PostgreSQL setup.
+For Project Synthesis 17, that means a repeatable backend, frontend, and PostgreSQL setup.
 
 ## Core Ideas
 
 - An image is a build artifact. It is the recipe plus filesystem used to start containers.
 - A container is a running instance of an image.
 - Docker Compose starts several containers together from one `compose.yaml`.
-- PyBank uses Compose because the app has three local parts: frontend, backend, and database.
+- Project Synthesis 17 uses Compose because the app has three local parts: frontend, backend, and database.
 
 ## Why Containers Help
 
@@ -76,7 +76,7 @@ Compose can use these checks to start services in a better order.
 
 ## Alembic
 
-Alembic remains the migration authority. PyBank does not use SQLAlchemy
+Alembic remains the migration authority. Project Synthesis 17 does not use SQLAlchemy
 `create_all` to silently change schemas. In the Docker development stack, the
 backend entrypoint runs `alembic upgrade head` before starting the API.
 

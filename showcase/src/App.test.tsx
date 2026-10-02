@@ -17,7 +17,7 @@ describe("Synthesis Explorer", () => {
       .getAllByRole("heading", { level: 2 })
       .map((heading) => heading.textContent);
     expect(level2).toEqual([
-      "Why seventeen phases",
+      "Why 17 stages",
       "System evolution",
       "Deep dives",
       "Source",
@@ -32,7 +32,7 @@ describe("Synthesis Explorer", () => {
 
     expect(screen.getByRole("heading", { name: "Kafka behind a transactional outbox" })).toBeInTheDocument();
     expect(screen.getByText("Phase 09 / 16")).toBeInTheDocument();
-    const queued = screen.getByTitle("PyBank architecture after phase 9 — Archify diagram");
+    const queued = screen.getByTitle("Project Synthesis 17 architecture after Phase 9 — Archify diagram");
     expect(queued).toHaveAttribute("src", evolutionFrameSrc(9));
   });
 

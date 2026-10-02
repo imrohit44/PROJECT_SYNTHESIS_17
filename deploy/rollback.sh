@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PyBank production rollback (Phase 16).
+# Project Synthesis 17 production rollback (Phase 16).
 #
 # Re-deploys a previously released commit SHA. Because deployment identity is
 # the immutable SHA, a rollback is the exact same operation as a forward deploy

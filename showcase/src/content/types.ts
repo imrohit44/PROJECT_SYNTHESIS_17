@@ -1,10 +1,10 @@
 /**
  * Content model for the Synthesis Explorer.
  *
- * The site describes one real repository: Project Synthesis 17 (PyBank).
- * The seventeen phases are documented in `docs/architecture/phase-N.md`; the
- * "System Evolution" frames are generated from `showcase/tools/evolution.mjs`,
- * which compiles the same topology into Archify IR files.
+ * The site describes one real repository: Project Synthesis 17.
+ * Its 17 engineering stages, Phase 0 through Phase 16, are documented in
+ * `docs/architecture/phase-N.md`; the "System Evolution" frames are generated from
+ * `showcase/tools/evolution.mjs`, which compiles the same topology into Archify IR files.
  */
 
 /** Why a phase exists in the story of the system. */

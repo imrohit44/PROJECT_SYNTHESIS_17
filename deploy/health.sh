@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PyBank production health check (Phase 16).
+# Project Synthesis 17 production health check (Phase 16).
 #
 # Read-only. Safe to run at any time; starts nothing, changes nothing.
 # Checks liveness (/health) and readiness (/ready) separately, because they
@@ -57,7 +57,7 @@ check() {
   fi
 }
 
-echo "PyBank deployment health"
+echo "Project Synthesis 17 deployment health"
 echo
 echo "Application (loopback only):"
 check "banking /health"  "${BACKEND}/health"

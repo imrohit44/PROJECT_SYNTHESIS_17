@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pybank-fraud"
 version = "0.1.0"
-description = "Fraud/Risk Service for PyBank."
+description = "Fraud/Risk Service for Project Synthesis 17."
 requires-python = ">=3.12"
 dependencies = [
     "structlog>=24.1,<25.0",

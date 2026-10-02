@@ -3,7 +3,7 @@
  * site is one page, so navigation is a hash.
  */
 const links = [
-  { href: "#why", label: "Why 17 phases" },
+  { href: "#why", label: "Why 17 stages" },
   { href: "#evolution", label: "Evolution" },
   { href: "#deep-dive", label: "Deep dives" },
   { href: "#source", label: "Source" },
@@ -22,7 +22,7 @@ export function SiteHeader() {
           </span>
           <span className="brand__text">
             <strong>Synthesis Explorer</strong>
-            <span>Project Synthesis 17 · PyBank</span>
+            <span>Project Synthesis 17 · Phase 0 → Phase 16</span>
           </span>
         </a>
         <nav className="site-nav" aria-label="Sections">

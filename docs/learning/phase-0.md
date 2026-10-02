@@ -6,7 +6,7 @@ Software architecture is the set of important decisions about system boundaries,
 
 ## 2. Why project structure matters
 
-Folders and modules communicate ownership. In PyBank, API routes, configuration, logging, and tests have separate homes. This prevents one file from becoming the place where every concern is mixed together. A structure is useful when it helps a new developer predict where a change belongs.
+Folders and modules communicate ownership. In Project Synthesis 17, API routes, configuration, logging, and tests have separate homes. This prevents one file from becoming the place where every concern is mixed together. A structure is useful when it helps a new developer predict where a change belongs.
 
 ## 3. Why configuration is separate from code
 
