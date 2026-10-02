@@ -185,7 +185,7 @@ jobs:
       # Building the three deployable images proves the Dockerfiles and their
       # build contexts are valid without starting the full stack.
       - name: Build backend image
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           file: Dockerfile
@@ -195,7 +195,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build fraud image
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           file: services/fraud/Dockerfile
@@ -205,7 +205,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build frontend image
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v7.4.0
         with:
           context: ./frontend
           file: frontend/Dockerfile
