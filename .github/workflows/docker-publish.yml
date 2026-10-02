@@ -75,7 +75,7 @@ jobs:
           echo "Publishing images for CI-validated commit ${sha}"
 
       - name: Check out the validated commit
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ steps.target.outputs.sha }}
 
