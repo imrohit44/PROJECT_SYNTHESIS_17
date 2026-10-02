@@ -30,12 +30,12 @@ dependencies = [
     # (backend/app/llm/client.py) and the fraud-assessment tool
     # (backend/app/assistant/tools.py) call HTTP APIs at request time, so
     # httpx must be installed in the production image, not just dev.
-    "httpx>=0.28,<1.0",
+    "httpx>=0.28.1,<1.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "httpx>=0.28,<1.0",
+    "httpx>=0.28.1,<1.0",
     "mypy>=1.14,<2.0",
     # Phase 17: pytest >= 9.0.3 fixes PYSEC-2026-1845 / CVE-2025-71176
     # (TOCTOU race in tmp/basetemp directory handling). pytest-asyncio 1.x is
