@@ -195,6 +195,32 @@ Both run the same services, the same migrations and the same health checks. The
 only differences are the image source, the port exposure, and the fail-fast
 secrets.
 
+### Running the same stack on a managed platform
+
+The Phase 16 design is not tied to one host. Anything that names a *host*
+becomes environment configuration; anything that names a *component* does not.
+
+| Host-specific today | How another platform supplies it |
+|---|---|
+| Service hostnames `kafka`, `postgres`, `redis`, `fraud` | `KAFKA_BOOTSTRAP_SERVERS`, `DATABASE_URL`, `FRAUD_DATABASE_URL`, `REDIS_URL`, `FRAUD_SERVICE_URL` |
+| Kafka broker identity | `KAFKA_ADVERTISED_LISTENERS` and `KAFKA_CONTROLLER_QUORUM_VOTERS` (Compose defaults keep the local `kafka` name) |
+| Host loopback ports `127.0.0.1:8000/8080` | the platform's private service URLs behind the same edge |
+| Named volumes `pybank_*_data` | platform-mounted storage at the same paths (PostgreSQL `/var/lib/postgresql`, Neo4j `/data`, Kafka `/tmp/kraft-combined-logs`) |
+| `FRONTEND_ORIGIN`, `JWT_SECRET`, passwords | platform secret store, never committed |
+
+Two invariants must survive the move:
+
+- **One public origin.** The published SPA is built with the relative base
+  `/api/v1`, so the edge must keep serving the app and the API from the same
+  origin. That is why `CORS_ALLOW_ORIGINS` can stay empty.
+- **Only the edge is public.** PostgreSQL, Redis, Kafka, Neo4j and the fraud
+  service stay on private networking. The fraud service in particular has no
+  authentication of its own; it relies entirely on being unreachable.
+
+Optional components are disabled by configuration, never by deletion:
+`GRAPH_ENABLED=false` keeps rules + ML fraud scoring without Neo4j, an unset
+`LLM_PROVIDER`/`LLM_API_KEY` leaves the assistant in its deterministic fallback
+mode, and `OTEL_TRACING_ENABLED=false` starts cleanly without a collector.
 ## 8. Data safety
 
 `docker compose down -v` destroys named volumes, which would delete the banking
