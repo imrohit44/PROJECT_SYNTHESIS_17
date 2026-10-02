@@ -7,14 +7,34 @@ import type { ConnectionStatus, RealtimeMessage, RealtimeNotification } from "..
 export const MAX_RECONNECT_BACKOFF_MS = 16000;
 export const MAX_RECONNECT_ATTEMPTS = 10;
 
-export function getWebSocketUrl(ticket: string): string {
-  const apiBase = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
-  const url = new URL(apiBase);
+/**
+ * Build the realtime WebSocket URL for an API base and a page origin.
+ *
+ * The API base may be absolute (local development, e.g.
+ * `http://localhost:8000/api/v1`) or relative (production, where the SPA and
+ * the API share one public origin behind the routing edge and the base is
+ * `/api/v1`). `new URL()` rejects a bare relative base, so the base is resolved
+ * against the page origin instead. That keeps one rule for both environments
+ * without hard-coding any deployment domain.
+ */
+export function buildWebSocketUrl(
+  apiBase: string,
+  pageOrigin: string,
+  ticket: string,
+): string {
+  const url = new URL(apiBase, pageOrigin);
   const protocol = url.protocol === "https:" ? "wss:" : "ws:";
   // Only the short-lived, single-use ticket travels in the URL. The JWT stays
   // in the Authorization header of the ticket request, so it never reaches
   // access logs or browser history.
   return `${protocol}//${url.host}/api/v1/ws?ticket=${encodeURIComponent(ticket)}`;
+}
+
+export function getWebSocketUrl(ticket: string): string {
+  const apiBase = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+  // window.location is the source of truth for the public origin: it follows
+  // the deployment (any domain, any scheme) with no extra configuration.
+  return buildWebSocketUrl(apiBase, window.location.origin, ticket);
 }
 
 export function useRealtime() {

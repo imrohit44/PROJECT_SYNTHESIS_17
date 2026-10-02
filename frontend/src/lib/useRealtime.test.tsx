@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getWebSocketUrl, useRealtime } from "./useRealtime";
+import { buildWebSocketUrl, getWebSocketUrl, useRealtime } from "./useRealtime";
 import { tokenStorage } from "./storage";
 
 // The JWT is never placed in the socket URL: the client exchanges it for a
@@ -46,6 +46,65 @@ class FakeWebSocket {
     this.onclose?.(new CloseEvent("close"));
   }
 }
+
+describe("buildWebSocketUrl", () => {
+  // Regression cover for the production image, which is built with the
+  // relative base `/api/v1`. `new URL("/api/v1")` used to throw
+  // "Invalid URL"; the base is now resolved against the page origin.
+  it("resolves a relative API base against an HTTPS page origin", () => {
+    expect(buildWebSocketUrl("/api/v1", "https://example.com", "tok")).toBe(
+      "wss://example.com/api/v1/ws?ticket=tok",
+    );
+  });
+
+  it("resolves a relative API base against an HTTP page origin", () => {
+    expect(buildWebSocketUrl("/api/v1", "http://localhost:5173", "tok")).toBe(
+      "ws://localhost:5173/api/v1/ws?ticket=tok",
+    );
+  });
+
+  it("keeps an absolute HTTP API base on ws://", () => {
+    expect(buildWebSocketUrl("http://localhost:8000/api/v1", "https://example.com", "tok")).toBe(
+      "ws://localhost:8000/api/v1/ws?ticket=tok",
+    );
+  });
+
+  it("keeps an absolute HTTPS API base on wss://", () => {
+    expect(buildWebSocketUrl("https://api.example.com/api/v1", "http://localhost:5173", "tok")).toBe(
+      "wss://api.example.com/api/v1/ws?ticket=tok",
+    );
+  });
+
+  it("carries only the encoded ticket, never a token", () => {
+    const url = buildWebSocketUrl("/api/v1", "https://example.com", "a b&c=d");
+
+    expect(url).toBe("wss://example.com/api/v1/ws?ticket=a%20b%26c%3Dd");
+    expect(url).not.toContain("access-token");
+    expect(new URL(url).searchParams.get("ticket")).toBe("a b&c=d");
+  });
+});
+
+describe("getWebSocketUrl", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("uses the browser origin when the production base is relative", () => {
+    // Exactly how the published image is built (VITE_API_BASE_URL=/api/v1).
+    vi.stubEnv("VITE_API_BASE_URL", "/api/v1");
+    vi.stubGlobal("location", { origin: "https://example.com" });
+
+    expect(getWebSocketUrl("tok")).toBe("wss://example.com/api/v1/ws?ticket=tok");
+  });
+
+  it("uses the configured absolute base when one is set", () => {
+    vi.stubEnv("VITE_API_BASE_URL", "http://localhost:8000/api/v1");
+    vi.stubGlobal("location", { origin: "http://localhost:5173" });
+
+    expect(getWebSocketUrl("tok")).toBe("ws://localhost:8000/api/v1/ws?ticket=tok");
+  });
+});
 
 describe("useRealtime", () => {
   beforeEach(() => {

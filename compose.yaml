@@ -34,16 +34,33 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      # Advertised listeners and the controller quorum embed the broker
+      # hostname. Docker Compose resolves `kafka` on the private network; any
+      # other environment (Railway, a managed broker, a second host) supplies
+      # its own reachable hostname through these two variables. Defaults below
+      # preserve local behaviour exactly.
+      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka:9093}
       KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS:-PLAINTEXT://kafka:9092}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # Where the broker keeps the KRaft metadata and the log segments. Pinned
+      # so the volume below is the real data directory rather than an accident
+      # of the image default, and so any platform storage mount has a stable
+      # target path.
+      KAFKA_LOG_DIRS: ${KAFKA_LOG_DIRS:-/tmp/kraft-combined-logs}
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes: []
+    # Persistence on a managed platform: mount platform storage at
+    # /tmp/kraft-combined-logs (KAFKA_LOG_DIRS above). Local development keeps
+    # no volume on purpose: a Docker named volume is created root-owned while
+    # the broker runs as uid 1000 (appuser), and formatting then fails with
+    # AccessDeniedException. A platform storage mount must therefore be
+    # writable by uid 1000.
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
       interval: 10s
