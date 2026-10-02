@@ -533,9 +533,10 @@ class TestEndpointBoundaries:
         assert response.status_code == 401
         assert response.json()["error"]["code"] == "AUTHENTICATION_REQUIRED"
 
-    def test_chat_reports_unavailable_without_llm_configuration(
+    def test_chat_answers_in_fallback_mode_without_llm_configuration(
         self, client: TestClient, token_factory: Callable[..., dict[str, str]]
     ) -> None:
+        """Missing provider credentials must not be a dead end, and must not leak."""
         tokens = token_factory(name="Alice")
         app.dependency_overrides[get_llm_client] = lambda: LLMClient(
             api_key="",
@@ -547,17 +548,16 @@ class TestEndpointBoundaries:
         try:
             response = client.post(
                 "/api/v1/assistant/chat",
-                json={"message": "hello"},
+                json={"message": "what can you do"},
                 headers={"Authorization": f"Bearer {tokens['access_token']}"},
             )
         finally:
             app.dependency_overrides.pop(get_llm_client, None)
 
-        assert response.status_code == 503
-        assert (
-            response.json()["error"]["message"]
-            == "The banking assistant is not configured"
-        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["mode"] == "fallback"
+        assert "account summary" in body["response"]
         assert "llm.invalid" not in response.text
         assert "api_key" not in response.text
 

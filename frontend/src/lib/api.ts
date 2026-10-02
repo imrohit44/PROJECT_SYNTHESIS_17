@@ -2,6 +2,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { tokenStorage } from "./storage";
 import type {
   AssistantChatResponse,
+  AssistantStatus,
   ErrorResponse,
   TokenResponse,
 } from "../types/api";
@@ -53,5 +54,14 @@ export function apiMessage(error: unknown, fallback = "Something went wrong.") {
 
 export async function sendAssistantMessage(message: string) {
   const { data } = await api.post<AssistantChatResponse>("/assistant/chat", { message });
+  return data;
+}
+
+/**
+ * Availability and answering mode only: the backend never exposes provider
+ * name, endpoint, or credentials to the client.
+ */
+export async function getAssistantStatus() {
+  const { data } = await api.get<AssistantStatus>("/assistant/status");
   return data;
 }

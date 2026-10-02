@@ -74,7 +74,7 @@ Those identifiers are implementation details, not a second product. They are kep
 - Deterministic rule scoring combined with trained ML scoring (scikit-learn) under configurable weights
 - Neo4j relationship projection producing a bounded graph adjustment; fraud degrades to rules plus ML when the graph is unavailable
 - Single risk assessment combining rules, model, and graph signals
-- Read-only LLM assistant: four allowlisted tools, no direct database or model-driven identity access, mutations impossible, explicit 503 when unconfigured
+- Read-only LLM assistant: four allowlisted tools, no direct database or model-driven identity access, mutations impossible; answers through the configured provider, or through a lightweight deterministic fallback when no provider is configured
 
 ### Realtime
 

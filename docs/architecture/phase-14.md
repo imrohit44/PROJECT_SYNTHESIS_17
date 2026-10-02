@@ -52,6 +52,7 @@ directly, never supplies identity, and cannot perform any banking mutation.
 | Assistant metrics | `backend/app/assistant/metrics.py` |
 | LLM client abstraction | `backend/app/llm/client.py` |
 | LLM transport models | `backend/app/llm/models.py` |
+| Lightweight fallback assistant | `backend/app/assistant/fallback.py` |
 | Settings | `backend/app/core/config.py` (`LLM_*`, `ASSISTANT_*`) |
 | Frontend page | `frontend/src/pages/Assistant.tsx` |
 | Frontend API call | `frontend/src/lib/api.ts` (`sendAssistantMessage`) |
@@ -136,9 +137,34 @@ Rules enforced by the registry itself:
 
 `LLMClient` speaks the OpenAI-compatible chat-completions protocol with native
 tool calling over `httpx` — provider SDKs and credentials never leak past this
-class. With no key configured, `LLMNotConfiguredError` maps to HTTP `503`
-("The banking assistant is not configured") while the rest of the banking API
-is unaffected: the assistant is optional.
+class.
+
+## Assistant modes
+
+The assistant answers in one of two modes, chosen by provider configuration only:
+
+| Mode | When | What answers |
+|---|---|---|
+| `llm` | `LLM_API_KEY` and `LLM_MODEL` are set | The Phase 14 agent loop calling the configured provider, unchanged |
+| `fallback` | No provider is configured | A deterministic assistant that plans read-only tool calls in ordinary Python |
+
+`backend/app/assistant/fallback.py` implements the fallback behind the same seam
+as the provider: it exposes `generate_with_tools(...)` and a `model` attribute,
+so `AgentService`, `ToolRegistry`, and the JWT-derived `AgentContext` are reused
+exactly as they are for the LLM. Nothing in the Phase 14 loop changes.
+
+The fallback recognises a small intent set — account summary, recent
+transactions, account details, risk/fraud status, and help — and answers from
+tool observations only. It never invents a value, never calls anything outside
+the frozen read-only allowlist, and cannot turn an account or transaction id
+from the user's message into access: the risk path takes its id from the
+transactions tool's own observation. Anything it does not recognise returns the
+list of supported questions instead of a guess.
+
+This exists so the banking application stays demonstrable without external AI
+credentials. It adds no model, provider, framework, container, or dependency.
+`GET /api/v1/assistant/status` reports `{"available": true, "mode": ...}` — and
+nothing else, so no provider name, endpoint, or credential reaches the client.
 
 ## Error mapping (no stack traces, no secrets)
 
@@ -147,10 +173,14 @@ is unaffected: the assistant is optional.
 | Missing/invalid JWT | 401 | (rejected by auth) |
 | Oversized message | 422 | `rejected` |
 | Rate limited | 429 | `rejected` |
-| LLM not configured | 503 | `not_configured` |
+| No provider configured | 200 (fallback answers) | `success` |
 | Provider error/timeout/malformed response | 503 | `llm_error` |
 | Tool-round limit exceeded | 400 | `rejected` |
 | Unknown tool / invalid args / tool failure | 200 with error observation | `assistant_tool_calls_total{status="error"}` |
+
+A tool failure inside the fallback becomes a plain "I couldn't retrieve your
+account information right now" reply — never a stack trace, path, or provider
+detail.
 
 Responses are asserted in tests to never contain `api_key`, provider URLs,
 `Traceback`, `ConnectError`, or the raw `LLM_API_KEY` value (which never has a

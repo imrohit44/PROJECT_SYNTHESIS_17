@@ -3,12 +3,12 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AxiosError } from "axios";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { sendAssistantMessage } from "../lib/api";
+import { getAssistantStatus, sendAssistantMessage } from "../lib/api";
 import { Assistant } from "./Assistant";
 
 vi.mock("../lib/api", async () => {
   const actual = await vi.importActual<typeof import("../lib/api")>("../lib/api");
-  return { ...actual, sendAssistantMessage: vi.fn() };
+  return { ...actual, sendAssistantMessage: vi.fn(), getAssistantStatus: vi.fn() };
 });
 
 function renderPage() {
@@ -57,6 +57,8 @@ describe("Assistant", () => {
   // implementation and failing the test with that rejection.
   beforeEach(() => {
     vi.mocked(sendAssistantMessage).mockReset();
+    vi.mocked(getAssistantStatus).mockReset();
+    vi.mocked(getAssistantStatus).mockResolvedValue({ available: true, mode: "llm" });
   });
 
   it("starts read-only and empty", () => {
@@ -104,16 +106,49 @@ describe("Assistant", () => {
 
   it("shows the backend message when the assistant is unavailable", async () => {
     vi.mocked(sendAssistantMessage).mockImplementation(() =>
-      assistantFailure("The banking assistant is not configured"),
+      assistantFailure("The banking assistant is temporarily unavailable"),
     );
     renderPage();
 
     ask("hello");
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "The banking assistant is not configured",
+      "The banking assistant is temporarily unavailable",
     );
     expect(screen.getByRole("alert")).not.toHaveTextContent("LLM_API_KEY");
+  });
+
+  it("announces demo mode instead of a dead end when no provider is configured", async () => {
+    vi.mocked(getAssistantStatus).mockResolvedValue({
+      available: true,
+      mode: "fallback",
+    });
+    vi.mocked(sendAssistantMessage).mockResolvedValue({
+      response: "Your accounts:\n\n• Savings account — 125.00 (active)",
+      conversation_id: null,
+      tool_calls: [{ tool: "get_account_summary", status: "success", detail: null }],
+      mode: "fallback",
+    });
+    renderPage();
+
+    expect(await screen.findByText("Demo mode")).toBeInTheDocument();
+    expect(screen.getByText(/lightweight banking mode/i)).toBeInTheDocument();
+    expect(screen.getByText("Read-only")).toBeInTheDocument();
+    expect(screen.queryByText(/not configured/i)).not.toBeInTheDocument();
+
+    ask("What is my balance?");
+
+    expect(await screen.findByText(/Savings account/)).toBeInTheDocument();
+  });
+
+  it("keeps the normal experience when a real provider is configured", async () => {
+    renderPage();
+
+    await waitFor(() => expect(getAssistantStatus).toHaveBeenCalled());
+    expect(screen.queryByText("Demo mode")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Try asking about a balance, a recent transaction, or a flagged payment."),
+    ).toBeInTheDocument();
   });
 
   it("never sends an empty question", () => {

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -59,7 +60,23 @@ class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
 
 
+# Which assistant answers a request: the configured LLM provider, or the
+# deterministic fallback that runs when no provider is configured. The client
+# only ever learns the mode, never any provider detail.
+AssistantMode = Literal["llm", "fallback"]
+MODE_LLM: AssistantMode = "llm"
+MODE_FALLBACK: AssistantMode = "fallback"
+
+
+class AssistantStatus(BaseModel):
+    """Availability of the assistant and the mode that answers."""
+
+    available: bool = True
+    mode: AssistantMode
+
+
 class ChatResponse(BaseModel):
     response: str
     conversation_id: str | None = None
     tool_calls: list[ToolCallRecord] = Field(default_factory=list)
+    mode: AssistantMode | None = None
