@@ -16,6 +16,33 @@ That discipline is the development approach. The recurring loop is: simple syste
 
 The 17-stage structure exists so the evolution can be followed end to end -- from an object-oriented core to a containerized, observable, event-driven platform -- with documentation at each step and verification where it matters.
 
+## Live Deployments
+
+Project Synthesis 17 runs as **two independent live deployments**, each serving a different purpose.
+
+| | Deployment | Purpose |
+|---|---|---|
+| 1 | **[Synthesis Explorer — Project Showcase](https://project-synthesis-17.vercel.app/)** | Understand the engineering evolution and architecture |
+| 2 | **[Live Banking Application](https://frontend-production-b4d5.up.railway.app/)** | Interact with the actual application |
+
+### 1. Synthesis Explorer — Project Showcase
+
+**<https://project-synthesis-17.vercel.app/>**
+
+The interactive visual showcase for Project Synthesis 17. It explains how the system evolved from Phase 0 through Phase 16 — the architecture, the engineering decisions, the transaction journey, the fraud pipeline, and the major technology additions — through an interactive visual experience.
+
+Start here to understand the engineering evolution and architecture of the project.
+
+### 2. Live Banking Application
+
+**<https://frontend-production-b4d5.up.railway.app/>**
+
+The deployed, functional banking application. It provides the actual user-facing banking experience, including authentication, accounts, transactions, the banking dashboard, fraud/risk integration, and the read-only banking assistant.
+
+Start here to interact with the application itself.
+
+The showcase is a static site and does not serve the banking application; the two deployments are separate, and only the Railway deployment runs the live banking system.
+
 ## Project Identity
 
 **Project Synthesis 17 is the official name of this project.** The system was originally developed under the internal name PyBank. Internal identifiers keep that historical namespace so the implementation stays stable: Python modules, database names (`pybank`, `pybank_fraud`), Kafka topics (`pybank.events`), Docker and Compose service names, environment variables (`PYBANK_*`), Redis keys, and Grafana dashboards all still use `pybank`.
