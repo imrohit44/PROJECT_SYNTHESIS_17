@@ -82,7 +82,7 @@ jobs:
       # The token is written into the runner's Docker config by the login
       # action. It is never passed as a build arg and never echoed.
       - name: Log in to GHCR
-        uses: docker/login-action@v3.4.0
+        uses: docker/login-action@v4.6.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
