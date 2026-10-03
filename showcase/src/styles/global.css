@@ -731,6 +731,50 @@ code {
   font-weight: 600;
 }
 
+/* ---------- live application ---------- */
+
+/*
+ * The closing beat. Same editorial column and same tokens as every other
+ * section; only the statement is sized up, because it is the last line of the
+ * argument. No layout of its own, so it collapses on narrow viewports with the
+ * rest of the page.
+ */
+
+.live-app {
+  padding-top: 5.5rem;
+  padding-bottom: 1rem;
+}
+
+.live-app__kicker {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin-bottom: 0.9rem;
+}
+
+.live-app__statement {
+  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+  line-height: 1.14;
+  letter-spacing: -0.035em;
+  max-width: 24ch;
+}
+
+.live-app__support {
+  color: var(--ink-soft);
+  max-width: 58ch;
+  margin: 0.9rem 0 1.8rem;
+}
+
+.live-app__note {
+  margin-top: 1.6rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 62ch;
+}
+
 /* ---------- footer ---------- */
 
 .site-footer {

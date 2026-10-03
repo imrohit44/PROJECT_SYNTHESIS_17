@@ -21,7 +21,26 @@ describe("Synthesis Explorer", () => {
       "System evolution",
       "Deep dives",
       "Source",
+      "Run it yourself",
     ]);
+  });
+
+  it("closes the story by linking to the deployed banking application", () => {
+    render(<App />);
+
+    // The final section is the continuation of the story, not a promotion:
+    // it points at the live application and says so.
+    const cta = screen.getByRole("link", { name: /open the live banking application/i });
+    expect(cta).toHaveAttribute(
+      "href",
+      "https://frontend-production-b4d5.up.railway.app/",
+    );
+    expect(cta).toHaveClass("button", "button--solid");
+    expect(screen.getByText(/not just documented/i)).toBeInTheDocument();
+
+    // The documentary itself stays the primary experience: no link to the
+    // application appears before the closing section.
+    expect(screen.getAllByRole("link", { name: /live banking application/i })).toHaveLength(1);
   });
 
   it("scrubs the evolution engine and updates stage plus card together", async () => {

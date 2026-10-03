@@ -3,12 +3,14 @@ import { SiteHeader } from "./components/SiteHeader";
 import { DeepDiveSection } from "./sections/DeepDiveSection";
 import { EvolutionSection } from "./sections/EvolutionSection";
 import { HeroSection } from "./sections/HeroSection";
+import { LiveAppSection } from "./sections/LiveAppSection";
 import { SourceSection } from "./sections/SourceSection";
 import { WhySection } from "./sections/WhySection";
 
 /**
  * Synthesis Explorer: one page, one story.
- * Hero → the argument → the evolution engine → the zooms → the receipts.
+ * Hero → the argument → the evolution engine → the zooms → the receipts →
+ * the running system.
  */
 export function App() {
   return (
@@ -20,6 +22,7 @@ export function App() {
         <EvolutionSection />
         <DeepDiveSection />
         <SourceSection />
+        <LiveAppSection />
       </main>
       <SiteFooter />
     </div>
